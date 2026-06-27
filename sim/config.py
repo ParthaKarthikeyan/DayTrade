@@ -46,6 +46,18 @@ class Config:
     # --- Fill model (backtest) ---
     slippage_bps: float = 1.0           # 1 basis point adverse slippage per fill
 
+    # --- Premarket momentum strategy (live paper, $1–$10 listed small caps) ---
+    pm_price_min: float = 1.0           # only trade names priced >= $1
+    pm_price_max: float = 10.0          # ...and <= $10 (listed small caps)
+    pm_min_gap_pct: float = 5.0         # minimum % up on the day to be a candidate
+    pm_top_n: int = 10                  # watch this many top movers
+    pm_max_positions: int = 1           # focus a small account on one trade at a time
+    pm_session_start: str = "07:00"     # start watching in premarket (ET)
+    pm_no_new_after: str = "11:30"      # open + 2h: stop taking new entries
+    pm_flatten_at: str = "11:35"        # force-close everything by here
+    pm_stop_pct: float = 0.05           # hard stop cap; the instant-cut usually fires first
+    pm_min_breakout_vol_mult: float = 1.0  # breakout bar volume vs recent average
+
     # --- Data / broker (Alpaca) ---
     data_feed: str = os.getenv("ALPACA_DATA_FEED", "iex")
     alpaca_key: str = os.getenv("ALPACA_API_KEY", "")
