@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DayTrade — Live Tracker</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --line:#30363d; --text:#e6edf3;
+    --muted:#8b949e; --green:#2ea043; --red:#f85149; --accent:#58a6ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text)}
+  header{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
+         padding:16px 24px;border-bottom:1px solid var(--line)}
+  h1{font-size:18px;margin:0;color:var(--accent)}
+  .sub{color:var(--muted);font-size:13px}
+  .badge{font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px}
+  .badge.halt{background:rgba(248,81,73,.15);color:var(--red);border:1px solid var(--red)}
+  .badge.live{background:rgba(46,160,67,.15);color:var(--green);border:1px solid var(--green)}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 24px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+  .card .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .card .v{font-size:22px;font-weight:600;margin-top:4px}
+  .pos{font-variant-numeric:tabular-nums}
+  .green{color:var(--green)} .red{color:var(--red)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+         padding:16px;margin-top:20px}
+  .panel h2{font-size:14px;margin:0 0 12px;color:var(--muted);text-transform:uppercase;
+            letter-spacing:.04em}
+  canvas{width:100%;height:280px;display:block}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{text-align:right;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  .exits{color:var(--muted);font-size:12px;text-align:left;white-space:normal}
+  .empty{color:var(--muted);padding:14px 0}
+  .overflow{overflow-x:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>DayTrade</h1>
+  <span id="sym" class="sub"></span>
+  <span id="mode" class="badge live" style="display:none"></span>
+  <span id="halt" class="badge halt" style="display:none">HALTED — 5% breaker</span>
+  <span id="updated" class="sub" style="margin-left:auto"></span>
+</header>
+
+<div class="wrap">
+  <div class="cards">
+    <div class="card"><div class="k">Equity</div><div id="equity" class="v">—</div></div>
+    <div class="card"><div class="k">P&amp;L ($)</div><div id="pnl" class="v">—</div></div>
+    <div class="card"><div class="k">P&amp;L (%)</div><div id="pnlpct" class="v">—</div></div>
+    <div class="card"><div class="k">Start cash</div><div id="start" class="v">—</div></div>
+    <div class="card"><div class="k">Trades</div><div id="ntrades" class="v">—</div></div>
+    <div class="card"><div class="k">Win rate</div><div id="winrate" class="v">—</div></div>
+    <div class="card"><div class="k">Max drawdown</div><div id="maxdd" class="v">—</div></div>
+    <div class="card"><div class="k">Open position</div><div id="position" class="v pos">flat</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Equity curve</h2>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="panel">
+    <h2>Trades</h2>
+    <div class="overflow">
+      <table id="trades">
+        <thead><tr><th>Entry time</th><th>Side</th><th>Shares</th><th>Entry $</th>
+          <th>P&amp;L $</th><th class="exits">Exits</th></tr></thead>
+        <tbody><tr><td class="empty" colspan="6">No trades yet.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const money = n => (n<0?"-$":"$") + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const signClass = n => n>0?"green":(n<0?"red":"");
+
+function drawChart(curve){
+  const c = $("chart"), dpr = window.devicePixelRatio||1;
+  const w = c.clientWidth, h = 280;
+  c.width = w*dpr; c.height = h*dpr;
+  const ctx = c.getContext("2d"); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  if(!curve || curve.length<2){ ctx.fillStyle="#8b949e"; ctx.fillText("Waiting for data…",12,24); return; }
+  const ys = curve.map(p=>p[1]);
+  let lo=Math.min(...ys), hi=Math.max(...ys);
+  if(hi===lo){ hi+=1; lo-=1; }
+  const pad=36, plotW=w-pad*2, plotH=h-pad;
+  const x=i=>pad + plotW*(i/(curve.length-1));
+  const y=v=>10 + (plotH-10)*(1-(v-lo)/(hi-lo));
+  // baseline at start equity
+  const base = curve[0][1];
+  ctx.strokeStyle="#30363d"; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(pad,y(base)); ctx.lineTo(w-pad,y(base)); ctx.stroke();
+  ctx.setLineDash([]);
+  // axis labels
+  ctx.fillStyle="#8b949e"; ctx.font="11px sans-serif"; ctx.textAlign="right";
+  ctx.fillText(money(hi),pad-6,y(hi)+4); ctx.fillText(money(lo),pad-6,y(lo)+4);
+  // area + line, colored by final vs start
+  const up = ys[ys.length-1] >= base;
+  const col = up ? "#2ea043" : "#f85149";
+  ctx.beginPath(); ctx.moveTo(x(0),y(curve[0][1]));
+  curve.forEach((p,i)=>ctx.lineTo(x(i),y(p[1])));
+  ctx.lineTo(x(curve.length-1),y(lo)); ctx.lineTo(x(0),y(lo)); ctx.closePath();
+  ctx.fillStyle = up ? "rgba(46,160,67,.12)" : "rgba(248,81,73,.12)"; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x(0),y(curve[0][1]));
+  curve.forEach((p,i)=>ctx.lineTo(x(i),y(p[1])));
+  ctx.strokeStyle=col; ctx.lineWidth=2; ctx.stroke();
+}
+
+function renderTrades(trades){
+  const tb = $("trades").querySelector("tbody");
+  if(!trades || !trades.length){
+    tb.innerHTML='<tr><td class="empty" colspan="6">No trades yet.</td></tr>'; return;
+  }
+  tb.innerHTML = trades.map(t=>{
+    const exits = (t.exits||[]).map(e=>`${e.reason}@${e.price}×${e.qty}`).join(", ");
+    return `<tr><td>${(t.entry_time||"").slice(0,19)}</td><td>${t.side}</td>
+      <td>${t.shares}</td><td>${Number(t.entry_price).toFixed(2)}</td>
+      <td class="${signClass(t.pnl)}">${money(t.pnl)}</td>
+      <td class="exits">${exits}</td></tr>`;
+  }).join("");
+}
+
+async function tick(){
+  let s;
+  try{ s = await (await fetch("/api/state",{cache:"no-store"})).json(); }
+  catch(e){ return; }
+  if(!s || !Object.keys(s).length){ $("sym").textContent="(run a backtest or the paper bot to populate)"; return; }
+
+  $("sym").textContent = s.symbol || "";
+  const modeEl=$("mode"); modeEl.style.display="inline-block";
+  modeEl.textContent = (s.mode||"").toUpperCase();
+  modeEl.className = "badge " + (s.mode==="paper"?"live":"live");
+  $("halt").style.display = s.halted ? "inline-block":"none";
+  $("updated").textContent = s.updated_at ? "updated "+s.updated_at : "";
+
+  $("equity").textContent = money(s.equity);
+  const pnl=$("pnl"); pnl.textContent = money(s.pnl); pnl.className="v "+signClass(s.pnl);
+  const pp=$("pnlpct"); pp.textContent = (s.pnl_pct>0?"+":"")+s.pnl_pct+"%"; pp.className="v "+signClass(s.pnl_pct);
+  $("start").textContent = money(s.start_cash);
+  $("ntrades").textContent = (s.metrics&&s.metrics.num_trades!=null)?s.metrics.num_trades:(s.trades?s.trades.length:0);
+  $("winrate").textContent = (s.metrics&&s.metrics.win_rate_pct!=null)?s.metrics.win_rate_pct.toFixed(0)+"%":"—";
+  $("maxdd").textContent = (s.metrics&&s.metrics.max_drawdown_pct!=null)?s.metrics.max_drawdown_pct.toFixed(2)+"%":"—";
+
+  const p=s.position;
+  $("position").innerHTML = p
+    ? `<span class="${p.side==='long'?'green':'red'}">${p.side.toUpperCase()}</span> ${p.shares} @ ${Number(p.entry_price).toFixed(2)} <span class="sub">(stop ${Number(p.stop).toFixed(2)})</span>`
+    : "flat";
+
+  drawChart(s.equity_curve);
+  renderTrades(s.trades);
+}
+
+tick();
+setInterval(tick, 2000);
+window.addEventListener("resize", tick);
+</script>
+</body>
+</html>

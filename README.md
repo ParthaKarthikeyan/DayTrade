@@ -128,6 +128,22 @@ Connects to your Alpaca **paper** account, streams 1-minute bars, and submits
 paper market orders for every entry/scale-out/stop the strategy generates. It is
 paper only — review thoroughly before considering real money.
 
+## Live tracking dashboard
+
+A self-contained local web page (no external CDNs) that tracks the bot in real
+time — equity, P&L, the open position, a trade log, and an equity-curve chart.
+It works for **both** a finished backtest and the **live paper bot**.
+
+```bash
+python run_backtest.py --symbol AAPL --date 2026-06-26   # writes logs/state.json
+python dashboard.py                                       # then open http://localhost:5000
+```
+
+The bot writes `logs/state.json`; the page polls `/api/state` every ~2 seconds.
+During paper trading the page updates each minute as new bars arrive, and shows a
+red **HALTED** badge the moment the 5% daily circuit-breaker trips. Paper-mode
+trade P&L is approximated from the local fill mirror.
+
 ## Project layout
 
 ```
@@ -140,8 +156,11 @@ sim/
   engine.py      SimEngine — bar-by-bar replay + conservative fills
   data.py        Alpaca / yfinance / CSV data adapters
   report.py      performance metrics + report formatting
+  state.py       JSON state snapshot for the dashboard
 run_backtest.py  CLI backtester
 run_paper.py     live Alpaca paper loop
+dashboard.py     local Flask dashboard (serves the live page + /api/state)
+static/          dashboard.html (self-contained, no CDNs)
 tests/           offline unit + integration tests (pytest)
 ```
 
