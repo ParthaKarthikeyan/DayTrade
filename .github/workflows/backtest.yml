@@ -1,0 +1,59 @@
+name: Backtest
+
+# Run the ORB bot over a real date range on free GitHub-hosted runners
+# (which, unlike a phone, have open internet to reach Alpaca). Trigger it from
+# the GitHub mobile app: Actions -> Backtest -> Run workflow. Results appear on
+# the run's Summary page.
+#
+# Requires two repository secrets (Settings -> Secrets and variables -> Actions):
+#   ALPACA_API_KEY, ALPACA_SECRET_KEY   (your Alpaca PAPER keys)
+
+on:
+  workflow_dispatch:
+    inputs:
+      symbols:
+        description: "Tickers (comma-separated)"
+        default: "AAPL,SPY"
+        required: true
+      start:
+        description: "Start date (YYYY-MM-DD)"
+        required: true
+      end:
+        description: "End date (YYYY-MM-DD)"
+        required: true
+      cash:
+        description: "Starting cash"
+        default: "2000"
+        required: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run multi-day backtest
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PAPER: "true"
+          ALPACA_DATA_FEED: iex
+        run: |
+          if [ -z "$ALPACA_API_KEY" ]; then
+            echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets." \
+              "Add them under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          python run_multiday.py \
+            --symbols "${{ inputs.symbols }}" \
+            --start "${{ inputs.start }}" \
+            --end "${{ inputs.end }}" \
+            --cash "${{ inputs.cash }}"

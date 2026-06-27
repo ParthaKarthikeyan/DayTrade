@@ -1,0 +1,16 @@
+# Core simulator / bot
+pandas>=2.0
+numpy>=1.24
+python-dotenv>=1.0
+
+# Market data + broker (Alpaca paper trading & historical data)
+alpaca-py>=0.20
+
+# Live tracking dashboard
+flask>=3.0
+
+# Optional offline data fallback (1-minute history, ~last 30 days)
+yfinance>=0.2
+
+# Tests
+pytest>=7.0
