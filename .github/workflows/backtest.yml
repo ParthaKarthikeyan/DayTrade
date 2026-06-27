@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       symbols:
-        description: "Tickers (comma-separated)"
+        description: "Tickers (comma-separated), or PREMARKET for the gap-and-go scan"
         default: "AAPL,SPY"
         required: true
       start:
@@ -40,20 +40,28 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run multi-day backtest
+      - name: Run backtest
         env:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: "true"
           ALPACA_DATA_FEED: iex
         run: |
-          if [ -z "$ALPACA_API_KEY" ]; then
-            echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets." \
-              "Add them under Settings -> Secrets and variables -> Actions."
-            exit 1
+          # "PREMARKET" -> free yfinance gap-and-go backtest (no Alpaca keys needed).
+          if echo "${{ inputs.symbols }}" | grep -qi '^PREMARKET'; then
+            python run_premarket_backtest.py \
+              --start "${{ inputs.start }}" \
+              --end "${{ inputs.end }}" \
+              --cash "${{ inputs.cash }}"
+          else
+            if [ -z "$ALPACA_API_KEY" ]; then
+              echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets." \
+                "Add them under Settings -> Secrets and variables -> Actions."
+              exit 1
+            fi
+            python run_multiday.py \
+              --symbols "${{ inputs.symbols }}" \
+              --start "${{ inputs.start }}" \
+              --end "${{ inputs.end }}" \
+              --cash "${{ inputs.cash }}"
           fi
-          python run_multiday.py \
-            --symbols "${{ inputs.symbols }}" \
-            --start "${{ inputs.start }}" \
-            --end "${{ inputs.end }}" \
-            --cash "${{ inputs.cash }}"

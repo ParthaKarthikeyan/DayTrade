@@ -7,6 +7,7 @@ Priority: Alpaca (if keys present) -> yfinance fallback -> local CSV. The CSV
 path keeps the simulator fully runnable offline and in tests.
 """
 
+import time
 from datetime import datetime
 
 import pandas as pd
@@ -44,7 +45,21 @@ def from_alpaca(symbol: str, date: str, cfg: Config) -> pd.DataFrame:
     req = StockBarsRequest(symbol_or_symbols=symbol, timeframe=TimeFrame.Minute,
                            start=start.to_pydatetime(), end=end.to_pydatetime(),
                            feed=cfg.data_feed)
-    bars = client.get_stock_bars(req).df
+
+    # Retry transient failures (e.g. 429 rate limits) with backoff, so throttled
+    # days aren't silently skipped during a large multi-day/multi-symbol run.
+    last_err = None
+    for attempt in range(5):
+        try:
+            bars = client.get_stock_bars(req).df
+            break
+        except Exception as e:  # noqa: BLE001 - APIError/HTTP/transport all retryable
+            last_err = e
+            time.sleep(1.5 * (attempt + 1))
+    else:
+        raise RuntimeError(f"Alpaca request failed for {symbol} {date}: {last_err}")
+
+    time.sleep(0.3)  # light pacing to stay under the free 200 req/min limit
     if bars.empty:
         raise RuntimeError(f"Alpaca returned no bars for {symbol} on {date}")
     # Multi-index (symbol, timestamp) -> single symbol frame.
