@@ -8,11 +8,14 @@ Examples:
 """
 
 import argparse
+import os
+from datetime import datetime
 
 from sim.config import CONFIG
 from sim.data import get_day_bars
 from sim.engine import SimEngine
 from sim.report import format_report
+from sim.state import build_state, write_state
 
 
 def main() -> None:
@@ -28,6 +31,8 @@ def main() -> None:
     p.add_argument("--daily-max-loss", type=float, default=CONFIG.daily_max_loss_pct,
                    help="daily drawdown circuit-breaker (0.05 = 5%%)")
     p.add_argument("--no-short", action="store_true", help="disable short entries")
+    p.add_argument("--state", default=os.path.join("logs", "state.json"),
+                   help="where to write the dashboard state file")
     args = p.parse_args()
 
     cfg = CONFIG
@@ -41,6 +46,14 @@ def main() -> None:
     df = get_day_bars(args.symbol, args.date, cfg, csv=args.csv)
     port = SimEngine(cfg).run(df, args.symbol)
     print(format_report(port, args.symbol, args.date))
+
+    state = build_state(port, mode="backtest", symbol=args.symbol,
+                        updated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        halted=any(f["reason"] == "breaker"
+                                   for t in port.trades for f in t.exits))
+    write_state(args.state, state)
+    print(f"\nDashboard state written to {args.state} "
+          f"-> run `python dashboard.py` and open http://localhost:5000")
 
 
 if __name__ == "__main__":
