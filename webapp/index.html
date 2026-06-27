@@ -1,0 +1,429 @@
+<title>DayTrade Simulator</title>
+<meta name="description" content="Browser-based Opening Range Breakout day-trading simulator with a two-layer risk engine.">
+<style>
+  :root{
+    --bg:#0a0e15; --panel:#121a26; --panel2:#0f1620; --line:#233143;
+    --text:#e7edf5; --muted:#8a9bb2; --accent:#e0a458; --accent-dim:#7a5e35;
+    --green:#3fb950; --red:#f85149;
+    --ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ui);
+       font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:18px 16px 56px}
+
+  header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+         padding-bottom:14px;border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:19px;letter-spacing:-.01em}
+  header h1 .mark{color:var(--accent)}
+  header .tag{color:var(--muted);font-size:13px}
+
+  .controls{display:grid;gap:14px;margin:18px 0;padding:16px;
+            background:var(--panel);border:1px solid var(--line);border-radius:10px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:5px;flex:1 1 120px;min-width:0}
+  label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  select,input[type=number],input[type=file]{
+    font:inherit;color:var(--text);background:var(--panel2);
+    border:1px solid var(--line);border-radius:7px;padding:9px 10px;width:100%}
+  input[type=number]{font-family:var(--mono)}
+  select:focus,input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .check{flex:1 1 120px;display:flex;align-items:center;gap:8px;padding-bottom:9px}
+  .check input{width:18px;height:18px;accent-color:var(--accent)}
+  .check label{text-transform:none;letter-spacing:0;font-size:14px;color:var(--text)}
+
+  button{font:inherit;font-weight:600;cursor:pointer;border-radius:7px;
+         padding:10px 18px;border:1px solid var(--accent-dim);
+         background:linear-gradient(180deg,#e9b772,#e0a458);color:#231703}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+  .ghost{background:transparent;color:var(--accent);border-color:var(--accent-dim);
+         font-weight:500;padding:10px 14px}
+  .hint{font-size:12px;color:var(--muted)}
+  .hint code{font-family:var(--mono);color:var(--accent);font-size:11.5px}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:18px 0}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+  .tile .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .tile .v{font-family:var(--mono);font-size:23px;font-weight:600;margin-top:3px;
+           font-variant-numeric:tabular-nums}
+  .tile .v.sm{font-size:18px}
+  .green{color:var(--green)} .red{color:var(--red)} .amber{color:var(--accent)}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+         padding:15px;margin-top:16px}
+  .panel h2{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;
+            color:var(--muted);font-weight:600}
+  .panel .sub{font-size:12px;color:var(--muted);margin:0 0 12px}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:11px;
+         background:rgba(248,81,73,.14);color:var(--red);border:1px solid var(--red);
+         vertical-align:middle;margin-left:8px}
+  canvas{width:100%;height:260px;display:block}
+
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;
+        font-variant-numeric:tabular-nums;white-space:nowrap}
+  th,td{text-align:right;padding:8px 11px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{font-family:var(--ui);font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+     color:var(--muted);font-weight:600}
+  td.exits{text-align:left;color:var(--muted);font-size:11.5px;white-space:normal;min-width:200px}
+  .empty{color:var(--muted);text-align:center;padding:18px 0;font-family:var(--ui)}
+
+  .note{margin-top:22px;padding:13px 15px;border:1px solid var(--line);border-radius:10px;
+        background:var(--panel2);font-size:12.5px;color:var(--muted)}
+  .note strong{color:var(--text)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><span class="mark">▲</span> DayTrade <span style="color:var(--muted);font-weight:400">Simulator</span></h1>
+    <span class="tag">Opening Range Breakout · EMA/VWAP · two-layer risk</span>
+  </header>
+
+  <section class="controls" aria-label="Simulation controls">
+    <div class="row">
+      <div class="field">
+        <label for="demo">Demo day</label>
+        <select id="demo">
+          <option value="trend">Trend up — bot goes long</option>
+          <option value="selloff">Sell-off — bot shorts the drop</option>
+          <option value="trap">Bull trap — a capped loss</option>
+          <option value="chop">Choppy grind — 5% breaker trips</option>
+        </select>
+      </div>
+      <div class="field" style="flex:0 0 auto">
+        <label>&nbsp;</label>
+        <button id="run">Run simulation</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="cash">Start cash $</label><input id="cash" type="number" value="2000" min="100" step="100"></div>
+      <div class="field"><label for="risk">Risk / trade %</label><input id="risk" type="number" value="1" min="0.1" step="0.1"></div>
+      <div class="field"><label for="stop">Max stop %</label><input id="stop" type="number" value="1" min="0.1" step="0.1"></div>
+      <div class="field"><label for="dd">Daily loss cap %</label><input id="dd" type="number" value="5" min="1" step="0.5"></div>
+      <div class="check"><input id="short" type="checkbox" checked><label for="short">Allow shorts</label></div>
+    </div>
+    <div class="row" style="align-items:center">
+      <div class="field" style="flex:1 1 240px"><label for="csv">…or load your own 1-min CSV</label><input id="csv" type="file" accept=".csv,text/csv"></div>
+      <button class="ghost" id="sample">Show CSV format</button>
+    </div>
+    <p class="hint" id="csvhint" hidden>Header row then 1-minute bars: <code>timestamp,open,high,low,close,volume</code> — e.g. <code>2026-06-26 09:30,100.1,100.4,99.9,100.2,18000</code></p>
+  </section>
+
+  <section class="tiles" id="tiles" aria-live="polite">
+    <div class="tile"><div class="k">Equity</div><div class="v" id="t-eq">—</div></div>
+    <div class="tile"><div class="k">P&amp;L</div><div class="v" id="t-pnl">—</div></div>
+    <div class="tile"><div class="k">Return</div><div class="v" id="t-ret">—</div></div>
+    <div class="tile"><div class="k">Trades</div><div class="v" id="t-tr">—</div></div>
+    <div class="tile"><div class="k">Win rate</div><div class="v sm" id="t-win">—</div></div>
+    <div class="tile"><div class="k">Profit factor</div><div class="v sm" id="t-pf">—</div></div>
+    <div class="tile"><div class="k">Max drawdown</div><div class="v sm" id="t-dd">—</div></div>
+    <div class="tile"><div class="k">Largest loss</div><div class="v sm" id="t-ll">—</div></div>
+  </section>
+
+  <section class="panel">
+    <h2>Equity curve <span class="badge" id="halt" hidden>HALTED · 5% breaker</span></h2>
+    <p class="sub" id="chartsub">Run a simulation to begin.</p>
+    <canvas id="chart" width="900" height="260"></canvas>
+  </section>
+
+  <section class="panel">
+    <h2>Trade log</h2>
+    <div class="scroll">
+      <table id="trades">
+        <thead><tr><th>Entry</th><th>Side</th><th>Shares</th><th>Entry $</th><th>P&amp;L $</th><th class="exits">Exits</th></tr></thead>
+        <tbody><tr><td class="empty" colspan="6">No trades yet.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="note">
+    <strong>This is a simulator.</strong> It runs the exact Opening Range Breakout strategy and risk
+    rules in your browser on one day of 1-minute data — no install, no server. <strong>Stop</strong> is the
+    tighter of the opposite opening-range edge or your max-stop %; winners scale out (breakeven at +1R,
+    half off at +2R, the runner on a 0.5% trailing stop); the <strong>daily loss cap</strong> halts trading
+    for the day. For <em>live</em> automated trading you still need an always-on host — a phone browser
+    tab can't run all session, and broker keys don't belong in client-side code.
+  </p>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const LONG = 1, SHORT = -1;
+
+/* ---------- indicators ---------- */
+function ema(vals, period){
+  const a = 2/(period+1), out = new Array(vals.length);
+  out[0] = vals[0];
+  for(let i=1;i<vals.length;i++) out[i] = a*vals[i] + (1-a)*out[i-1];
+  return out;
+}
+function vwap(bars){
+  let cv=0, cpv=0; const out=new Array(bars.length);
+  for(let i=0;i<bars.length;i++){
+    const tp=(bars[i].h+bars[i].l+bars[i].c)/3;
+    cpv+=tp*bars[i].v; cv+=bars[i].v;
+    out[i]= cv>0 ? cpv/cv : tp;
+  }
+  return out;
+}
+const minOfDay = d => d.getHours()*60 + d.getMinutes();
+
+/* ---------- engine ---------- */
+function simulate(bars, cfg){
+  const closes = bars.map(b=>b.c);
+  const ef = ema(closes, cfg.emaFast), es = ema(closes, cfg.emaSlow), vw = vwap(bars);
+  const openMin = minOfDay(bars[0].t);
+  const orReady = openMin + cfg.orMinutes;
+  const noNew   = openMin + 360;   // 09:30 + 6h00 = 15:30
+  const flatten = openMin + 385;   // 09:30 + 6h25 = 15:55
+
+  // opening range
+  let orHigh=-Infinity, orLow=Infinity;
+  for(const b of bars){ if(minOfDay(b.t) < orReady){ orHigh=Math.max(orHigh,b.h); orLow=Math.min(orLow,b.l);} }
+
+  const slip = cfg.slippageBps/10000;
+  const fillBuy  = p => p*(1+slip), fillSell = p => p*(1-slip);
+
+  let cash=cfg.cash, pos=null, halted=false, dayStart=cfg.cash;
+  const trades=[], curve=[];
+
+  const equity = price => cash + (pos ? pos.side*pos.shares*price : 0);
+
+  function open(side, price, t){
+    const pctDist = price*cfg.maxStopPct;
+    let rps, stop;
+    if(side===LONG){ const orD=price-orLow; rps=Math.min(...[orD,pctDist].filter(x=>x>0)); stop=price-rps; }
+    else           { const orD=orHigh-price; rps=Math.min(...[orD,pctDist].filter(x=>x>0)); stop=price+rps; }
+    if(!(rps>0)) return;
+    const riskDollars = equity(price)*cfg.riskPct;
+    let shares = Math.floor(riskDollars/rps);
+    shares = Math.min(shares, Math.floor((cash*cfg.maxLev)/price));
+    if(shares<1) return;
+    const fill = side===LONG ? fillBuy(price) : fillSell(price);
+    cash -= side*shares*fill;
+    pos = {side, entry:fill, entryTime:t, initial:shares, shares, stop, rps,
+           halfTaken:false, hw:fill, realized:0, exits:[]};
+  }
+  function closeQty(qty, price, reason, t){
+    cash += pos.side*qty*price;
+    const pnl = pos.side*qty*(price-pos.entry);
+    pos.realized += pnl; pos.shares -= qty;
+    pos.exits.push({qty, price, reason, pnl, t});
+    if(pos.shares <= 1e-9){
+      trades.push({side:pos.side, entryTime:pos.entryTime, entry:pos.entry,
+                   shares:pos.initial, pnl:pos.realized, exits:pos.exits});
+      pos=null;
+    }
+  }
+  const closeAll = (price, reason, t) => {
+    const f = pos.side===LONG ? fillSell(price) : fillBuy(price);
+    closeQty(pos.shares, f, reason, t);
+  };
+
+  for(let i=0;i<bars.length;i++){
+    const b=bars[i], m=minOfDay(b.t);
+    const bar={o:b.o,h:b.h,l:b.l,c:b.c,ef:ef[i],es:es[i],vw:vw[i]};
+
+    // 1) manage open position
+    if(pos){
+      if(m>=flatten || halted){ closeAll(b.c, halted?"breaker":"time_stop", b.t); }
+      else{
+        const stopHit = pos.side===LONG ? bar.l<=pos.stop : bar.h>=pos.stop;
+        if(stopHit){
+          const r = Math.abs(pos.stop-pos.entry)<1e-9 ? "breakeven" : (pos.halfTaken?"trail_stop":"stop_loss");
+          closeQty(pos.shares, pos.stop, r, b.t);
+        } else {
+          const t1 = pos.entry + pos.side*pos.rps;
+          const t2 = pos.entry + pos.side*cfg.rr*pos.rps;
+          const hit1 = pos.side===LONG ? bar.h>=t1 : bar.l<=t1;
+          const hit2 = pos.side===LONG ? bar.h>=t2 : bar.l<=t2;
+          if(hit1) pos.stop = pos.side===LONG ? Math.max(pos.stop,pos.entry) : Math.min(pos.stop,pos.entry);
+          if(hit2 && !pos.halfTaken){
+            const half=Math.floor(pos.shares/2);
+            if(half>=1) closeQty(half, t2, "scale_2R", b.t);
+            if(pos) pos.halfTaken=true;
+          }
+          if(pos){
+            if(pos.side===LONG){ pos.hw=Math.max(pos.hw,bar.h); if(pos.halfTaken) pos.stop=Math.max(pos.stop,pos.hw*(1-cfg.trail)); }
+            else              { pos.hw=Math.min(pos.hw,bar.l); if(pos.halfTaken) pos.stop=Math.min(pos.stop,pos.hw*(1+cfg.trail)); }
+          }
+        }
+      }
+    }
+
+    // 2) daily circuit-breaker
+    const eq=equity(b.c);
+    if(eq <= dayStart*(1-cfg.dailyMax)){ halted=true; if(pos) closeAll(b.c,"breaker",b.t); }
+
+    // 3) entries
+    if(!pos && !halted && m>=orReady && m<=noNew && isFinite(orHigh)){
+      const warm = !isNaN(bar.ef)&&!isNaN(bar.es)&&!isNaN(bar.vw);
+      if(warm){
+        if(b.c>orHigh && bar.ef>bar.es && b.c>bar.vw) open(LONG,b.c,b.t);
+        else if(cfg.allowShort && b.c<orLow && bar.ef<bar.es && b.c<bar.vw) open(SHORT,b.c,b.t);
+      }
+    }
+    curve.push([b.t, equity(b.c)]);
+  }
+  if(pos) closeAll(bars[bars.length-1].c, "eod_safety", bars[bars.length-1].t);
+
+  return {trades, curve, halted, startCash:cfg.cash, endEquity: curve.length?curve[curve.length-1][1]:cfg.cash};
+}
+
+/* ---------- metrics ---------- */
+function metrics(r){
+  const t=r.trades, wins=t.filter(x=>x.pnl>0), losses=t.filter(x=>x.pnl<0);
+  const gw=wins.reduce((s,x)=>s+x.pnl,0), gl=-losses.reduce((s,x)=>s+x.pnl,0);
+  let peak=r.curve.length?r.curve[0][1]:r.startCash, mdd=0;
+  for(const [,e] of r.curve){ peak=Math.max(peak,e); if(peak) mdd=Math.max(mdd,(peak-e)/peak); }
+  return {
+    end:r.endEquity, pnl:r.endEquity-r.startCash,
+    ret:(r.endEquity/r.startCash-1)*100, n:t.length,
+    winRate: t.length? wins.length/t.length*100 : 0,
+    pf: gl>0 ? gw/gl : (gw>0?Infinity:0),
+    mdd: mdd*100, largestLoss: t.reduce((m,x)=>Math.min(m,x.pnl),0),
+  };
+}
+
+/* ---------- demo data ---------- */
+function frame(closes, hi, lo){
+  const bars=[]; const base=new Date(2026,5,26,9,30,0);
+  for(let i=0;i<closes.length;i++){
+    bars.push({t:new Date(base.getTime()+i*60000),
+      o: i? closes[i-1]:closes[0], h:hi[i], l:lo[i], c:closes[i], v:15000});
+  }
+  return bars;
+}
+function demo(kind){
+  const orBars=[]; for(let i=0;i<15;i++) orBars.push(100 + (i%2?0.01:-0.01));
+  let c=[...orBars], price=100;
+  if(kind==="trend"){ for(let i=0;i<110;i++){ price+=0.15; c.push(price);} }
+  else if(kind==="selloff"){ for(let i=0;i<110;i++){ price-=0.45; c.push(price);} }
+  else if(kind==="trap"){ c.push(100.6); for(let i=0;i<50;i++) c.push(100.6-(i+1)*0.8); }
+  else { for(let k=0;k<15;k++) c.push(100.6, 99.2); }   // choppy sawtooth
+  const hi=c.map(x=>x+0.05), lo=c.map(x=>x-0.05);
+  return {bars:frame(c,hi,lo), short: kind!=="trap" && kind!=="chop", fast:kind==="chop"};
+}
+
+/* ---------- CSV ---------- */
+function parseCSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  const head=lines[0].toLowerCase().split(",").map(s=>s.trim());
+  const idx=n=>head.indexOf(n);
+  const it=idx("timestamp"), io=idx("open"), ih=idx("high"), il=idx("low"), ic=idx("close"), iv=idx("volume");
+  if([it,io,ih,il,ic].some(x=>x<0)) throw new Error("CSV needs columns: timestamp,open,high,low,close,volume");
+  const bars=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const p=lines[i].split(",");
+    const t=new Date(p[it].trim().replace(" ","T"));
+    if(isNaN(t)) continue;
+    bars.push({t, o:+p[io], h:+p[ih], l:+p[il], c:+p[ic], v: iv>=0 ? (+p[iv]||0) : 0});
+  }
+  bars.sort((a,b)=>a.t-b.t);
+  if(bars.length<20) throw new Error("Not enough bars in CSV (need a full 1-minute session).");
+  return bars;
+}
+
+/* ---------- render ---------- */
+const money = n => (n<0?"-$":"$")+Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const cls = n => n>0?"green":(n<0?"red":"");
+const sideName = s => s===LONG?"long":"short";
+const fmtTime = t => `${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`;
+
+function drawChart(curve, startCash){
+  const c=$("chart"), dpr=window.devicePixelRatio||1, w=c.clientWidth, h=260;
+  c.width=w*dpr; c.height=h*dpr; const x=c.getContext("2d"); x.scale(dpr,dpr); x.clearRect(0,0,w,h);
+  if(!curve||curve.length<2){ x.fillStyle="#8a9bb2"; x.font="13px system-ui"; x.fillText("No data",12,24); return; }
+  const ys=curve.map(p=>p[1]); let lo=Math.min(...ys), hi=Math.max(...ys);
+  if(hi===lo){hi+=1;lo-=1;}
+  const padL=58, padR=12, top=12, bot=h-22, plotW=w-padL-padR;
+  const X=i=>padL+plotW*(i/(curve.length-1));
+  const Y=v=>top+(bot-top)*(1-(v-lo)/(hi-lo));
+  // baseline
+  x.strokeStyle="#233143"; x.lineWidth=1; x.setLineDash([4,4]);
+  x.beginPath(); x.moveTo(padL,Y(startCash)); x.lineTo(w-padR,Y(startCash)); x.stroke(); x.setLineDash([]);
+  x.fillStyle="#8a9bb2"; x.font="11px ui-monospace,monospace"; x.textAlign="right";
+  x.fillText(money(hi),padL-7,Y(hi)+4); x.fillText(money(lo),padL-7,Y(lo)+4);
+  const up = ys[ys.length-1]>=startCash, col = up?"#3fb950":"#f85149";
+  // area
+  x.beginPath(); x.moveTo(X(0),Y(curve[0][1]));
+  curve.forEach((p,i)=>x.lineTo(X(i),Y(p[1])));
+  x.lineTo(X(curve.length-1),Y(lo)); x.lineTo(X(0),Y(lo)); x.closePath();
+  x.fillStyle= up?"rgba(63,185,80,.12)":"rgba(248,81,73,.12)"; x.fill();
+  // line
+  x.beginPath(); x.moveTo(X(0),Y(curve[0][1]));
+  curve.forEach((p,i)=>x.lineTo(X(i),Y(p[1])));
+  x.strokeStyle=col; x.lineWidth=2; x.stroke();
+  // endpoint
+  const li=curve.length-1; x.fillStyle=col;
+  x.beginPath(); x.arc(X(li),Y(curve[li][1]),3.2,0,7); x.fill();
+}
+
+function render(r){
+  const m=metrics(r);
+  $("t-eq").textContent=money(m.end);
+  const pnl=$("t-pnl"); pnl.textContent=money(m.pnl); pnl.className="v "+cls(m.pnl);
+  const ret=$("t-ret"); ret.textContent=(m.ret>=0?"+":"")+m.ret.toFixed(2)+"%"; ret.className="v "+cls(m.pnl);
+  $("t-tr").textContent=m.n;
+  $("t-win").textContent=m.n?m.winRate.toFixed(0)+"%":"—";
+  $("t-pf").textContent=m.pf===Infinity?"∞":m.pf.toFixed(2);
+  $("t-dd").textContent=m.mdd.toFixed(2)+"%";
+  const ll=$("t-ll"); ll.textContent=money(m.largestLoss); ll.className="v sm "+(m.largestLoss<0?"red":"");
+  $("halt").hidden=!r.halted;
+
+  $("chartsub").textContent = `${r.curve.length} one-minute bars · started ${money(r.startCash)}`;
+  drawChart(r.curve, r.startCash);
+
+  const tb=$("trades").querySelector("tbody");
+  if(!r.trades.length){ tb.innerHTML='<tr><td class="empty" colspan="6">No entries triggered on this day.</td></tr>'; return; }
+  tb.innerHTML=r.trades.map(t=>{
+    const exits=t.exits.map(e=>`${e.reason}@${e.price.toFixed(2)}×${e.qty}`).join(", ");
+    return `<tr><td>${fmtTime(t.entryTime)}</td><td class="${t.side===LONG?'green':'red'}">${sideName(t.side)}</td>`+
+      `<td>${t.shares}</td><td>${t.entry.toFixed(2)}</td>`+
+      `<td class="${cls(t.pnl)}">${money(t.pnl)}</td><td class="exits">${exits}</td></tr>`;
+  }).join("");
+}
+
+/* ---------- wire up ---------- */
+function readCfg(over){
+  return Object.assign({
+    cash:+$("cash").value||2000, orMinutes:15, emaFast:9, emaSlow:20,
+    riskPct:(+$("risk").value||1)/100, maxStopPct:(+$("stop").value||1)/100,
+    dailyMax:(+$("dd").value||5)/100, rr:2, trail:0.005, maxLev:1,
+    slippageBps:1, allowShort:$("short").checked,
+  }, over||{});
+}
+let csvBars=null;
+
+function run(){
+  let bars, cfg;
+  if(csvBars){ bars=csvBars; cfg=readCfg(); }
+  else{
+    const d=demo($("demo").value);
+    bars=d.bars;
+    cfg=readCfg(d.fast ? {allowShort:false, emaFast:1, emaSlow:2} : {allowShort: d.short && $("short").checked});
+  }
+  render(simulate(bars, cfg));
+}
+
+$("run").addEventListener("click", run);
+$("demo").addEventListener("change", ()=>{ csvBars=null; $("csv").value=""; run(); });
+$("sample").addEventListener("click", ()=>{ const h=$("csvhint"); h.hidden=!h.hidden; });
+$("csv").addEventListener("change", e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ csvBars=parseCSV(rd.result); $("chartsub").textContent=`Loaded ${f.name}`; run(); }
+                  catch(err){ csvBars=null; alert(err.message); } };
+  rd.readAsText(f);
+});
+window.addEventListener("resize", ()=>{ if($("chart").width) run(); });
+
+run(); // first paint with the default demo
+</script>

@@ -1,90 +1,173 @@
-# TradingView Forex Auto-Trader (Python + OANDA)
+# DayTrade — US-Stock Day-Trading Bot + Simulator
 
-A minimal, production-ready starter to receive TradingView webhooks and place Forex trades via OANDA with basic risk controls and a price-action hook you can extend.
+An automated **stock** day-trading bot built around the classic **Opening Range
+Breakout (ORB)** strategy, with a hard two-layer risk engine (never lose more
+than ~5% of the account in a day) and a **real-time simulator seeded with $2000**
+so you can backtest it on a real trading day's 1-minute data before risking
+anything.
 
-## Quick start
+> The old Forex/OANDA code (`app.py`, `streamlit_app.py`, `broker/`,
+> `price_action/`) is **deprecated** and unused by this bot.
 
-1) Create and fill a `.env` file (copy from `.env.example`):
+## How it works (the whole loop)
+
+1. Pull a day's 1-minute bars (Alpaca, or yfinance offline).
+2. Build the **opening range** = high/low of the first 15 minutes (09:30–09:45 ET).
+3. Each new bar, check the **entry rules**. If they fire, size the position from
+   the risk budget and enter.
+4. Manage the open trade bar-by-bar: move the stop, scale out at profit, trail
+   the runner.
+5. Flatten everything by 15:55 — **no overnight positions**.
+6. The **daily circuit-breaker** halts trading the moment the account is down 5%.
+
+The exact same `sim/strategy.py` + `sim/risk.py` code runs in both the backtest
+(`run_backtest.py`) and the live paper loop (`run_paper.py`).
+
+## The strategy (entry rules)
+
+Trades 1-minute bars during regular hours only. `EMA9`/`EMA20` are the fast/slow
+exponential moving averages; `VWAP` is the session volume-weighted price.
+
+| Direction | Conditions (ALL must be true) |
+|-----------|-------------------------------|
+| **Long**  | bar closes **above** opening-range high **and** `EMA9 > EMA20` **and** price `> VWAP` |
+| **Short** | bar closes **below** opening-range low **and** `EMA9 < EMA20` **and** price `< VWAP` |
+
+- One position at a time. **No new entries after 15:30.** All flat by 15:55.
+- The EMA + VWAP filters keep you trading *with* the trend and block low-quality
+  breakouts — this is what stops the bot from over-trading.
+
+## Profit & loss rules (clear and defined)
+
+Let **R = the dollars risked per trade** = `|entry price − stop price|`.
+
+**Loss side — when a trade closes at a loss:**
+- **Stop placement:** the *tighter* of (a) the opposite side of the opening
+  range, or (b) **1%** of entry price (configurable up to 2%).
+- If price hits the stop, the remaining shares are closed immediately. Maximum
+  loss on any trade ≈ **1% of the account** (see sizing below).
+
+**Profit side — when a trade closes at a profit (scale-out):**
+- **At +1R:** move the stop to **breakeven** → the trade can no longer lose.
+- **At +2R:** **sell half** the position, banking the gain.
+- **Runner (other half):** rides a **trailing stop** (0.5% below the running
+  high for longs / above the low for shorts) and exits only when the trend
+  reverses — this lets winners run.
+- **Time stop:** anything still open is force-closed at **15:55**.
+
+So a winning trade can exit in up to three pieces (half at 2R, runner on the
+trail, remainder at the time stop), each logged separately.
+
+## Risk engine — the two layers that cap losses at 5%
+
+**Layer 1 — per-trade sizing.** Risk a fixed **1% of current equity** per trade:
 
 ```
-OANDA_API_KEY=YOUR_OANDA_V20_TOKEN
-OANDA_ACCOUNT_ID=YOUR_OANDA_ACCOUNT_ID
-OANDA_ENV=practice
-WEBHOOK_PORT=8080
-WEBHOOK_HOST=0.0.0.0
-ALERT_SHARED_SECRET=change-this
-MAX_RISK_PCT=1.0
+risk_dollars   = equity × 1%                 # $20 on a $2000 account
+risk_per_share = |entry − stop|
+shares         = floor(risk_dollars / risk_per_share)   # capped by buying power
 ```
 
-2) Install dependencies:
+Because position size is derived *from* the stop distance, a stopped-out trade
+loses ~1% of the account regardless of the stock's price.
+
+**Layer 2 — daily circuit-breaker.** If equity falls **5% below the day's
+starting balance** (−$100 on $2000), the bot **halts all new entries and
+flattens open positions** for the rest of the day. This is the hard "max 5%
+loss" guarantee.
+
+### Worked example ($2000 account)
+
+- Account equity = **$2000** → risk budget = **$20** per trade.
+- Buy signal at **$50.00**; stop (1% of entry) at **$49.50** → risk/share = $0.50.
+- Shares = floor($20 / $0.50) = **40 shares** (cost $2000, within buying power).
+- Stopped out at $49.50 → loss = 40 × $0.50 = **$20 (1%)**.
+- Hits +2R ($51.00): sell 20 shares (+$20 locked), stop to breakeven, trail the
+  other 20 for more.
+- After ~5 consecutive losers (−$100) the circuit-breaker stops the day at −5%.
+
+## Setup
 
 ```bash
 pip install -r requirements.txt
+cp .env.example .env          # then add your free Alpaca PAPER keys
 ```
 
-3) Run the webhook server:
+`.env` keys (see `.env.example`): `ALPACA_API_KEY`, `ALPACA_SECRET_KEY`,
+`ALPACA_PAPER=true`, `ALPACA_DATA_FEED=iex` (free feed for paper accounts).
+
+## Backtest the bot on a real day
 
 ```bash
-python app.py
+python run_backtest.py --symbol AAPL --date 2026-06-26
 ```
 
-4) In TradingView, set an alert with Webhook URL pointing to your server, e.g. `http://<your-ip>:8080/webhook`.
+Starts at $2000, replays that day's 1-minute bars, and prints a per-trade table
+plus a summary (return, win rate, profit factor, **max drawdown**, and whether
+the 5% breaker fired). Useful flags:
 
-### TradingView alert payload
-Set the alert message to valid JSON like this (edit values as needed):
-
-```json
-{
-  "secret": "change-this",
-  "strategy_id": "price_action_v1",
-  "symbol": "EUR_USD",
-  "side": "buy",
-  "entry_price": 1.1005,
-  "stop_loss": 1.0985,
-  "take_profit": 1.1045,
-  "risk_pct": 0.5,
-  "timeframe": "15"
-}
+```
+--csv data/aapl.csv     # run fully offline from a CSV (timestamp,open,high,low,close,volume)
+--cash 5000             # change starting capital
+--risk 0.01             # risk per trade (0.01 = 1%)
+--max-stop 0.02         # widen the per-trade stop cap to 2%
+--daily-max-loss 0.05   # daily circuit-breaker threshold
+--no-short              # long-only
 ```
 
-- `symbol` must use OANDA instrument symbols like `EUR_USD`, `GBP_JPY`, etc.
-- `risk_pct` is percent of account balance to risk on this trade. Capped by `MAX_RISK_PCT`.
-- Server assumes account currency equals the quote currency. If not, adjust the risk model in `broker/oanda_client.py`.
+If no Alpaca keys are set, it falls back to **yfinance** (1-minute history is
+limited to ~the last 30 days).
 
-## Files
-- `app.py`: Flask webhook that validates and routes orders
-- `config.py`: Environment management and constants
-- `broker/oanda_client.py`: Thin OANDA REST client and order sizing
-- `price_action/patterns.py`: Hook for your price-action filters
-- `utils/logger.py`: Structured logging to console and file
-- `requirements.txt`: Python deps
+## Live paper trading
 
-## Security
-- Uses a shared secret in the JSON payload (`secret`). Match it to `ALERT_SHARED_SECRET`.
-- Restrict inbound IPs at your firewall/reverse proxy if exposing publicly.
-
-## Extending price action
-Implement your logic in `price_action/patterns.py`. The server calls `validate_signal(...)` before placing orders. Return `False` to block trades that do not meet your criteria.
-
-## Pine Script alert example
-Put this in your TradingView alert message (JSON), and keep it in sync with your strategy variables:
-
-```json
-{
-  "secret": "change-this",
-  "strategy_id": "price_action_v1",
-  "symbol": "{{ticker}}".replace(":", "_"),
-  "side": "{{strategy.order.action}}".toLowerCase(),
-  "entry_price": {{close}},
-  "stop_loss": {{close}} - 0.0020,
-  "take_profit": {{close}} + 0.0040,
-  "risk_pct": 0.5,
-  "timeframe": "{{interval}}"
-}
+```bash
+python run_paper.py --symbols AAPL,MSFT      # during US market hours
 ```
 
-Note: Pine cannot compute HMAC headers dynamically in alerts; use the shared secret field.
+Connects to your Alpaca **paper** account, streams 1-minute bars, and submits
+paper market orders for every entry/scale-out/stop the strategy generates. It is
+paper only — review thoroughly before considering real money.
+
+## Live tracking dashboard
+
+A self-contained local web page (no external CDNs) that tracks the bot in real
+time — equity, P&L, the open position, a trade log, and an equity-curve chart.
+It works for **both** a finished backtest and the **live paper bot**.
+
+```bash
+python run_backtest.py --symbol AAPL --date 2026-06-26   # writes logs/state.json
+python dashboard.py                                       # then open http://localhost:5000
+```
+
+The bot writes `logs/state.json`; the page polls `/api/state` every ~2 seconds.
+During paper trading the page updates each minute as new bars arrive, and shows a
+red **HALTED** badge the moment the 5% daily circuit-breaker trips. Paper-mode
+trade P&L is approximated from the local fill mirror.
+
+## Project layout
+
+```
+sim/
+  config.py      all tunables (account, strategy, risk, fills, data)
+  indicators.py  EMA + VWAP (causal, no look-ahead)
+  strategy.py    ORBStrategy — pure entry logic (shared by sim & live)
+  risk.py        RiskManager — sizing, scale-out, stop, 5% breaker
+  portfolio.py   cash/positions/equity + partial-close trade log
+  engine.py      SimEngine — bar-by-bar replay + conservative fills
+  data.py        Alpaca / yfinance / CSV data adapters
+  report.py      performance metrics + report formatting
+  state.py       JSON state snapshot for the dashboard
+run_backtest.py  CLI backtester
+run_paper.py     live Alpaca paper loop
+dashboard.py     local Flask dashboard (serves the live page + /api/state)
+static/          dashboard.html (self-contained, no CDNs)
+tests/           offline unit + integration tests (pytest)
+```
+
+Run the tests: `python -m pytest tests/ -q`
 
 ## Disclaimer
-This code is for educational purposes. Trading involves risk. Use at your own risk and test thoroughly on paper or demo accounts before going live.
 
+Educational software. Trading involves substantial risk of loss. Backtest
+results are not indicative of future returns. Test on paper thoroughly; use at
+your own risk.
