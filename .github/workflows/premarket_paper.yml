@@ -1,0 +1,38 @@
+name: Premarket paper bot
+
+# Runs the live premarket gap-and-go bot against your Alpaca PAPER account each
+# weekday morning, then exits when it flattens (~11:35 ET). Free GitHub runners.
+#
+# Scheduled workflows only run from the DEFAULT branch, so this must be on master.
+# Requires repo secrets: ALPACA_API_KEY, ALPACA_SECRET_KEY (paper keys).
+
+on:
+  workflow_dispatch:        # run manually any time (it self-skips outside the window)
+  schedule:
+    # 11:00 UTC = 07:00 ET in summer (EDT) / 06:00 ET in winter (EST) — premarket.
+    - cron: "0 11 * * 1-5"
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 320     # safety cap; the bot exits itself at the flatten time
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run premarket paper bot
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PAPER: "true"
+          ALPACA_DATA_FEED: iex
+        run: |
+          if [ -z "$ALPACA_API_KEY" ]; then
+            echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets."
+            exit 1
+          fi
+          python run_premarket_paper.py
