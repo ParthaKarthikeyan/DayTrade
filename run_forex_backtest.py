@@ -12,7 +12,7 @@ import argparse
 import os
 
 from forex.config import DEFAULT
-from forex.data import get_fx, from_csv
+from forex.data import get_fx, get_oanda, to_oanda, from_csv
 from forex.engine import run_variants
 
 VARIANTS = ["pure_orb", "trend_orb", "pure_trend"]
@@ -25,10 +25,12 @@ def fmt_pf(pf):
 def main():
     p = argparse.ArgumentParser(description="Forex 3-variant backtester (yfinance)")
     p.add_argument("--pairs", default=",".join(DEFAULT.pairs))
+    p.add_argument("--source", choices=["yfinance", "oanda"], default="yfinance")
     p.add_argument("--period", default="60d", help="yfinance period (15m caps ~60d)")
+    p.add_argument("--years", type=float, default=2.0, help="OANDA history length")
     p.add_argument("--cash", type=float, default=DEFAULT.start_cash)
     p.add_argument("--risk", type=float, default=DEFAULT.risk_per_trade_pct)
-    p.add_argument("--csv", help="load one pair's bars from CSV instead of yfinance")
+    p.add_argument("--csv", help="load one pair's bars from CSV instead of a feed")
     args = p.parse_args()
 
     cfg = DEFAULT
@@ -39,7 +41,12 @@ def main():
     rows = []          # (pair, variant, metrics)
     for pair in pairs:
         try:
-            df = from_csv(args.csv) if args.csv else get_fx(pair, args.period, cfg.interval)
+            if args.csv:
+                df = from_csv(args.csv)
+            elif args.source == "oanda":
+                df = get_oanda(to_oanda(pair), years=args.years)
+            else:
+                df = get_fx(pair, args.period, cfg.interval)
         except Exception as e:
             print(f"{pair}: data error — {e}")
             continue
@@ -51,8 +58,10 @@ def main():
                   f"win={m['win_rate']:.0f}%  pf={fmt_pf(m['profit_factor'])}  "
                   f"maxDD={m['max_dd']:.2f}%")
 
+    window = (f"{args.years:g}y of OANDA M15" if args.source == "oanda"
+              else f"{args.period} of yfinance 15m")
     md = ["# Forex backtest — pure ORB vs trend vs trend-filtered ORB", "",
-          f"${cfg.start_cash:,.0f} start · majors · London-session ORB · {args.period} of 15m data.", "",
+          f"${cfg.start_cash:,.0f} start · majors · London-session ORB · {window}.", "",
           "| Pair | Variant | Return | Trades | Win% | Profit factor | Max DD |",
           "|---|---|--:|--:|--:|--:|--:|"]
     for pair, v, m in rows:

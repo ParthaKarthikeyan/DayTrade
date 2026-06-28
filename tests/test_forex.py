@@ -3,7 +3,27 @@
 import pandas as pd
 
 from forex.config import ForexConfig
+from forex.data import to_oanda, _parse_candles
 from forex.engine import run_orb, run_trend, run_variants
+
+
+def test_to_oanda_mapping():
+    assert to_oanda("EURUSD=X") == "EUR_USD"
+    assert to_oanda("GBPUSD=X") == "GBP_USD"
+    assert to_oanda("EUR_USD") == "EUR_USD"
+
+
+def test_parse_oanda_candles():
+    payload = {"candles": [
+        {"complete": True, "time": "2026-06-01T07:00:00Z",
+         "mid": {"o": "1.1000", "h": "1.1010", "l": "1.0995", "c": "1.1005"}},
+        {"complete": False, "time": "2026-06-01T07:15:00Z",   # dropped (incomplete)
+         "mid": {"o": "1.1005", "h": "1.1006", "l": "1.1004", "c": "1.1005"}},
+    ]}
+    df = _parse_candles(payload)
+    assert len(df) == 1
+    assert str(df.index.tz) == "UTC"
+    assert df.iloc[0]["close"] == 1.1005
 
 
 def cfg(**over):
