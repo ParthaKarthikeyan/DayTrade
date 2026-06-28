@@ -53,6 +53,9 @@ jobs:
               --start "${{ inputs.start }}" \
               --end "${{ inputs.end }}" \
               --cash "${{ inputs.cash }}"
+          # "FOREX" -> free yfinance FX 3-variant backtest (no keys needed).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FOREX'; then
+            python run_forex_backtest.py --cash "${{ inputs.cash }}"
           else
             if [ -z "$ALPACA_API_KEY" ]; then
               echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets." \
