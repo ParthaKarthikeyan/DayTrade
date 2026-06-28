@@ -46,6 +46,8 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: "true"
           ALPACA_DATA_FEED: iex
+          OANDA_API_KEY: ${{ secrets.OANDA_API_KEY }}
+          OANDA_ENV: practice
         run: |
           # "PREMARKET" -> free yfinance gap-and-go backtest (no Alpaca keys needed).
           if echo "${{ inputs.symbols }}" | grep -qi '^PREMARKET'; then
@@ -53,9 +55,14 @@ jobs:
               --start "${{ inputs.start }}" \
               --end "${{ inputs.end }}" \
               --cash "${{ inputs.cash }}"
-          # "FOREX" -> free yfinance FX 3-variant backtest (no keys needed).
+          # "FOREX" -> FX 3-variant backtest. Deep OANDA history if the key is set,
+          # else free yfinance (~60 days).
           elif echo "${{ inputs.symbols }}" | grep -qi '^FOREX'; then
-            python run_forex_backtest.py --cash "${{ inputs.cash }}"
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_backtest.py --source oanda --years 2 --cash "${{ inputs.cash }}"
+            else
+              python run_forex_backtest.py --cash "${{ inputs.cash }}"
+            fi
           else
             if [ -z "$ALPACA_API_KEY" ]; then
               echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets." \
