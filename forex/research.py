@@ -256,6 +256,27 @@ def split_train_test(df: pd.DataFrame, train_frac: float = 0.65):
     return df.iloc[:cut], df.iloc[cut:]
 
 
+def walk_forward(df: pd.DataFrame, pair: str, fn, params, n_folds: int = 5,
+                 start_cash: float = 2000.0) -> List[dict]:
+    """Chop the series into `n_folds` sequential, non-overlapping out-of-sample chunks
+    and evaluate the (fixed-param) strategy on each independently. The right temporal
+    robustness check for a single pair: a real edge holds across most time windows, a
+    fluke shows up in one. Params are fixed, so there is no fitting/leakage — each chunk
+    is a clean OOS period (its first ~200 bars are indicator warm-up that won't trade).
+    """
+    n = len(df)
+    seg = n // n_folds
+    folds = []
+    for i in range(n_folds):
+        a = i * seg
+        b = (i + 1) * seg if i < n_folds - 1 else n
+        chunk = df.iloc[a:b]
+        if len(chunk) < 50:
+            continue
+        folds.append(metrics(fn(chunk, pair, start_cash=start_cash, **params), start_cash))
+    return folds
+
+
 def evaluate(df: pd.DataFrame, pair: str, start_cash: float = 2000.0,
              train_frac: float = 0.65, catalogue=None) -> Dict[str, dict]:
     """Run every strategy in `catalogue` (default STRATEGIES) on train + held-out test."""

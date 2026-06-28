@@ -55,6 +55,14 @@ jobs:
               --start "${{ inputs.start }}" \
               --end "${{ inputs.end }}" \
               --cash "${{ inputs.cash }}"
+          # "FXWALK" -> walk-forward validation on a focused 1-2 pair set
+          # (EUR/USD + GBP/USD, H4, sequential out-of-sample time folds).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FXWALK'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_walkforward.py --source oanda --cash "${{ inputs.cash }}"
+            else
+              python run_forex_walkforward.py --source yfinance --cash "${{ inputs.cash }}"
+            fi
           # "FXRESEARCH" -> out-of-sample lower-frequency trend-following search
           # (H4 + Daily, train/test split). Uses OANDA deep history if the key is set.
           elif echo "${{ inputs.symbols }}" | grep -qi '^FXRESEARCH'; then
