@@ -128,12 +128,15 @@ class PremarketPaperBot:
             if self.pos is not None:
                 self._close(b["c"], "breaker", ts)
 
-        # entry (one position; before the cutoff)
+        # entry (one position; before the cutoff) — bull-flag breakout
+        sig_stop = None
         if (self.pos is None and not self.halted and ts.time() <= self.no_new
-                and vol_avg is not None
-                and self.strat.entry_long(b, sh, vwap, vol_avg)):
+                and vol_avg is not None):
+            window = hist[-(self.cfg.pm_pullback_lookback + 1):]
+            sig_stop = self.strat.entry_signal(window, vwap, vol_avg)
+        if sig_stop is not None:
             entry = b["c"]
-            stop = self.strat.initial_stop(entry, b["l"])
+            stop = sig_stop
             rps = entry - stop
             if rps > 0:
                 shares = int((eq * self.cfg.risk_per_trade_pct) // rps)

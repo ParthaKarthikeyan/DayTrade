@@ -145,11 +145,14 @@ def simulate_symbol_day(bars: List[dict], symbol: str, start_equity: float,
             if pos is not None:
                 close(bar["c"], "breaker", t)
 
-        # 3) entry (one position, before the cutoff)
-        if (pos is None and not halted and t.time() <= no_new and vol_avg is not None
-                and strat.entry_long(bar, session_high, vwap, vol_avg)):
+        # 3) entry (one position, before the cutoff) — bull-flag breakout
+        sig_stop = None
+        if pos is None and not halted and t.time() <= no_new and vol_avg is not None:
+            sig_stop = strat.entry_signal(bars[max(0, i - cfg.pm_pullback_lookback):i + 1],
+                                          vwap, vol_avg)
+        if sig_stop is not None:
             entry = bar["c"] * (1 + PM_SLIPPAGE)
-            stop = strat.initial_stop(entry, bar["l"])
+            stop = sig_stop
             rps = entry - stop
             if rps > 0:
                 shares = int((equity * cfg.risk_per_trade_pct) // rps)

@@ -44,13 +44,19 @@ def test_rank_gappers_filters_and_sorts():
 
 
 # --- strategy primitives -------------------------------------------------
-def test_entry_requires_breakout_vwap_and_volume():
-    s = PremarketMomentum(cfg())
-    bar = {"o": 3.0, "h": 3.1, "l": 3.0, "c": 3.10, "v": 5000}
-    assert s.entry_long(bar, session_high=3.05, vwap=3.00, vol_avg=2000) is True
-    assert s.entry_long(bar, session_high=3.20, vwap=3.00, vol_avg=2000) is False  # no breakout
-    assert s.entry_long(bar, session_high=3.05, vwap=3.20, vol_avg=2000) is False  # below VWAP
-    assert s.entry_long(bar, session_high=3.05, vwap=3.00, vol_avg=9999) is False  # weak volume
+def test_entry_signal_bull_flag_breakout():
+    s = PremarketMomentum(cfg())   # pm_pullback_lookback = 3
+    flag = [{"o": 3.10, "h": 3.12, "l": 3.05, "c": 3.08, "v": 1000},
+            {"o": 3.08, "h": 3.11, "l": 3.06, "c": 3.09, "v": 1000},
+            {"o": 3.09, "h": 3.12, "l": 3.07, "c": 3.10, "v": 1000}]
+    breakout = {"o": 3.10, "h": 3.20, "l": 3.09, "c": 3.18, "v": 3000}
+    window = flag + [breakout]
+    stop = s.entry_signal(window, vwap=3.00, vol_avg=1000)
+    assert stop == pytest.approx(3.05)                       # = flag low
+    assert s.entry_signal(window, vwap=3.50, vol_avg=1000) is None    # below VWAP
+    assert s.entry_signal(window, vwap=3.00, vol_avg=9999) is None    # weak volume
+    no_break = {**breakout, "h": 3.11, "c": 3.10}
+    assert s.entry_signal(flag + [no_break], vwap=3.00, vol_avg=1000) is None  # no new high
 
 
 def test_exit_priority():
