@@ -151,7 +151,7 @@ def run_mean_reversion(df: pd.DataFrame, pair: str, *, start_cash: float = 2000.
                        risk_pct: float = 0.01, max_leverage: float = 30.0,
                        sma_period: int = 20, band_k: float = 2.0,
                        stop_k: float = 3.5, trend_ema: int = 200,
-                       max_hold: int = 20) -> dict:
+                       max_hold: int = 20, spread_pips: float = None) -> dict:
     """Fade Bollinger-band extremes back to the mean.
 
     FX majors range more than they trend intraday, so the hypothesis is: when price
@@ -171,7 +171,8 @@ def run_mean_reversion(df: pd.DataFrame, pair: str, *, start_cash: float = 2000.
     d["lower"] = d["sma"] - band_k * d["std"]
 
     pip = pip_size(pair)
-    hs = SPREAD_PIPS.get(pair, 1.5) * pip / 2.0
+    sp = SPREAD_PIPS.get(pair, 1.5) if spread_pips is None else spread_pips
+    hs = sp * pip / 2.0                       # half-spread per side (0 = gross/no cost)
     equity = start_cash
     pos = None
     trades: List[dict] = []
