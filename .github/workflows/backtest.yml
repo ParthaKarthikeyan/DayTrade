@@ -59,6 +59,10 @@ jobs:
           # Coinbase public data needs no key.
           elif echo "${{ inputs.symbols }}" | grep -qi '^CRYPTO'; then
             python run_crypto_research.py --source coinbase --cash "${{ inputs.cash }}"
+          # "FUTURES" -> diversified multi-asset daily trend (managed-futures style).
+          # yfinance daily futures/proxy data; no key.
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FUTURES'; then
+            python run_futures_research.py --cash "${{ inputs.cash }}"
           # "FXSCALP" -> scalping cost test (M5/M1 fade, gross vs net spread).
           elif echo "${{ inputs.symbols }}" | grep -qi '^FXSCALP'; then
             if [ -n "$OANDA_API_KEY" ]; then
