@@ -44,8 +44,8 @@ def main():
     md = ["# Crypto research — does activity survive costs?", "",
           f"${args.cash:,.0f} start · {', '.join(PRODUCTS)} · fade + Donchian trend · "
           "cost shown GROSS / LOW 20bps / MID 60bps round-trip · walk-forward at LOW.",
-          "", "| TF | Asset | Strat | Trades/yr | Gross ret | Net@20 ret/PF | Net@60 ret | WF@20 |",
-          "|---|---|---|--:|--:|--:|--:|--:|"]
+          "", "| TF | Asset | Strat | Trades/yr | Gross ret | Net@20 ret/PF | Net@20 maxDD | Net@60 ret | WF@20 |",
+          "|---|---|---|--:|--:|--:|--:|--:|--:|"]
     verdicts = []
     for interval, (years, max_hold) in TFS.items():
         for product in PRODUCTS:
@@ -67,20 +67,30 @@ def main():
                                      start_cash=args.cash)
                 wf = sum(1 for f in folds if f["ret"] > 0 and f["profit_factor"] > 1.0)
                 ok = n20["ret"] > 0 and n20["profit_factor"] > 1.0 and wf > len(folds) / 2
-                verdicts.append((interval, product, strat, ok, n20, wf, len(folds), tpy))
+                verdicts.append((interval, product, strat, ok, n20, wf, len(folds), tpy, folds))
                 md.append(f"| {interval} | {product} | {strat} | {tpy:,.0f} | "
                           f"{g['ret']:+.0f}% | **{n20['ret']:+.0f}%**/{fmt_pf(n20['profit_factor'])} | "
-                          f"{n60['ret']:+.0f}% | {wf}/{len(folds)} |")
+                          f"{n20['max_dd']:.0f}% | {n60['ret']:+.0f}% | {wf}/{len(folds)} |")
                 print(f"{interval} {product} {strat}: {tpy:,.0f}/yr gross {g['ret']:+.0f}% "
                       f"net20 {n20['ret']:+.0f}%/pf{fmt_pf(n20['profit_factor'])} "
                       f"net60 {n60['ret']:+.0f}% wf {wf}/{len(folds)}")
 
     md += ["", "## Verdict (net of LOW 20bps cost + walk-forward)", ""]
     cands = [v for v in verdicts if v[3]]
-    for interval, product, strat, ok, n20, wf, nf, tpy in verdicts:
+    for interval, product, strat, ok, n20, wf, nf, tpy, folds in verdicts:
         md.append(f"- **{interval} / {product} / {strat}**: {tpy:,.0f} trades/yr · "
-                  f"net@20 {n20['ret']:+.0f}% (PF {fmt_pf(n20['profit_factor'])}) · "
-                  f"WF {wf}/{nf} → {'✅ CANDIDATE' if ok else '❌ no'}")
+                  f"net@20 {n20['ret']:+.0f}% (PF {fmt_pf(n20['profit_factor'])}, "
+                  f"maxDD {n20['max_dd']:.0f}%) · WF {wf}/{nf} → "
+                  f"{'✅ CANDIDATE' if ok else '❌ no'}")
+
+    # Per-fold detail for trend candidates — reveals bear-market behaviour (fold ~3-4
+    # spans the 2022 crypto bear). A long-only bull-bias artefact would show big losses
+    # there; surviving it is what separates a real trend edge from sample luck.
+    md += ["", "### Per-fold returns — trend candidates (chronological, fold 1 = oldest)", ""]
+    for interval, product, strat, ok, n20, wf, nf, tpy, folds in verdicts:
+        if strat == "trend" and ok:
+            cells = " · ".join(f"{f['ret']:+.0f}% (dd{f['max_dd']:.0f}%)" for f in folds)
+            md.append(f"- **{interval} {product}**: {cells}")
     if cands:
         md.append(f"\n**{len(cands)} candidate(s) survive low-fee costs AND walk-forward — "
                   "worth a forward paper test on a low-fee venue. Mid-fee (60bps) results "
