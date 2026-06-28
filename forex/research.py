@@ -145,12 +145,97 @@ def run_trend_breakout(df: pd.DataFrame, pair: str, *, start_cash: float = 2000.
     return {"trades": trades, "curve": curve, "end": equity}
 
 
-# --- strategy catalogue (FIXED params — no sweep) --------------------------
+# --- a mean-reversion engine (Bollinger fade) ------------------------------
+def run_mean_reversion(df: pd.DataFrame, pair: str, *, start_cash: float = 2000.0,
+                       risk_pct: float = 0.01, max_leverage: float = 30.0,
+                       sma_period: int = 20, band_k: float = 2.0,
+                       stop_k: float = 3.5, trend_ema: int = 200,
+                       max_hold: int = 20) -> dict:
+    """Fade Bollinger-band extremes back to the mean.
+
+    FX majors range more than they trend intraday, so the hypothesis is: when price
+    stretches `band_k` std-devs from its SMA, it reverts. Long the lower band / short
+    the upper band; take profit at the SMA (mean); stop at `stop_k` std beyond entry;
+    bail after `max_hold` bars. A long-EMA filter blocks fading *with* a strong trend
+    (don't catch a falling knife): only fade longs above the trend EMA region.
+    """
+    if len(df) < max(sma_period, trend_ema) + 5:
+        return {"trades": [], "curve": [start_cash], "end": start_cash}
+
+    d = df.copy()
+    d["sma"] = d["close"].rolling(sma_period).mean()
+    d["std"] = d["close"].rolling(sma_period).std()
+    d["ema"] = ema(d["close"], trend_ema)
+    d["upper"] = d["sma"] + band_k * d["std"]
+    d["lower"] = d["sma"] - band_k * d["std"]
+
+    pip = pip_size(pair)
+    hs = SPREAD_PIPS.get(pair, 1.5) * pip / 2.0
+    equity = start_cash
+    pos = None
+    trades: List[dict] = []
+    curve = [equity]
+
+    def close(px, reason, ts):
+        nonlocal equity, pos
+        fill = px - pos["side"] * hs
+        pnl = pos["side"] * pos["units"] * (fill - pos["entry"])
+        trades.append({"side": pos["side"], "entry_time": pos["entry_time"],
+                       "exit_time": ts, "entry": pos["entry"], "exit": fill,
+                       "units": pos["units"], "pnl": pnl, "reason": reason})
+        equity += pnl
+        curve.append(equity)
+        pos = None
+
+    for ts, r in d.iterrows():
+        if np.isnan(r["std"]) or r["std"] <= 0 or np.isnan(r["ema"]):
+            continue
+        if pos is not None:
+            side, held = pos["side"], pos["bars"]
+            pos["bars"] += 1
+            stop_hit = (side == 1 and r["low"] <= pos["stop"]) or \
+                       (side == -1 and r["high"] >= pos["stop"])
+            tp_hit = (side == 1 and r["high"] >= r["sma"]) or \
+                     (side == -1 and r["low"] <= r["sma"])
+            if stop_hit:
+                close(pos["stop"], "stop", ts)
+            elif tp_hit:
+                close(r["sma"], "mean", ts)
+            elif held >= max_hold:
+                close(r["close"], "time", ts)
+
+        if pos is None:
+            # fade longs only above the trend EMA, shorts only below (avoid knives)
+            long_sig = r["close"] < r["lower"] and r["close"] > r["ema"]
+            short_sig = r["close"] > r["upper"] and r["close"] < r["ema"]
+            side = 1 if long_sig else (-1 if short_sig else 0)
+            if side:
+                entry = r["close"] + side * hs
+                dist = stop_k * r["std"]
+                if dist > 0:
+                    units = min(equity * risk_pct / dist, equity * max_leverage / entry)
+                    if units > 0:
+                        pos = {"side": side, "entry": entry,
+                               "stop": entry - side * dist, "units": units,
+                               "bars": 0, "entry_time": ts}
+
+    if pos is not None:
+        last = d.iloc[-1]
+        close(last["close"], "eod", last.name)
+    return {"trades": trades, "curve": curve, "end": equity}
+
+
+# --- strategy catalogue (FIXED params — no sweep). (fn, params) per entry ---
 STRATEGIES = {
-    "donchian_trend": dict(use_donchian=True, entry_lookback=20, exit_lookback=10,
-                           atr_stop_mult=3.0, trend_fast=50, trend_slow=200),
-    "ema_cross_trend": dict(use_donchian=False, atr_stop_mult=3.0,
-                            trend_fast=50, trend_slow=200),
+    "donchian_trend": (run_trend_breakout,
+                       dict(use_donchian=True, entry_lookback=20, exit_lookback=10,
+                            atr_stop_mult=3.0, trend_fast=50, trend_slow=200)),
+    "ema_cross_trend": (run_trend_breakout,
+                        dict(use_donchian=False, atr_stop_mult=3.0,
+                             trend_fast=50, trend_slow=200)),
+    "bollinger_fade": (run_mean_reversion,
+                       dict(sma_period=20, band_k=2.0, stop_k=3.5,
+                            trend_ema=200, max_hold=20)),
 }
 
 
@@ -165,9 +250,9 @@ def evaluate(df: pd.DataFrame, pair: str, start_cash: float = 2000.0,
     """Run every strategy on the train slice and the held-out test slice."""
     train, test = split_train_test(df, train_frac)
     out = {}
-    for name, params in STRATEGIES.items():
+    for name, (fn, params) in STRATEGIES.items():
         out[name] = {
-            "train": metrics(run_trend_breakout(train, pair, start_cash=start_cash, **params), start_cash),
-            "test": metrics(run_trend_breakout(test, pair, start_cash=start_cash, **params), start_cash),
+            "train": metrics(fn(train, pair, start_cash=start_cash, **params), start_cash),
+            "test": metrics(fn(test, pair, start_cash=start_cash, **params), start_cash),
         }
     return out

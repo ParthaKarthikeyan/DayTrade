@@ -72,24 +72,25 @@ def main():
     md = ["# Forex research — lower-frequency trend following (out-of-sample)", "",
           f"${args.cash:,.0f} start · {len(PAIRS)} majors · {src_label} · "
           f"train={args.train_frac:.0%} / test={1-args.train_frac:.0%} held out.", "",
-          "Fixed textbook params (Donchian 20/10, ATR×3, EMA 50/200) — **no parameter "
-          "sweep**, nothing curve-fit. A strategy is a CANDIDATE only if it is "
-          "profitable out-of-sample on a majority of pairs.", "",
+          "Fixed textbook params — **no parameter sweep**, nothing curve-fit. A "
+          "strategy is a CANDIDATE only if it is profitable in BOTH the train slice "
+          "AND the held-out test slice on a majority of pairs (consistency = signal; "
+          "winning only out-of-sample = noise).", "",
           "| Timeframe | Strategy | Pair | Train ret | Train PF | Test ret | Test PF | Test trades | Test maxDD |",
           "|---|---|---|--:|--:|--:|--:|--:|--:|"]
     verdict = []
     for (tf, strat), rows in sorted(results.items()):
-        oos_wins = 0
+        consistent = 0   # profitable in BOTH train and test (a real edge is, noise isn't)
         for pair, tr, te in rows:
-            win = te["ret"] > 0 and te["profit_factor"] > 1.0
-            oos_wins += 1 if win else 0
+            win = (tr["ret"] > 0 and te["ret"] > 0 and te["profit_factor"] > 1.0)
+            consistent += 1 if win else 0
             md.append(f"| {tf} | {strat} | {pair} | {tr['ret']:+.2f}% | "
                       f"{fmt_pf(tr['profit_factor'])} | {te['ret']:+.2f}% | "
                       f"{fmt_pf(te['profit_factor'])} | {te['trades']} | {te['max_dd']:.1f}% |")
         n = len(rows)
-        status = "✅ CANDIDATE" if oos_wins > n / 2 else "❌ no edge"
-        verdict.append(f"- **{tf} / {strat}**: profitable out-of-sample on "
-                       f"{oos_wins}/{n} pairs → {status}")
+        status = "✅ CANDIDATE" if consistent > n / 2 else "❌ no robust edge"
+        verdict.append(f"- **{tf} / {strat}**: profitable in BOTH train & test on "
+                       f"{consistent}/{n} pairs → {status}")
 
     md += ["", "## Verdict (out-of-sample)", ""] + verdict
     md += ["", "> Trend following trades infrequently, so spread drag is small — but "
