@@ -25,16 +25,54 @@ def rank_gappers(rows: List[dict], cfg: Config) -> List[dict]:
     return keep[: cfg.pm_top_n]
 
 
+def float_ok(symbol: str, cfg: Config) -> bool:
+    """Low-float filter via yfinance. Fail-open: keep the name if data is missing."""
+    try:
+        import yfinance as yf
+        info = yf.Ticker(symbol).get_info()
+        shares = info.get("floatShares") or info.get("sharesOutstanding")
+        if not shares:
+            return True
+        return float(shares) <= cfg.pm_max_float_shares
+    except Exception:
+        return True
+
+
+def has_recent_news(symbol: str) -> bool:
+    """Weak free news check (yfinance). Fail-open on error."""
+    try:
+        import yfinance as yf
+        return bool(yf.Ticker(symbol).news)
+    except Exception:
+        return True
+
+
 def scan_live(cfg: Config) -> List[str]:
-    """Live watchlist via Alpaca's market-movers screener (gainers)."""
+    """Live whole-market watchlist via Alpaca's movers screener, enriched for free.
+
+    Filters to Ross's criteria we can get without paid data: price band, % gain,
+    top movers, and low float (yfinance). News is optional (pm_require_news).
+    """
     from alpaca.data.historical.screener import ScreenerClient
     from alpaca.data.requests import MarketMoversRequest
 
     client = ScreenerClient(cfg.alpaca_key, cfg.alpaca_secret)
     resp = client.get_market_movers(MarketMoversRequest(top=50))
-    rows = [
-        {"symbol": m.symbol, "ref_price": float(m.price),
-         "gap_pct": float(m.percent_change)}
+    cands = [
+        {"symbol": m.symbol, "ref_price": float(m.price), "gap_pct": float(m.percent_change)}
         for m in resp.gainers
+        if cfg.pm_price_min <= float(m.price) <= cfg.pm_price_max
+        and float(m.percent_change) >= cfg.pm_min_gain_pct
     ]
-    return [r["symbol"] for r in rank_gappers(rows, cfg)]
+    cands.sort(key=lambda r: r["gap_pct"], reverse=True)
+
+    out: List[str] = []
+    for c in cands:
+        if not float_ok(c["symbol"], cfg):
+            continue
+        if cfg.pm_require_news and not has_recent_news(c["symbol"]):
+            continue
+        out.append(c["symbol"])
+        if len(out) >= cfg.pm_top_n:
+            break
+    return out

@@ -25,24 +25,34 @@ class PremarketMomentum:
     def __init__(self, cfg):
         self.cfg = cfg
 
-    def entry_long(self, bar: dict, session_high: float,
-                   vwap: Optional[float], vol_avg: Optional[float]) -> bool:
-        """True when the bar breaks the session high with VWAP + volume support.
+    def entry_signal(self, window, vwap: Optional[float],
+                     vol_avg: Optional[float]) -> Optional[float]:
+        """Ross-style bull-flag breakout. Returns the stop price if it triggers.
 
-        `session_high` is the high of all *prior* bars this session.
+        `window` is the recent bars with the current bar last. The bars before it
+        form the "flag" (a small consolidation/pullback after a move up). We enter
+        when the current bar breaks to a NEW HIGH above the flag, while above VWAP
+        and on strong volume. Stop = the low of the flag (capped at pm_stop_pct).
+        Returns None if no entry.
         """
-        if vwap is None or vol_avg is None or vol_avg <= 0:
-            return False
-        return (
-            bar["c"] > session_high
-            and bar["c"] > vwap
-            and bar["v"] >= self.cfg.pm_min_breakout_vol_mult * vol_avg
-        )
+        cfg = self.cfg
+        L = cfg.pm_pullback_lookback
+        if vwap is None or vol_avg is None or vol_avg <= 0 or len(window) < L + 1:
+            return None
+        cur = window[-1]
+        flag = window[-(L + 1):-1]            # the L bars before the current one
+        flag_high = max(b["h"] for b in flag)
+        flag_low = min(b["l"] for b in flag)
 
-    def initial_stop(self, entry: float, breakout_low: float) -> float:
-        """Tightest sensible stop: the breakout bar's low, capped at pm_stop_pct."""
-        pct_stop = entry * (1.0 - self.cfg.pm_stop_pct)
-        return max(breakout_low, pct_stop)
+        if cur["h"] <= flag_high:             # not a new high over the flag yet
+            return None
+        if cur["c"] <= vwap:                  # must hold above VWAP
+            return None
+        if cur["v"] < cfg.pm_min_breakout_vol_mult * vol_avg:   # needs volume
+            return None
+
+        stop = max(flag_low, cur["c"] * (1.0 - cfg.pm_stop_pct))  # cap risk
+        return stop if stop < cur["c"] else None
 
     def exit_reason(self, pos: PMPosition, bar: dict, prev_bar: Optional[dict],
                     vwap: Optional[float]) -> Optional[str]:
