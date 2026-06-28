@@ -45,6 +45,7 @@ class PremarketPaperBot:
         self.strat = PremarketMomentum(cfg)
 
         self.start_cash = self._equity()
+        self.watch = []                # today's scanned watchlist (for the recap)
         self.bars = {}                 # symbol -> list of bar dicts
         self.cum = {}                  # symbol -> [cum_pv, cum_vol]
         self.session_high = {}         # symbol -> float
@@ -160,6 +161,45 @@ class PremarketPaperBot:
             start_cash=self.start_cash, equity=self._equity(), halted=self.halted,
             position=pos_dict, equity_curve=self.equity_curve, trades=self.completed))
 
+    # --- daily recap ------------------------------------------------------
+    def _recap_md(self) -> str:
+        end_eq = self._equity()
+        pnl = end_eq - self.start_cash
+        pct = pnl / self.start_cash * 100 if self.start_cash else 0.0
+        wins = [t for t in self.completed if t["pnl"] > 0]
+        wr = len(wins) / len(self.completed) * 100 if self.completed else 0.0
+        day = self._now_et().strftime("%Y-%m-%d")
+        out = [
+            f"# Premarket paper bot — {day}", "",
+            f"**Equity:** ${self.start_cash:,.2f} → ${end_eq:,.2f}  "
+            f"(**{pnl:+,.2f}**, {pct:+.2f}%)"
+            + ("  ⛔ HALTED (5% daily cap)" if self.halted else ""),
+            f"**Watchlist:** {', '.join(self.watch) if self.watch else '—'}",
+            f"**Trades:** {len(self.completed)}  ·  **Win rate:** {wr:.0f}%", "",
+        ]
+        if self.completed:
+            out += ["| Exit | Symbol | Shares | Entry $ | Reason | P&L $ |",
+                    "|---|---|--:|--:|---|--:|"]
+            for t in self.completed:
+                tm = str(t["exit_time"])[11:16]
+                reason = t["exits"][0]["reason"] if t.get("exits") else ""
+                out.append(f"| {tm} | {t['symbol']} | {int(t['shares'])} | "
+                           f"{t['entry_price']:.2f} | {reason} | {t['pnl']:+.2f} |")
+        else:
+            out.append("_No valid setups triggered today._")
+        return "\n".join(out)
+
+    def _write_recap(self):
+        md = self._recap_md()
+        print("\n" + md)
+        path = os.environ.get("GITHUB_STEP_SUMMARY")
+        if path:
+            try:
+                with open(path, "a", encoding="utf-8") as f:
+                    f.write(md + "\n")
+            except OSError:
+                pass
+
     # --- session control --------------------------------------------------
     def _end_session(self):
         try:
@@ -167,6 +207,7 @@ class PremarketPaperBot:
             print("[session] flattened all positions, closing.")
         except Exception as e:
             print(f"[session] close_all_positions failed: {e}")
+        self._write_recap()
         os._exit(0)
 
     def run(self):
@@ -178,6 +219,7 @@ class PremarketPaperBot:
         if not watch:
             print("[scan] no gappers found; using fallback watchlist")
             watch = FALLBACK_WATCHLIST
+        self.watch = watch
         print(f"Premarket paper bot  equity=${self.start_cash:,.2f}  watching {watch}")
 
         for s in watch:
@@ -202,8 +244,14 @@ def main():
 
     now_et = datetime.now(ZoneInfo(CONFIG.timezone))
     if now_et.time() > _parse_hhmm(CONFIG.pm_flatten_at):
-        print(f"[session] {now_et:%H:%M} ET is past the {CONFIG.pm_flatten_at} window — "
-              "nothing to trade now. Scheduled to run premarket on weekdays.")
+        msg = (f"# Premarket paper bot — {now_et:%Y-%m-%d}\n\n"
+               f"_Started {now_et:%H:%M} ET, past the {CONFIG.pm_flatten_at} window — "
+               "no session today (the schedule runs premarket on weekdays)._")
+        print(msg)
+        path = os.environ.get("GITHUB_STEP_SUMMARY")
+        if path:
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(msg + "\n")
         return
     PremarketPaperBot(CONFIG, state_path=args.state).run()
 
