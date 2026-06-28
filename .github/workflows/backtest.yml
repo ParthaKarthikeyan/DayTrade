@@ -55,6 +55,14 @@ jobs:
               --start "${{ inputs.start }}" \
               --end "${{ inputs.end }}" \
               --cash "${{ inputs.cash }}"
+          # "FXRESEARCH" -> out-of-sample lower-frequency trend-following search
+          # (H4 + Daily, train/test split). Uses OANDA deep history if the key is set.
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FXRESEARCH'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_research.py --source oanda --cash "${{ inputs.cash }}"
+            else
+              python run_forex_research.py --source yfinance --cash "${{ inputs.cash }}"
+            fi
           # "FOREX" -> FX 3-variant backtest. Deep OANDA history if the key is set,
           # else free yfinance (~60 days).
           elif echo "${{ inputs.symbols }}" | grep -qi '^FOREX'; then
