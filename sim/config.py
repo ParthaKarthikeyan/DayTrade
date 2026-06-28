@@ -57,6 +57,11 @@ class Config:
     pm_flatten_at: str = "11:35"        # force-close everything by here
     pm_stop_pct: float = 0.05           # hard stop cap; the instant-cut usually fires first
     pm_min_breakout_vol_mult: float = 1.0  # breakout bar volume vs recent average
+    # Ross-style scan + entry refinements
+    pm_min_gain_pct: float = 25.0       # live: stock must be up >= this % on the day
+    pm_max_float_shares: float = 10_000_000   # low-float filter (yfinance, fail-open)
+    pm_require_news: bool = False       # require a recent news catalyst (weak free signal)
+    pm_pullback_lookback: int = 3       # bars in the bull-flag before the breakout
 
     # --- Data / broker (Alpaca) ---
     data_feed: str = os.getenv("ALPACA_DATA_FEED", "iex")
