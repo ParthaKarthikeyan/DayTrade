@@ -35,6 +35,7 @@ def pip_size(pair: str) -> float:
 SPREAD_PIPS = {
     "EUR_USD": 1.0, "GBP_USD": 1.5, "USD_JPY": 1.0,
     "AUD_USD": 1.2, "USD_CAD": 1.7, "NZD_USD": 1.8, "EUR_JPY": 1.6,
+    "USD_CHF": 1.8, "EUR_GBP": 1.5,
 }
 
 
@@ -239,6 +240,16 @@ STRATEGIES = {
 }
 
 
+# Robustness neighbourhood for the Bollinger-fade candidate. This is NOT a sweep to
+# pick the best — we run the whole neighbourhood and ask "is the edge stable across
+# nearby params, or only at one fragile point?" A real edge survives its neighbours.
+MR_ROBUST_GRID = {
+    f"sma{s}_k{k}": (run_mean_reversion,
+                     dict(sma_period=s, band_k=k, stop_k=3.5, trend_ema=200, max_hold=20))
+    for s in (15, 20, 25) for k in (1.5, 2.0, 2.5)
+}
+
+
 def split_train_test(df: pd.DataFrame, train_frac: float = 0.65):
     n = len(df)
     cut = int(n * train_frac)
@@ -246,11 +257,12 @@ def split_train_test(df: pd.DataFrame, train_frac: float = 0.65):
 
 
 def evaluate(df: pd.DataFrame, pair: str, start_cash: float = 2000.0,
-             train_frac: float = 0.65) -> Dict[str, dict]:
-    """Run every strategy on the train slice and the held-out test slice."""
+             train_frac: float = 0.65, catalogue=None) -> Dict[str, dict]:
+    """Run every strategy in `catalogue` (default STRATEGIES) on train + held-out test."""
+    catalogue = catalogue or STRATEGIES
     train, test = split_train_test(df, train_frac)
     out = {}
-    for name, (fn, params) in STRATEGIES.items():
+    for name, (fn, params) in catalogue.items():
         out[name] = {
             "train": metrics(fn(train, pair, start_cash=start_cash, **params), start_cash),
             "test": metrics(fn(test, pair, start_cash=start_cash, **params), start_cash),
