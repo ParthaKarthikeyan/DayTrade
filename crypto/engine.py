@@ -85,7 +85,8 @@ def run_fade(df: pd.DataFrame, *, start_cash: float = 2000.0, cost_bps: float = 
 def run_trend(df: pd.DataFrame, *, start_cash: float = 2000.0, cost_bps: float = 20.0,
               risk_pct: float = 0.01, entry_lookback: int = 20, exit_lookback: int = 10,
               atr_period: int = 14, atr_stop_mult: float = 3.0,
-              trend_fast: int = 50, trend_slow: int = 200) -> dict:
+              trend_fast: int = 50, trend_slow: int = 200,
+              max_leverage: float = 1.0) -> dict:
     """Donchian breakout trend-follower with ATR chandelier stop and % cost."""
     if len(df) < trend_slow + entry_lookback + 5:
         return {"trades": [], "curve": [start_cash], "end": start_cash}
@@ -143,7 +144,7 @@ def run_trend(df: pd.DataFrame, *, start_cash: float = 2000.0, cost_bps: float =
             if side:
                 entry = r["close"]
                 dist = atr_stop_mult * r["atr"]
-                units = _size(equity, risk_pct, dist, entry)
+                units = _size(equity, risk_pct, dist, entry, max_leverage)
                 if units > 0:
                     pos = {"side": side, "entry": entry, "stop": entry - side * dist,
                            "peak": entry, "units": units, "entry_time": ts}
