@@ -1,0 +1,51 @@
+name: Futures paper bot
+
+# Forward paper test for the diversified $10k futures trend system. Runs once each
+# weekday after the US session, replays the deployment rules on fresh daily bars in
+# whole micro contracts, records two paper books (5% / 8% risk), and commits the
+# updated ledger (logs/futures_paper.json) back so the forward record accumulates.
+#
+# No broker keys needed — data is free yfinance daily bars. Scheduled workflows only
+# run from the DEFAULT branch, so to get the daily auto-run this file must live on
+# master; until then, trigger it manually (Actions -> Futures paper bot -> Run workflow).
+
+on:
+  workflow_dispatch:
+    inputs:
+      cash:
+        description: "Paper account size"
+        default: "10000"
+        required: false
+  schedule:
+    # 22:15 UTC weekdays — after the US equity close (21:00 UTC summer), so the day's
+    # daily bars have settled on yfinance.
+    - cron: "15 22 * * 1-5"
+
+permissions:
+  contents: write
+
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run futures paper bot
+        run: python run_futures_paper.py --cash "${{ inputs.cash || '10000' }}"
+      - name: Commit forward ledger
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add paper_ledger/futures_paper.json
+          if git diff --cached --quiet; then
+            echo "No ledger change to commit."
+          else
+            git commit -m "futures paper bot: daily ledger update"
+            git push
+          fi
