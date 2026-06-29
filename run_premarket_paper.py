@@ -36,12 +36,14 @@ class PremarketPaperBot:
     def __init__(self, cfg, state_path="logs/state.json"):
         from alpaca.trading.client import TradingClient
         from alpaca.data.live import StockDataStream
+        from alpaca.data.enums import DataFeed
 
         self.cfg = cfg
         self.state_path = state_path
         self.trading = TradingClient(cfg.alpaca_key, cfg.alpaca_secret, paper=True)
+        # The live stream needs a DataFeed enum, not the raw string (it reads feed.value).
         self.stream = StockDataStream(cfg.alpaca_key, cfg.alpaca_secret,
-                                      feed=cfg.data_feed)
+                                      feed=DataFeed(cfg.data_feed))
         self.strat = PremarketMomentum(cfg)
 
         self.start_cash = self._equity()
