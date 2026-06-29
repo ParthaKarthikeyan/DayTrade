@@ -59,6 +59,10 @@ jobs:
           # Coinbase public data needs no key.
           elif echo "${{ inputs.symbols }}" | grep -qi '^CRYPTO'; then
             python run_crypto_research.py --source coinbase --cash "${{ inputs.cash }}"
+          # "FUTDEPLOY" -> realistic deployment model: whole micro contracts, real
+          # point values/margins, risk sweep vs drawdown budget (default $10k).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FUTDEPLOY'; then
+            python run_futures_deploy.py --cash "${{ inputs.cash }}"
           # "FUTURES" -> diversified multi-asset daily trend (managed-futures style).
           # yfinance daily futures/proxy data; no key.
           elif echo "${{ inputs.symbols }}" | grep -qi '^FUTURES'; then
