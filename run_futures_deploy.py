@@ -157,10 +157,10 @@ def main():
     md.append("- " + " · ".join(f"Fold {i+1}: {c}" for i, c in enumerate(cells)))
     md.append(f"- **Profitable in {wins}/{args.folds} folds.**")
 
-    md += ["", "> Integer-contract sizing at $%d makes the risk knob LUMPY — many sleeves "
-           "sit at 1 contract, so realised risk is whatever one micro costs, not the % you "
-           "set. Margins/point values are approximate (verify with your broker). This is a "
-           "backtest; forward paper-test before funding real money." % args.cash]
+    md += ["", f"> Integer-contract sizing at ${args.cash:,.0f} makes the risk knob LUMPY — "
+           "many sleeves sit at 1 contract, so realised risk is whatever one micro costs, not "
+           "the % you set. Margins/point values are approximate (verify with your broker). "
+           "This is a backtest; forward paper-test before funding real money."]
 
     report = "\n".join(md)
     sp = os.environ.get("GITHUB_STEP_SUMMARY")
