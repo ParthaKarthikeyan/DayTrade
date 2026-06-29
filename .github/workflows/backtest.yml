@@ -59,6 +59,10 @@ jobs:
           # Coinbase public data needs no key.
           elif echo "${{ inputs.symbols }}" | grep -qi '^CRYPTO'; then
             python run_crypto_research.py --source coinbase --cash "${{ inputs.cash }}"
+          # "FUTPAPER" -> forward paper bot for the $10k futures system: two paper books
+          # (5%/8% risk), today's target micro positions, durable ledger. yfinance; no key.
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FUTPAPER'; then
+            python run_futures_paper.py --cash "${{ inputs.cash }}"
           # "FUTDEPLOY" -> realistic deployment model: whole micro contracts, real
           # point values/margins, risk sweep vs drawdown budget (default $10k).
           elif echo "${{ inputs.symbols }}" | grep -qi '^FUTDEPLOY'; then
