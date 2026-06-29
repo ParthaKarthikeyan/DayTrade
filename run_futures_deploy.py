@@ -23,12 +23,19 @@ from forex.engine import metrics
 
 SLEEVES = {
     "ES=F": ("S&P 500", "equity"), "GC=F": ("Gold", "metal"),
-    "CL=F": ("Crude oil", "energy"), "ZN=F": ("10Y T-Note", "rates"),
+    "CL=F": ("Crude oil", "energy"),
     "6E=F": ("Euro FX", "fx"), "BTC-USD": ("Bitcoin", "crypto"),
 }
+# The rates sleeve (10Y note) is intentionally EXCLUDED: there is no affordable micro,
+# and one full ZN contract risks more than a $10k account's per-trade budget allows
+# (it traded 0 times in testing). So a $10k micro account can't get bond diversification.
 TREND = dict(entry_lookback=20, exit_lookback=10, atr_period=14, atr_stop_mult=3.0,
              trend_fast=50, trend_slow=200, cost_per_contract=2.0)
 YEARS = 12
+# Realistically tradable history: CME micros (MES/MGC/MCL/M6E) launched May 2019;
+# Micro Bitcoin (MBT) launched May 2021. Backtesting earlier overstates what a $10k
+# micro account could have held, so each sleeve is clamped to its instrument's life.
+HISTORY = {"ES=F": 7, "GC=F": 7, "CL=F": 7, "6E=F": 7, "BTC-USD": 5}
 RISK_LEVELS = [0.01, 0.02, 0.03, 0.05, 0.08]   # per-trade risk as % of the account
 
 
@@ -55,7 +62,11 @@ def portfolio_curve(frames, cash, risk_pct):
                                   start_cash=cash, **TREND)
         per[tkr] = res
         pnls.append(daily_pnl(res["trades"]))
-    combined = pd.concat(pnls).groupby(level=0).sum().sort_index()
+    combined = pd.concat(pnls).groupby(level=0).sum().sort_index() if pnls else pd.Series(dtype=float)
+    if combined.empty:                       # no sleeve could afford a trade at this risk
+        span = [min(df.index[0] for df in frames.values()),
+                max(df.index[-1] for df in frames.values())]
+        return pd.Series([cash, cash], index=span), per
     idx = pd.date_range(combined.index.min(), combined.index.max(), freq="D")
     curve = cash + combined.reindex(idx, fill_value=0.0).cumsum()
     return curve, per
@@ -71,17 +82,20 @@ def main():
     frames, missing = {}, []
     for tkr in SLEEVES:
         try:
-            frames[tkr] = get_daily(tkr, YEARS)
+            frames[tkr] = get_daily(tkr, HISTORY.get(tkr, YEARS))
         except Exception as e:
             missing.append(f"{tkr} ({e})")
     if not frames:
         print("No data fetched:", missing)
         return
 
+    span = max((max(df.index[-1] for df in frames.values())
+                - min(df.index[0] for df in frames.values())).days / 365.0, 0.01)
     md = ["# Futures deployment model — realistic $%d, whole micro contracts" % args.cash, "",
-          f"Daily Donchian/EMA trend · {len(frames)} sleeves · ~{YEARS}y · integer micros, "
-          "real point values, $2/contract round-trip commission. Risk = fixed % of account "
-          "per trade.", ""]
+          f"Daily Donchian/EMA trend · {len(frames)} sleeves · micro-era history "
+          f"(MES/MGC/MCL/M6E from 2019, MBT from 2021; ~{span:.0f}y) · integer micros, real "
+          "point values, $2/contract round-trip commission. Rates sleeve excluded (no "
+          "affordable micro at $10k). Risk = fixed % of account per trade.", ""]
     if missing:
         md.append(f"_Sleeves with no data, skipped: {', '.join(missing)}._\n")
 
