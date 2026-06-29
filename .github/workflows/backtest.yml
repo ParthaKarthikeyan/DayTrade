@@ -46,6 +46,8 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: "true"
           ALPACA_DATA_FEED: iex
+          OANDA_API_KEY: ${{ secrets.OANDA_API_KEY }}
+          OANDA_ENV: practice
         run: |
           # "PREMARKET" -> free yfinance gap-and-go backtest (no Alpaca keys needed).
           if echo "${{ inputs.symbols }}" | grep -qi '^PREMARKET'; then
@@ -53,6 +55,61 @@ jobs:
               --start "${{ inputs.start }}" \
               --end "${{ inputs.end }}" \
               --cash "${{ inputs.cash }}"
+          # "CRYPTO" -> crypto research (BTC/ETH, fade+trend, %-cost, walk-forward).
+          # Coinbase public data needs no key.
+          elif echo "${{ inputs.symbols }}" | grep -qi '^CRYPTO'; then
+            python run_crypto_research.py --source coinbase --cash "${{ inputs.cash }}"
+          # "FUTPAPER" -> forward paper bot for the $10k futures system: two paper books
+          # (5%/8% risk), today's target micro positions, durable ledger. yfinance; no key.
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FUTPAPER'; then
+            python run_futures_paper.py --cash "${{ inputs.cash }}"
+          # "FUTDEPLOY" -> realistic deployment model: whole micro contracts, real
+          # point values/margins, risk sweep vs drawdown budget (default $10k).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FUTDEPLOY'; then
+            python run_futures_deploy.py --cash "${{ inputs.cash }}"
+          # "FUTURES" -> diversified multi-asset daily trend (managed-futures style).
+          # yfinance daily futures/proxy data; no key.
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FUTURES'; then
+            python run_futures_research.py --cash "${{ inputs.cash }}"
+          # "FXSCALP" -> scalping cost test (M5/M1 fade, gross vs net spread).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FXSCALP'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_scalp.py --source oanda --cash "${{ inputs.cash }}"
+            else
+              python run_forex_scalp.py --source yfinance --cash "${{ inputs.cash }}"
+            fi
+          # "FXSTRUCT" -> mechanized top-down + area-of-interest retest method
+          # (multi-TF trend + 3-touch level + retest entry, OOS + walk-forward).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FXSTRUCT'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_structure.py --source oanda --cash "${{ inputs.cash }}"
+            else
+              python run_forex_structure.py --source yfinance --cash "${{ inputs.cash }}"
+            fi
+          # "FXWALK" -> walk-forward validation on a focused 1-2 pair set
+          # (EUR/USD + GBP/USD, H4, sequential out-of-sample time folds).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FXWALK'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_walkforward.py --source oanda --cash "${{ inputs.cash }}"
+            else
+              python run_forex_walkforward.py --source yfinance --cash "${{ inputs.cash }}"
+            fi
+          # "FXRESEARCH" -> out-of-sample lower-frequency trend-following search
+          # (H4 + Daily, train/test split). Uses OANDA deep history if the key is set.
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FXRESEARCH'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_research.py --source oanda --cash "${{ inputs.cash }}"
+            else
+              python run_forex_research.py --source yfinance --cash "${{ inputs.cash }}"
+            fi
+          # "FOREX" -> FX 3-variant backtest. Deep OANDA history if the key is set,
+          # else free yfinance (~60 days).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FOREX'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_backtest.py --source oanda --years 2 --cash "${{ inputs.cash }}"
+            else
+              python run_forex_backtest.py --cash "${{ inputs.cash }}"
+            fi
           else
             if [ -z "$ALPACA_API_KEY" ]; then
               echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets." \
