@@ -5,14 +5,14 @@
     {
       "date": "2026-06-29",
       "5pct": {
-        "equity": 14570.19,
-        "ret_pct": 45.7,
+        "equity": 14527.69,
+        "ret_pct": 45.28,
         "max_dd": 10.43,
         "open_positions": 1
       },
       "8pct": {
-        "equity": 30934.29,
-        "ret_pct": 209.34,
+        "equity": 30870.54,
+        "ret_pct": 208.71,
         "max_dd": 21.37,
         "open_positions": 1
       }
