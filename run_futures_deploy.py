@@ -102,8 +102,9 @@ def main():
         med_risk = float((TREND["atr_stop_mult"] * a * pv).dropna().median())
         md.append(f"| {label} | {sym} | ${pv:,.2f} | ${margin:,.0f} | ${med_risk:,.0f} | "
                   f"{med_risk/args.cash*100:.1f}% |")
+    fit_note = "fits" if total_margin < args.cash else "TOO MUCH to hold all at once"
     md.append(f"\n_Holding one contract in every sleeve at once needs ~${total_margin:,.0f} "
-              f"of margin (of ${args.cash:,.0f}) — { 'fits' if total_margin < args.cash else 'TOO MUCH, can\\'t hold all at once'}._")
+              f"of margin (of ${args.cash:,.0f}) — {fit_note}._")
 
     # --- Risk sweep: map return & drawdown vs the risk knob -------------------
     md += ["", "## Risk sweep — return & drawdown vs per-trade risk", "",
