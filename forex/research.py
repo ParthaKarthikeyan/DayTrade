@@ -227,6 +227,138 @@ def run_mean_reversion(df: pd.DataFrame, pair: str, *, start_cash: float = 2000.
     return {"trades": trades, "curve": curve, "end": equity}
 
 
+# --- structure / area-of-interest retest engine ---------------------------
+def _pivots(df: pd.DataFrame, w: int):
+    """Confirmed swing pivots (fractals). A swing high at i is the strict max of the
+    [i-w, i+w] window; a swing low the strict min. Returns a list of (confirm_idx,
+    price) where confirm_idx = i + w — the bar by which the pivot is KNOWN (causal:
+    a fractal needs w bars on each side, so we can't 'see' it until w bars later)."""
+    highs, lows = df["high"].values, df["low"].values
+    n = len(df)
+    out = []
+    for i in range(w, n - w):
+        seg_h, seg_l = highs[i - w:i + w + 1], lows[i - w:i + w + 1]
+        if highs[i] == seg_h.max() and (seg_h == highs[i]).sum() == 1:
+            out.append((i + w, float(highs[i])))
+        elif lows[i] == seg_l.min() and (seg_l == lows[i]).sum() == 1:
+            out.append((i + w, float(lows[i])))
+    return out
+
+
+def run_structure_retest(df: pd.DataFrame, pair: str, *, start_cash: float = 2000.0,
+                         risk_pct: float = 0.01, max_leverage: float = 30.0,
+                         trend_fast: int = 50, trend_slow: int = 200,
+                         atr_period: int = 14, atr_stop_mult: float = 2.0,
+                         pivot_w: int = 3, min_touches: int = 3, cluster_bps: float = 10.0,
+                         zone_bps: float = 10.0, level_window: int = 120) -> dict:
+    """A mechanical version of the 'top-down + area-of-interest' discretionary method.
+
+    1. TREND (top-down proxy): EMA(fast) > EMA(slow) = bullish, only buy; below = bearish,
+       only sell. Stands in for 'the majority of higher timeframes agree'.
+    2. AREA OF INTEREST: cluster confirmed swing pivots (highs AND lows) by price within
+       `cluster_bps`. A cluster with >= `min_touches` pivots in the last `level_window`
+       bars is a valid horizontal level (the video's '3 touches = a zone' rule).
+    3. RETEST ENTRY: in a bull regime, when price dips into a support level's zone
+       (+/- `zone_bps`) and the bar closes bullishly back above it (the 'reaction'),
+       go long. Mirror for shorts. ATR stop below the zone, chandelier trail to ride
+       toward the next area. Everything is causal — pivots/levels use only past bars.
+    """
+    if len(df) < trend_slow + level_window + pivot_w + 5:
+        return {"trades": [], "curve": [start_cash], "end": start_cash}
+
+    d = df.copy().reset_index(drop=False)
+    d["fast"] = ema(d["close"], trend_fast)
+    d["slow"] = ema(d["close"], trend_slow)
+    d["atr_v"] = atr(d, atr_period)
+    ts_col = d.columns[0]
+
+    pivots = _pivots(d, pivot_w)            # (confirm_idx, price), chronological
+    pi = 0                                  # cursor into pivots as we stream bars
+    levels: List[dict] = []                 # active clusters: {price, idxs:[bar_i,...]}
+
+    pip = pip_size(pair)
+    hs = SPREAD_PIPS.get(pair, 1.5) * pip / 2.0
+    equity, pos = start_cash, None
+    trades, curve = [], [equity]
+
+    def close(px, reason, ts):
+        nonlocal equity, pos
+        fill = px - pos["side"] * hs
+        pnl = pos["side"] * pos["units"] * (fill - pos["entry"])
+        trades.append({"side": pos["side"], "entry_time": ts, "exit_time": ts,
+                       "entry": pos["entry"], "exit": fill, "units": pos["units"],
+                       "pnl": pnl, "reason": reason})
+        equity += pnl
+        curve.append(equity)
+        pos = None
+
+    for i in range(len(d)):
+        r = d.iloc[i]
+        ts = r[ts_col]
+        # fold in any pivots that have become known by this bar, into clusters
+        while pi < len(pivots) and pivots[pi][0] <= i:
+            _, price = pivots[pi]
+            pi += 1
+            hit = None
+            for lv in levels:
+                if abs(price - lv["price"]) / lv["price"] <= cluster_bps / 10000.0:
+                    hit = lv
+                    break
+            if hit:
+                hit["idxs"].append(i)
+                hit["price"] = (hit["price"] * (len(hit["idxs"]) - 1) + price) / len(hit["idxs"])
+            else:
+                levels.append({"price": price, "idxs": [i]})
+
+        if np.isnan(r["slow"]) or np.isnan(r["atr_v"]) or r["atr_v"] <= 0:
+            continue
+        long_regime, short_regime = r["fast"] > r["slow"], r["fast"] < r["slow"]
+
+        if pos is not None:
+            side = pos["side"]
+            if side == 1:
+                pos["peak"] = max(pos["peak"], r["high"])
+                pos["stop"] = max(pos["stop"], pos["peak"] - atr_stop_mult * r["atr_v"])
+                if r["low"] <= pos["stop"]:
+                    close(pos["stop"], "stop", ts)
+                elif short_regime:
+                    close(r["close"], "regime_flip", ts)
+            else:
+                pos["peak"] = min(pos["peak"], r["low"])
+                pos["stop"] = min(pos["stop"], pos["peak"] + atr_stop_mult * r["atr_v"])
+                if r["high"] >= pos["stop"]:
+                    close(pos["stop"], "stop", ts)
+                elif long_regime:
+                    close(r["close"], "regime_flip", ts)
+
+        if pos is None and (long_regime or short_regime):
+            # valid levels = >= min_touches, with a touch inside the recent window
+            zt = zone_bps / 10000.0
+            side = 0
+            for lv in levels:
+                if len(lv["idxs"]) < min_touches or lv["idxs"][-1] < i - level_window:
+                    continue
+                lvl = lv["price"]
+                zlo, zhi = lvl * (1 - zt), lvl * (1 + zt)
+                if long_regime and r["low"] <= zhi and r["close"] > lvl and r["close"] > r["open"]:
+                    side = 1; break                        # support retest + bullish reaction
+                if short_regime and r["high"] >= zlo and r["close"] < lvl and r["close"] < r["open"]:
+                    side = -1; break                       # resistance retest + bearish reaction
+            if side:
+                entry = r["close"] + side * hs
+                dist = atr_stop_mult * r["atr_v"]
+                if dist > 0:
+                    units = min(equity * risk_pct / dist, equity * max_leverage / entry)
+                    if units > 0:
+                        pos = {"side": side, "entry": entry,
+                               "stop": entry - side * dist, "peak": entry,
+                               "units": units, "entry_time": ts}
+
+    if pos is not None:
+        close(d.iloc[-1]["close"], "eod", d.iloc[-1][ts_col])
+    return {"trades": trades, "curve": curve, "end": equity}
+
+
 # --- strategy catalogue (FIXED params — no sweep). (fn, params) per entry ---
 STRATEGIES = {
     "donchian_trend": (run_trend_breakout,
@@ -238,6 +370,10 @@ STRATEGIES = {
     "bollinger_fade": (run_mean_reversion,
                        dict(sma_period=20, band_k=2.0, stop_k=3.5,
                             trend_ema=200, max_hold=20)),
+    "structure_retest": (run_structure_retest,
+                         dict(trend_fast=50, trend_slow=200, atr_stop_mult=2.0,
+                              pivot_w=3, min_touches=3, cluster_bps=10.0,
+                              zone_bps=10.0, level_window=120)),
 }
 
 

@@ -70,6 +70,14 @@ jobs:
             else
               python run_forex_scalp.py --source yfinance --cash "${{ inputs.cash }}"
             fi
+          # "FXSTRUCT" -> mechanized top-down + area-of-interest retest method
+          # (multi-TF trend + 3-touch level + retest entry, OOS + walk-forward).
+          elif echo "${{ inputs.symbols }}" | grep -qi '^FXSTRUCT'; then
+            if [ -n "$OANDA_API_KEY" ]; then
+              python run_forex_structure.py --source oanda --cash "${{ inputs.cash }}"
+            else
+              python run_forex_structure.py --source yfinance --cash "${{ inputs.cash }}"
+            fi
           # "FXWALK" -> walk-forward validation on a focused 1-2 pair set
           # (EUR/USD + GBP/USD, H4, sequential out-of-sample time folds).
           elif echo "${{ inputs.symbols }}" | grep -qi '^FXWALK'; then
