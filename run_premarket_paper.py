@@ -15,6 +15,7 @@ SIP feed (paid) fixes that. Validate forward over several sessions.
 """
 
 import argparse
+import json
 import os
 import sys
 import threading
@@ -32,15 +33,41 @@ from premarket.strategy import PMPosition, PremarketMomentum
 VOL_LOOKBACK = 5
 FALLBACK_WATCHLIST = ["SOFI", "MARA", "RIOT", "PLUG", "NIO", "F", "SOUN", "BBAI"]
 
+# Durable forward record, committed back by the workflow so the track record
+# survives the ephemeral runner. NOT under logs/ (which is gitignored). One row
+# per trading day; the dashboard state in logs/ stays transient.
+LEDGER = os.path.join("paper_ledger", "premarket_paper.json")
+
+
+def _load_ledger(path: str) -> dict:
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                led = json.load(f)
+            led.setdefault("history", [])
+            return led
+        except (OSError, json.JSONDecodeError):
+            pass
+    return {"history": []}
+
+
+def _upsert_row(history: list, row: dict) -> list:
+    """Append today's row, replacing any existing row for the same date (re-runs)."""
+    history = [r for r in history if r.get("date") != row["date"]]
+    history.append(row)
+    history.sort(key=lambda r: r["date"])
+    return history
+
 
 class PremarketPaperBot:
-    def __init__(self, cfg, state_path="logs/state.json"):
+    def __init__(self, cfg, state_path="logs/state.json", ledger_path=LEDGER):
         from alpaca.trading.client import TradingClient
         from alpaca.data.live import StockDataStream
         from alpaca.data.enums import DataFeed
 
         self.cfg = cfg
         self.state_path = state_path
+        self.ledger_path = ledger_path
         self.trading = TradingClient(cfg.alpaca_key, cfg.alpaca_secret, paper=True)
         # The live stream needs a DataFeed enum, not the raw string (it reads feed.value).
         self.stream = StockDataStream(cfg.alpaca_key, cfg.alpaca_secret,
@@ -203,6 +230,36 @@ class PremarketPaperBot:
             except OSError:
                 pass
 
+    def _write_ledger(self):
+        """Append today's result to the durable, committed ledger (one row/day)."""
+        end_eq = self._equity()
+        pnl = end_eq - self.start_cash
+        wins = [t for t in self.completed if t["pnl"] > 0]
+        wr = len(wins) / len(self.completed) * 100 if self.completed else 0.0
+        row = {
+            "date": self._now_et().strftime("%Y-%m-%d"),
+            "start_equity": round(self.start_cash, 2),
+            "end_equity": round(end_eq, 2),
+            "pnl": round(pnl, 2),
+            "pnl_pct": round(pnl / self.start_cash * 100, 2) if self.start_cash else 0.0,
+            "trades": len(self.completed),
+            "win_rate": round(wr, 1),
+            "halted": self.halted,
+            "watchlist": self.watch,
+        }
+        try:
+            led = _load_ledger(self.ledger_path)
+            led["history"] = _upsert_row(led["history"], row)
+            led["last_run"] = row["date"]
+            os.makedirs(os.path.dirname(self.ledger_path) or ".", exist_ok=True)
+            tmp = self.ledger_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(led, f, indent=2)
+            os.replace(tmp, self.ledger_path)
+            print(f"[ledger] wrote {self.ledger_path} ({len(led['history'])} day(s))")
+        except OSError as e:
+            print(f"[ledger] failed to write ledger: {e}")
+
     # --- session control --------------------------------------------------
     def _end_session(self):
         try:
@@ -210,6 +267,7 @@ class PremarketPaperBot:
             print("[session] flattened all positions, closing.")
         except Exception as e:
             print(f"[session] close_all_positions failed: {e}")
+        self._write_ledger()
         self._write_recap()
         # os._exit() skips stdout flushing; on a CI pipe stdout is block-buffered,
         # so the recap + trade prints would be discarded. Flush first so the run
@@ -246,6 +304,7 @@ class PremarketPaperBot:
 def main():
     p = argparse.ArgumentParser(description="Live Alpaca premarket paper bot")
     p.add_argument("--state", default=os.path.join("logs", "state.json"))
+    p.add_argument("--ledger", default=LEDGER)
     args = p.parse_args()
     if not CONFIG.has_alpaca:
         raise SystemExit("Set ALPACA_API_KEY and ALPACA_SECRET_KEY first.")
@@ -261,7 +320,7 @@ def main():
             with open(path, "a", encoding="utf-8") as f:
                 f.write(msg + "\n")
         return
-    PremarketPaperBot(CONFIG, state_path=args.state).run()
+    PremarketPaperBot(CONFIG, state_path=args.state, ledger_path=args.ledger).run()
 
 
 if __name__ == "__main__":
