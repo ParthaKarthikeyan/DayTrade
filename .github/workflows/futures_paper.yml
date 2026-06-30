@@ -47,5 +47,7 @@ jobs:
             echo "No ledger change to commit."
           else
             git commit -m "futures paper bot: daily ledger update"
-            git push
+            # master may have advanced since checkout; rebase then push.
+            git pull --rebase origin master || true
+            git push origin HEAD:master
           fi
