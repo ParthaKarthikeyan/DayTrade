@@ -16,6 +16,7 @@ SIP feed (paid) fixes that. Validate forward over several sessions.
 
 import argparse
 import os
+import sys
 import threading
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -210,6 +211,11 @@ class PremarketPaperBot:
         except Exception as e:
             print(f"[session] close_all_positions failed: {e}")
         self._write_recap()
+        # os._exit() skips stdout flushing; on a CI pipe stdout is block-buffered,
+        # so the recap + trade prints would be discarded. Flush first so the run
+        # log is legible, then hard-exit to kill the still-running websocket thread.
+        sys.stdout.flush()
+        sys.stderr.flush()
         os._exit(0)
 
     def run(self):

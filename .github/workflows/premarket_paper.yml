@@ -12,6 +12,14 @@ on:
     # 11:00 UTC = 07:00 ET in summer (EDT) / 06:00 ET in winter (EST) — premarket.
     - cron: "0 11 * * 1-5"
 
+# Alpaca's free tier allows only ONE live data websocket per account. If a manual
+# run overlaps the scheduled run, the second connection gets HTTP 429
+# "connection limit exceeded" and trades nothing all session. Serialise runs of
+# this workflow and let the in-progress one finish (don't cancel a live session).
+concurrency:
+  group: premarket-paper-bot
+  cancel-in-progress: false
+
 jobs:
   trade:
     runs-on: ubuntu-latest
@@ -30,6 +38,7 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: "true"
           ALPACA_DATA_FEED: iex
+          PYTHONUNBUFFERED: "1"   # stream prints live instead of block-buffering on the CI pipe
         run: |
           if [ -z "$ALPACA_API_KEY" ]; then
             echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets."
