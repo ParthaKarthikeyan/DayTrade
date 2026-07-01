@@ -1,0 +1,25 @@
+{
+  "history": [
+    {
+      "date": "2026-07-01",
+      "start_equity": 94397.11,
+      "end_equity": 89389.95,
+      "pnl": -5007.16,
+      "pnl_pct": -5.3,
+      "trades": 4,
+      "win_rate": 25.0,
+      "halted": true,
+      "watchlist": [
+        "JEM",
+        "CELZ",
+        "CUPR",
+        "CRCD",
+        "AVXX",
+        "OPTXW",
+        "GVH",
+        "NTRBW"
+      ]
+    }
+  ],
+  "last_run": "2026-07-01"
+}
