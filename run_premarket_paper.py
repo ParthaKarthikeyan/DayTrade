@@ -63,6 +63,39 @@ def _upsert_row(history: list, row: dict) -> list:
     return history
 
 
+def pair_fills_fifo(fills: list):
+    """Pair raw broker fills into long-only round-trip trades using FIFO per symbol,
+    so entry/exit prices and P&L reflect ACTUAL executions (incl. slippage), not the
+    bot's intended prices. Each fill: {time, symbol, side ('buy'/'sell'), qty, price}.
+    Returns (trades, realized_pnl). Buys open lots; sells close them oldest-first."""
+    from collections import defaultdict, deque
+    lots = defaultdict(deque)          # symbol -> deque of [qty, price, time]
+    trades = []
+    for f in sorted(fills, key=lambda x: x["time"]):
+        sym, qty, px = f["symbol"], float(f["qty"]), float(f["price"])
+        if "buy" in f["side"].lower():
+            lots[sym].append([qty, px, f["time"]])
+            continue
+        remaining, cost, matched, entry_time = qty, 0.0, 0.0, None
+        while remaining > 1e-9 and lots[sym]:
+            lot = lots[sym][0]
+            take = min(remaining, lot[0])
+            if entry_time is None:
+                entry_time = lot[2]
+            cost += take * lot[1]; matched += take
+            lot[0] -= take; remaining -= take
+            if lot[0] <= 1e-9:
+                lots[sym].popleft()
+        if matched > 1e-9:
+            avg_entry = cost / matched
+            sh = int(matched) if abs(matched - round(matched)) < 1e-9 else round(matched, 4)
+            trades.append({"symbol": sym, "side": "long", "shares": sh,
+                           "entry_time": entry_time, "entry_price": round(avg_entry, 4),
+                           "exit_time": f["time"], "exit_price": round(px, 4),
+                           "pnl": round(matched * (px - avg_entry), 2)})
+    return trades, round(sum(t["pnl"] for t in trades), 2)
+
+
 class PremarketPaperBot:
     def __init__(self, cfg, state_path="logs/state.json", ledger_path=LEDGER,
                  trades_path=TRADES):
@@ -88,7 +121,9 @@ class PremarketPaperBot:
         self.pos = None                # single active PMPosition (max 1)
         self.halted = False
         self.equity_curve = []
-        self.completed = []
+        self.completed = []            # bot's local mirror (intended prices)
+        self.fill_trades = []          # round-trips from ACTUAL Alpaca fills
+        self.fills_realized = 0.0      # realized P&L reconstructed from real fills
 
         self.no_new = _parse_hhmm(cfg.pm_no_new_after)
         self.flatten = _parse_hhmm(cfg.pm_flatten_at)
@@ -202,27 +237,33 @@ class PremarketPaperBot:
         end_eq = self._equity()
         pnl = end_eq - self.start_cash
         pct = pnl / self.start_cash * 100 if self.start_cash else 0.0
-        wins = [t for t in self.completed if t["pnl"] > 0]
-        wr = len(wins) / len(self.completed) * 100 if self.completed else 0.0
+        trades = self.fill_trades
+        wins = [t for t in trades if t["pnl"] > 0]
+        wr = len(wins) / len(trades) * 100 if trades else 0.0
         day = self._now_et().strftime("%Y-%m-%d")
+        gap = pnl - self.fills_realized
         out = [
             f"# Premarket paper bot — {day}", "",
             f"**Equity:** ${self.start_cash:,.2f} → ${end_eq:,.2f}  "
             f"(**{pnl:+,.2f}**, {pct:+.2f}%)"
             + ("  ⛔ HALTED (5% daily cap)" if self.halted else ""),
             f"**Watchlist:** {', '.join(self.watch) if self.watch else '—'}",
-            f"**Trades:** {len(self.completed)}  ·  **Win rate:** {wr:.0f}%", "",
+            f"**Trades:** {len(trades)}  ·  **Win rate:** {wr:.0f}%", "",
+            "**Reconciliation** (real fills vs account):",
+            f"- Account P&L (truth): **{pnl:+,.2f}**",
+            f"- Realized from actual fills: {self.fills_realized:+,.2f}",
+            f"- Unexplained gap (fees / carried position / open): {gap:+,.2f}", "",
         ]
-        if self.completed:
-            out += ["| Exit | Symbol | Shares | Entry $ | Reason | P&L $ |",
-                    "|---|---|--:|--:|---|--:|"]
-            for t in self.completed:
-                tm = str(t["exit_time"])[11:16]
-                reason = t["exits"][0]["reason"] if t.get("exits") else ""
-                out.append(f"| {tm} | {t['symbol']} | {int(t['shares'])} | "
-                           f"{t['entry_price']:.2f} | {reason} | {t['pnl']:+.2f} |")
+        if trades:
+            out += ["| Exit | Symbol | Shares | Entry $ | Exit $ | P&L $ |",
+                    "|---|---|--:|--:|--:|--:|"]
+            for t in trades:
+                ex = f"{t['exit_price']:.2f}" if t.get("exit_price") is not None else "—"
+                out.append(f"| {str(t['exit_time'])[:5]} | {t['symbol']} | "
+                           f"{int(t['shares'])} | {t['entry_price']:.2f} | {ex} | "
+                           f"{t['pnl']:+.2f} |")
         else:
-            out.append("_No valid setups triggered today._")
+            out.append("_No fills today._")
         return "\n".join(out)
 
     def _write_recap(self):
@@ -266,21 +307,58 @@ class PremarketPaperBot:
         except OSError as e:
             print(f"[ledger] failed to write ledger: {e}")
 
+    def _fetch_fills(self, day: str) -> list:
+        """Pull today's ACTUAL executions from Alpaca (real fill prices, incl. slippage)."""
+        fills = []
+        try:
+            from alpaca.trading.requests import GetAccountActivitiesRequest
+            from alpaca.trading.enums import ActivityType
+            req = GetAccountActivitiesRequest(activity_types=[ActivityType.FILL])
+            for a in self.trading.get_account_activities(req):
+                t = str(getattr(a, "transaction_time", "") or "")
+                if not t.startswith(day):          # keep only today's fills
+                    continue
+                side = str(getattr(a, "side", "") or "").split(".")[-1].lower()
+                fills.append({
+                    "time": (t[11:19] or t), "symbol": getattr(a, "symbol", ""),
+                    "side": side, "qty": float(getattr(a, "qty", 0) or 0),
+                    "price": float(getattr(a, "price", 0) or 0),
+                })
+        except Exception as e:                     # noqa: BLE001 — fall back to the mirror
+            print(f"[fills] could not fetch Alpaca fills ({e}); using local mirror")
+        return sorted(fills, key=lambda f: f["time"])
+
     def _write_trades(self):
-        """Append today's individual trades to the durable per-trade log, grouped by
-        session date and accumulated across days (re-runs replace the same date)."""
+        """Append today's trades to the durable per-trade log using ACTUAL Alpaca fills
+        (real prices/slippage), and record how those reconcile against the account move.
+        Falls back to the bot's local mirror if the fills API is unavailable."""
         day = self._now_et().strftime("%Y-%m-%d")
-        flat = []
-        for t in self.completed:
-            flat.append({
-                "date": day, "symbol": t["symbol"], "side": t.get("side", "long"),
-                "shares": t["shares"], "entry_time": str(t["entry_time"])[11:19],
-                "entry_price": t["entry_price"], "exit_time": str(t["exit_time"])[11:19],
-                "exit_reason": t["exits"][0]["reason"] if t.get("exits") else "",
-                "pnl": t["pnl"],
-            })
-        block = {"date": day, "trades": flat, "trade_count": len(flat),
-                 "day_pnl": round(sum(x["pnl"] for x in flat), 2)}
+        fills = self._fetch_fills(day)
+        if fills:
+            self.fill_trades, self.fills_realized = pair_fills_fifo(fills)
+            source, trades = "alpaca_fills", self.fill_trades
+        else:
+            source = "local_mirror"
+            trades = [{"symbol": t["symbol"], "side": t.get("side", "long"),
+                       "shares": t["shares"], "entry_time": str(t["entry_time"])[11:19],
+                       "entry_price": t["entry_price"], "exit_time": str(t["exit_time"])[11:19],
+                       "exit_price": None, "pnl": t["pnl"]} for t in self.completed]
+            self.fill_trades = trades
+            self.fills_realized = round(sum(t["pnl"] for t in trades), 2)
+
+        for t in trades:
+            t["date"] = day
+        account_pnl = round(self._equity() - self.start_cash, 2)
+        mirror_pnl = round(sum(t["pnl"] for t in self.completed), 2)
+        block = {
+            "date": day, "source": source,
+            "account_pnl": account_pnl,               # truth (Alpaca equity move)
+            "fills_realized_pnl": self.fills_realized,  # from real fills
+            "mirror_pnl": mirror_pnl,                  # bot's intended-price estimate
+            "reconciliation_gap": round(account_pnl - self.fills_realized, 2),
+            "fill_count": len(fills), "trade_count": len(trades),
+            "trades": trades, "fills": fills,
+        }
         try:
             log = _load_ledger(self.trades_path)
             log["history"] = _upsert_row(log["history"], block)
@@ -290,7 +368,9 @@ class PremarketPaperBot:
             with open(tmp, "w", encoding="utf-8") as f:
                 json.dump(log, f, indent=2)
             os.replace(tmp, self.trades_path)
-            print(f"[trades] wrote {self.trades_path} ({len(flat)} trade(s) today)")
+            print(f"[trades] wrote {self.trades_path} — {len(trades)} trade(s) from "
+                  f"{source}; fills-realized ${self.fills_realized:,.2f} vs account "
+                  f"${account_pnl:,.2f} (gap ${account_pnl - self.fills_realized:,.2f})")
         except OSError as e:
             print(f"[trades] failed to write trade log: {e}")
 
