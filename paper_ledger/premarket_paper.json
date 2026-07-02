@@ -19,7 +19,29 @@
         "GVH",
         "NTRBW"
       ]
+    },
+    {
+      "date": "2026-07-02",
+      "start_equity": 89381.3,
+      "end_equity": 86704.16,
+      "pnl": -2677.14,
+      "pnl_pct": -3.0,
+      "trades": 11,
+      "win_rate": 36.4,
+      "halted": false,
+      "watchlist": [
+        "EHGO",
+        "CANF",
+        "DSC",
+        "KRSP.WS",
+        "NBIZ",
+        "WTO",
+        "ICU",
+        "RGNT",
+        "WCT",
+        "AHMA"
+      ]
     }
   ],
-  "last_run": "2026-07-01"
+  "last_run": "2026-07-02"
 }
