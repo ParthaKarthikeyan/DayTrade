@@ -19,6 +19,7 @@ import json
 import os
 import sys
 import threading
+import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -309,7 +310,8 @@ def main():
     if not CONFIG.has_alpaca:
         raise SystemExit("Set ALPACA_API_KEY and ALPACA_SECRET_KEY first.")
 
-    now_et = datetime.now(ZoneInfo(CONFIG.timezone))
+    tz = ZoneInfo(CONFIG.timezone)
+    now_et = datetime.now(tz)
     if now_et.time() > _parse_hhmm(CONFIG.pm_flatten_at):
         msg = (f"# Premarket paper bot — {now_et:%Y-%m-%d}\n\n"
                f"_Started {now_et:%H:%M} ET, past the {CONFIG.pm_flatten_at} window — "
@@ -320,6 +322,21 @@ def main():
             with open(path, "a", encoding="utf-8") as f:
                 f.write(msg + "\n")
         return
+
+    # GitHub's scheduled runners boot at an unpredictable delay (minutes to hours).
+    # Decouple boot time from trading start: if the runner came up before the
+    # premarket session start, idle until then so the watchlist scan and entries
+    # begin at a consistent ET time regardless of when the cron actually fired.
+    start_t = _parse_hhmm(CONFIG.pm_session_start)
+    if now_et.time() < start_t:
+        target = now_et.replace(hour=start_t.hour, minute=start_t.minute,
+                                second=0, microsecond=0)
+        wait_s = (target - now_et).total_seconds()
+        print(f"[wait] runner up at {now_et:%H:%M} ET; holding "
+              f"{int(wait_s // 60)} min until session start {CONFIG.pm_session_start} ET")
+        sys.stdout.flush()
+        time.sleep(wait_s)
+
     PremarketPaperBot(CONFIG, state_path=args.state, ledger_path=args.ledger).run()
 
 

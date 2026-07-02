@@ -9,8 +9,12 @@ name: Premarket paper bot
 on:
   workflow_dispatch:        # run manually any time (it self-skips outside the window)
   schedule:
-    # 11:00 UTC = 07:00 ET in summer (EDT) / 06:00 ET in winter (EST) — premarket.
-    - cron: "0 11 * * 1-5"
+    # Fire EARLY with a big buffer. GitHub's scheduled queue can delay a run by
+    # minutes to a few hours; the bot itself then idles until pm_session_start
+    # (07:00 ET) before trading, so the actual session start is consistent no
+    # matter when the runner boots. 09:23 UTC = 05:23 ET (EDT); the odd minute
+    # avoids the top-of-hour scheduling congestion that caused the worst delays.
+    - cron: "23 9 * * 1-5"
 
 # Alpaca's free tier allows only ONE live data websocket per account. If a manual
 # run overlaps the scheduled run, the second connection gets HTTP 429
@@ -26,7 +30,7 @@ permissions:
 jobs:
   trade:
     runs-on: ubuntu-latest
-    timeout-minutes: 320     # safety cap; the bot exits itself at the flatten time
+    timeout-minutes: 420     # covers an early boot + idle-wait through the 11:35 ET flatten
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
