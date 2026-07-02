@@ -38,6 +38,9 @@ FALLBACK_WATCHLIST = ["SOFI", "MARA", "RIOT", "PLUG", "NIO", "F", "SOUN", "BBAI"
 # survives the ephemeral runner. NOT under logs/ (which is gitignored). One row
 # per trading day; the dashboard state in logs/ stays transient.
 LEDGER = os.path.join("paper_ledger", "premarket_paper.json")
+# Per-trade log: every completed trade, grouped by session date and accumulated
+# across days (this bot trades live, so unlike the futures replay it appends).
+TRADES = os.path.join("paper_ledger", "premarket_trades.json")
 
 
 def _load_ledger(path: str) -> dict:
@@ -61,7 +64,8 @@ def _upsert_row(history: list, row: dict) -> list:
 
 
 class PremarketPaperBot:
-    def __init__(self, cfg, state_path="logs/state.json", ledger_path=LEDGER):
+    def __init__(self, cfg, state_path="logs/state.json", ledger_path=LEDGER,
+                 trades_path=TRADES):
         from alpaca.trading.client import TradingClient
         from alpaca.data.live import StockDataStream
         from alpaca.data.enums import DataFeed
@@ -69,6 +73,7 @@ class PremarketPaperBot:
         self.cfg = cfg
         self.state_path = state_path
         self.ledger_path = ledger_path
+        self.trades_path = trades_path
         self.trading = TradingClient(cfg.alpaca_key, cfg.alpaca_secret, paper=True)
         # The live stream needs a DataFeed enum, not the raw string (it reads feed.value).
         self.stream = StockDataStream(cfg.alpaca_key, cfg.alpaca_secret,
@@ -261,6 +266,34 @@ class PremarketPaperBot:
         except OSError as e:
             print(f"[ledger] failed to write ledger: {e}")
 
+    def _write_trades(self):
+        """Append today's individual trades to the durable per-trade log, grouped by
+        session date and accumulated across days (re-runs replace the same date)."""
+        day = self._now_et().strftime("%Y-%m-%d")
+        flat = []
+        for t in self.completed:
+            flat.append({
+                "date": day, "symbol": t["symbol"], "side": t.get("side", "long"),
+                "shares": t["shares"], "entry_time": str(t["entry_time"])[11:19],
+                "entry_price": t["entry_price"], "exit_time": str(t["exit_time"])[11:19],
+                "exit_reason": t["exits"][0]["reason"] if t.get("exits") else "",
+                "pnl": t["pnl"],
+            })
+        block = {"date": day, "trades": flat, "trade_count": len(flat),
+                 "day_pnl": round(sum(x["pnl"] for x in flat), 2)}
+        try:
+            log = _load_ledger(self.trades_path)
+            log["history"] = _upsert_row(log["history"], block)
+            log["last_run"] = day
+            os.makedirs(os.path.dirname(self.trades_path) or ".", exist_ok=True)
+            tmp = self.trades_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(log, f, indent=2)
+            os.replace(tmp, self.trades_path)
+            print(f"[trades] wrote {self.trades_path} ({len(flat)} trade(s) today)")
+        except OSError as e:
+            print(f"[trades] failed to write trade log: {e}")
+
     # --- session control --------------------------------------------------
     def _end_session(self):
         try:
@@ -269,6 +302,7 @@ class PremarketPaperBot:
         except Exception as e:
             print(f"[session] close_all_positions failed: {e}")
         self._write_ledger()
+        self._write_trades()
         self._write_recap()
         # os._exit() skips stdout flushing; on a CI pipe stdout is block-buffered,
         # so the recap + trade prints would be discarded. Flush first so the run
@@ -306,6 +340,7 @@ def main():
     p = argparse.ArgumentParser(description="Live Alpaca premarket paper bot")
     p.add_argument("--state", default=os.path.join("logs", "state.json"))
     p.add_argument("--ledger", default=LEDGER)
+    p.add_argument("--trades", default=TRADES)
     args = p.parse_args()
     if not CONFIG.has_alpaca:
         raise SystemExit("Set ALPACA_API_KEY and ALPACA_SECRET_KEY first.")
@@ -337,7 +372,8 @@ def main():
         sys.stdout.flush()
         time.sleep(wait_s)
 
-    PremarketPaperBot(CONFIG, state_path=args.state, ledger_path=args.ledger).run()
+    PremarketPaperBot(CONFIG, state_path=args.state, ledger_path=args.ledger,
+                      trades_path=args.trades).run()
 
 
 if __name__ == "__main__":
