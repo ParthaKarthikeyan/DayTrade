@@ -50,13 +50,24 @@ def book_snapshot(frames: dict, cash: float, risk_pct: float) -> dict:
     snapshot: headline equity/return/drawdown, the open position per sleeve (the orders a
     real account would be holding right now), and a daily equity curve for the dashboard."""
     risk_dollars = cash * risk_pct
-    pnls, per, positions = [], {}, []
+    pnls, per, positions, trade_log = [], {}, [], []
     for tkr, df in frames.items():
         sym, pv, _margin = SPECS[tkr]
         res = run_trend_contracts(df, point_value=pv, risk_dollars=risk_dollars,
                                   start_cash=cash, **TREND)
         per[tkr] = res
         pnls.append(_daily_pnl(res["trades"]))
+        for t in res["trades"]:
+            trade_log.append({
+                "sleeve": SLEEVES[tkr], "ticker": tkr, "micro": sym,
+                "side": "long" if t["side"] == 1 else "short",
+                "contracts": t["contracts"],
+                "entry_time": str(pd.Timestamp(t["entry_time"]).date()),
+                "entry": round(t["entry"], 4),
+                "exit_time": str(pd.Timestamp(t["exit_time"]).date()),
+                "exit": round(t["exit"], 4),
+                "pnl": round(t["pnl"], 2), "reason": t["reason"],
+            })
         op = res["open"]
         if op is not None:
             positions.append({
@@ -94,6 +105,7 @@ def book_snapshot(frames: dict, cash: float, risk_pct: float) -> dict:
         "trades": m["trades"],
         "win_rate": round(m["win_rate"], 1),
         "positions": positions,
+        "trade_log": sorted(trade_log, key=lambda t: t["exit_time"]),
         "equity_curve": [[d.strftime("%Y-%m-%d"), round(float(e), 2)]
                          for d, e in curve.items()],
     }

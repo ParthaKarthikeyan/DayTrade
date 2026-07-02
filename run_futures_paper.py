@@ -29,6 +29,9 @@ from sim.state import build_live_state, write_state
 # The durable forward record. NOT under logs/ (which is gitignored) — this ledger is
 # the track record we want to keep and commit back across the ephemeral runners.
 LEDGER = os.path.join("paper_ledger", "futures_paper.json")
+# The full trade-by-trade log (every closed trade + today's open positions, per book).
+# Rewritten each run — it's a deterministic replay, so this is the authoritative log.
+TRADES = os.path.join("paper_ledger", "futures_trades.json")
 
 
 def load_ledger(path: str, cash: float, today: str) -> dict:
@@ -67,6 +70,7 @@ def main():
     p = argparse.ArgumentParser(description="Forward paper bot for the $10k futures system")
     p.add_argument("--cash", type=float, default=10000.0)
     p.add_argument("--ledger", default=LEDGER)
+    p.add_argument("--trades", default=TRADES)
     p.add_argument("--state", default=os.path.join("logs", "futures_state.json"))
     args = p.parse_args()
 
@@ -97,8 +101,20 @@ def main():
     with open(args.ledger, "w", encoding="utf-8") as f:
         json.dump(led, f, indent=2)
 
-    # --- forward-only segment (bars since deployment) -------------------------
     dep = led["deployment_date"]
+
+    # --- durable trade-by-trade log (every closed trade + open positions) -----
+    trades_doc = {"deployment_date": dep, "generated": today, "cash": cash, "books": {}}
+    for name, b in books.items():
+        trades_doc["books"][name] = {
+            "risk_pct": b["risk_pct"],
+            "closed": b["trade_log"],
+            "open": b["positions"],
+        }
+    with open(args.trades, "w", encoding="utf-8") as f:
+        json.dump(trades_doc, f, indent=2)
+
+    # --- forward-only segment (bars since deployment) -------------------------
     fwd = [r for r in led["history"] if r["date"] >= dep]
     days_live = len(fwd)
 
@@ -144,6 +160,24 @@ def main():
     else:
         md += ["", "_Forward record starts accumulating from the next run. Today is the "
                "baseline; come back after several sessions to compare live vs. backtest._"]
+
+    # --- trade log: closed trades since deployment (8% primary book) ----------
+    prim_trades = books["8pct"]["trade_log"]
+    fwd_trades = [t for t in prim_trades if t["exit_time"] >= dep]
+    md += ["", "## Trades since deployment (8% book)", ""]
+    if fwd_trades:
+        md += ["| Exit | Sleeve | Side | Qty | Entry | Exit | P&L $ | Reason |",
+               "|---|---|---|--:|--:|--:|--:|---|"]
+        for t in fwd_trades:
+            md.append(f"| {t['exit_time']} | {t['sleeve']} | {t['side']} | "
+                      f"{t['contracts']} | {t['entry']} | {t['exit']} | "
+                      f"{t['pnl']:+,.0f} | {t['reason']} |")
+    else:
+        md.append("_No trades have closed since deployment yet — open positions are "
+                  "still running (see today's target positions above). Full backtest "
+                  "trade history is in `paper_ledger/futures_trades.json`._")
+    md += ["", f"_Full per-trade log ({len(prim_trades)} closed trades incl. backtest, "
+           "both books) committed to `paper_ledger/futures_trades.json`._"]
 
     md += ["", "> Whole-micro sizing at $10k is lumpy — many sleeves sit at 1 contract, so "
            "realised risk is whatever one micro costs, not the % set. Continuous-contract / "
