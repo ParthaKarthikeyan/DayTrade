@@ -15,8 +15,8 @@
           "entry_time": "2019-07-31",
           "entry": 1.1103,
           "exit_time": "2019-08-05",
-          "exit": 1.1191,
-          "pnl": -224.76,
+          "exit": 1.1188,
+          "pnl": -216.53,
           "reason": "stop"
         },
         {
@@ -29,7 +29,7 @@
           "entry": 1.099,
           "exit_time": "2019-09-13",
           "exit": 1.1096,
-          "pnl": -269.45,
+          "pnl": -269.25,
           "reason": "stop"
         },
         {
@@ -64,11 +64,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-10-25",
-          "entry": 3020.25,
+          "entry_time": "2019-10-28",
+          "entry": 3036.25,
           "exit_time": "2019-12-03",
           "exit": 3096.754,
-          "pnl": 380.52,
+          "pnl": 300.52,
           "reason": "stop"
         },
         {
@@ -90,11 +90,11 @@
           "micro": "MCL",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-12-17",
-          "entry": 60.94,
+          "entry_time": "2019-12-13",
+          "entry": 60.07,
           "exit_time": "2020-01-08",
           "exit": 60.6485,
-          "pnl": -31.15,
+          "pnl": 55.85,
           "reason": "stop"
         },
         {
@@ -912,8 +912,8 @@
           "side": "short",
           "contracts": 2,
           "entry": 1.1364,
-          "stop": 1.1506,
-          "unrealized": -135.0
+          "stop": 1.1523,
+          "unrealized": -246.25
         }
       ]
     },
@@ -929,8 +929,8 @@
           "entry_time": "2019-07-31",
           "entry": 1.1103,
           "exit_time": "2019-08-05",
-          "exit": 1.1191,
-          "pnl": -449.52,
+          "exit": 1.1188,
+          "pnl": -433.06,
           "reason": "stop"
         },
         {
@@ -939,11 +939,11 @@
           "micro": "MCL",
           "side": "short",
           "contracts": 1,
-          "entry_time": "2019-08-01",
-          "entry": 53.95,
+          "entry_time": "2019-08-07",
+          "entry": 51.09,
           "exit_time": "2019-08-13",
-          "exit": 56.8098,
-          "pnl": -287.98,
+          "exit": 57.446,
+          "pnl": -637.6,
           "reason": "stop"
         },
         {
@@ -955,8 +955,8 @@
           "entry_time": "2019-08-02",
           "entry": 1445.6,
           "exit_time": "2019-09-10",
-          "exit": 1495.7221,
-          "pnl": 499.22,
+          "exit": 1495.656,
+          "pnl": 498.56,
           "reason": "stop"
         },
         {
@@ -969,7 +969,7 @@
           "entry": 1.099,
           "exit_time": "2019-09-13",
           "exit": 1.1096,
-          "pnl": -404.17,
+          "pnl": -403.87,
           "reason": "stop"
         },
         {
@@ -994,8 +994,8 @@
           "entry_time": "2019-10-02",
           "entry": 2880.5,
           "exit_time": "2019-10-11",
-          "exit": 2985.5731,
-          "pnl": -527.37,
+          "exit": 2985.5723,
+          "pnl": -527.36,
           "reason": "stop"
         },
         {
@@ -1030,11 +1030,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-10-25",
-          "entry": 3020.25,
+          "entry_time": "2019-10-28",
+          "entry": 3036.25,
           "exit_time": "2019-12-03",
           "exit": 3096.754,
-          "pnl": 380.52,
+          "pnl": 300.52,
           "reason": "stop"
         },
         {
@@ -1055,12 +1055,12 @@
           "ticker": "CL=F",
           "micro": "MCL",
           "side": "long",
-          "contracts": 2,
-          "entry_time": "2019-12-17",
-          "entry": 60.94,
+          "contracts": 1,
+          "entry_time": "2019-12-06",
+          "entry": 59.2,
           "exit_time": "2020-01-08",
           "exit": 60.6485,
-          "pnl": -62.3,
+          "pnl": 142.85,
           "reason": "stop"
         },
         {
@@ -1088,19 +1088,6 @@
           "exit": 3260.3646,
           "pnl": -80.18,
           "reason": "stop"
-        },
-        {
-          "sleeve": "Crude oil",
-          "ticker": "CL=F",
-          "micro": "MCL",
-          "side": "short",
-          "contracts": 1,
-          "entry_time": "2020-01-31",
-          "entry": 51.56,
-          "exit_time": "2020-02-19",
-          "exit": 53.29,
-          "pnl": -175.0,
-          "reason": "exit_break"
         },
         {
           "sleeve": "S&P 500",
@@ -2684,8 +2671,8 @@
           "side": "short",
           "contracts": 3,
           "entry": 1.1364,
-          "stop": 1.1506,
-          "unrealized": -202.5
+          "stop": 1.1523,
+          "unrealized": -369.37
         }
       ]
     }
