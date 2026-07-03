@@ -1,5 +1,5 @@
 {
-  "deployment_date": "2026-06-29",
+  "deployment_date": "2026-07-03",
   "cash": 10000.0,
   "history": [
     {
@@ -61,7 +61,23 @@
         "max_dd": 23.25,
         "open_positions": 1
       }
+    },
+    {
+      "date": "2026-07-03",
+      "5pct": {
+        "equity": 38140.83,
+        "ret_pct": 281.41,
+        "max_dd": 16.25,
+        "open_positions": 1
+      },
+      "8pct": {
+        "equity": 68237.37,
+        "ret_pct": 582.37,
+        "max_dd": 28.19,
+        "open_positions": 1
+      }
     }
   ],
-  "last_run": "2026-07-02"
+  "last_run": "2026-07-03",
+  "rules_version": 2
 }
