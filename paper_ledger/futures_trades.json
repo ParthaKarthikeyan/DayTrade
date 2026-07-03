@@ -1836,7 +1836,7 @@
           "contracts": 8,
           "entry": 1.1364,
           "stop": 1.1523,
-          "unrealized": -1210.0
+          "unrealized": -1074.99
         }
       ]
     },
@@ -4167,7 +4167,7 @@
           "contracts": 24,
           "entry": 1.1364,
           "stop": 1.1523,
-          "unrealized": -3629.99
+          "unrealized": -3224.98
         }
       ]
     }
