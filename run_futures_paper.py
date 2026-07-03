@@ -23,7 +23,8 @@ import os
 from datetime import datetime, timezone
 
 from futures.data import get_daily
-from futures.paper import SLEEVES, HISTORY, RISK_BOOKS, book_snapshot
+from futures.paper import SLEEVES, HISTORY, RISK_BOOKS, RULES_VERSION, book_snapshot
+from sim.gist import GistPublisher
 from sim.state import build_live_state, write_state
 
 # The durable forward record. NOT under logs/ (which is gitignored) — this ledger is
@@ -42,10 +43,17 @@ def load_ledger(path: str, cash: float, today: str) -> dict:
             led.setdefault("deployment_date", today)
             led.setdefault("cash", cash)
             led.setdefault("history", [])
+            # A rules change invalidates the old forward record: the replay is a pure
+            # function of the frozen rules, so mixing rule sets would fake the OOS
+            # story. Re-stamp deployment and start the forward clock again.
+            if led.get("rules_version") != RULES_VERSION:
+                led["rules_version"] = RULES_VERSION
+                led["deployment_date"] = today
             return led
         except (OSError, json.JSONDecodeError):
             pass
-    return {"deployment_date": today, "cash": cash, "history": []}
+    return {"deployment_date": today, "cash": cash, "history": [],
+            "rules_version": RULES_VERSION}
 
 
 def upsert_today(history: list, row: dict) -> list:
@@ -115,8 +123,18 @@ def main():
         json.dump(trades_doc, f, indent=2)
 
     # --- forward-only segment (bars since deployment) -------------------------
-    fwd = [r for r in led["history"] if r["date"] >= dep]
+    # Only rows produced by the CURRENT rules count — older rows belong to a
+    # previous rule set's replay and would fake the forward story.
+    fwd = [r for r in led["history"]
+           if r["date"] >= dep and all(k in r for k in RISK_BOOKS)]
     days_live = len(fwd)
+
+    def fwd_stats(name):
+        if not fwd:
+            return None
+        first, last = fwd[0][name]["equity"], fwd[-1][name]["equity"]
+        return {"start": first, "end": last,
+                "ret_pct": round((last / first - 1) * 100, 2) if first else 0.0}
 
     # --- dashboard state (primary = 8% book) ----------------------------------
     primary = books["8pct"]
@@ -125,19 +143,38 @@ def main():
         p0 = primary["positions"][0]
         pos = {"side": p0["side"], "shares": p0["contracts"],
                "entry_price": p0["entry"], "stop": p0["stop"], "half_taken": False}
-    write_state(args.state, build_live_state(
+    state = build_live_state(
         mode="paper", symbol="futures-10k (8% book)", updated_at=today,
         start_cash=cash, equity=primary["equity"], halted=False, position=pos,
-        equity_curve=primary["equity_curve"], trades=[]))
+        equity_curve=primary["equity_curve"], trades=[])
+    state["deployment_date"] = dep
+    state["forward"] = {name: fwd_stats(name) for name in RISK_BOOKS}
+    write_state(args.state, state)
+    GistPublisher().push("futures_live.json", state, force=True)
 
-    # --- markdown recap -------------------------------------------------------
+    # --- markdown recap: the FORWARD record is the headline -------------------
     md = [f"# Futures $10k forward paper bot — {today}", "",
           f"Diversified daily trend · {len(frames)} sleeves · whole micro contracts · "
-          f"two paper books (5% / 8% risk per trade).",
-          f"**Deployed {dep}** · **{days_live} day(s)** of forward record"
-          + (f" · _no data: {', '.join(missing)}_" if missing else ""), "",
-          "| Book | Equity | Return | Max DD | Trades | Win % | Open |",
-          "|---|--:|--:|--:|--:|--:|--:|"]
+          f"two paper books (5% / 8% of current equity risked per trade, one shared "
+          f"account, margin-capped concurrent positions).",
+          f"**Rules v{RULES_VERSION} deployed {dep}** · **{days_live} day(s)** of "
+          "forward record"
+          + (f" · _no data: {', '.join(missing)}_" if missing else ""), ""]
+
+    md += ["## Forward record since deployment (the number that matters)", ""]
+    if days_live >= 2:
+        for name in RISK_BOOKS:
+            s = fwd_stats(name)
+            md.append(f"- {name[:-3]}% book: ${s['start']:,.0f} → ${s['end']:,.0f} "
+                      f"(**{s['ret_pct']:+.1f}%** over {days_live} days)")
+    else:
+        md.append("_Forward record starts accumulating from the next run. Today is the "
+                  "baseline; everything below is backtest context, not results._")
+
+    md += ["", "## Backtest replay (context only — the rules were CHOSEN on this data)",
+           "",
+           "| Book | Equity | Return | Max DD | Trades | Win % | Open |",
+           "|---|--:|--:|--:|--:|--:|--:|"]
     for name, b in books.items():
         md.append(f"| {b['risk_pct']*100:.0f}% risk | ${b['equity']:,.0f} | "
                   f"{b['ret_pct']:+.1f}% | {b['max_dd']:.1f}% | {b['trades']} | "
@@ -146,20 +183,6 @@ def main():
     for name, b in books.items():
         md += ["", f"## {b['risk_pct']*100:.0f}% book — today's target positions",
                "", fmt_pos(b["positions"])]
-
-    if days_live >= 2:
-        first8 = next((r["8pct"]["equity"] for r in fwd), cash)
-        last8 = fwd[-1]["8pct"]["equity"]
-        first5 = next((r["5pct"]["equity"] for r in fwd), cash)
-        last5 = fwd[-1]["5pct"]["equity"]
-        md += ["", "## Forward record since deployment", "",
-               f"- 8% book: ${first8:,.0f} → ${last8:,.0f} "
-               f"({(last8/first8-1)*100:+.1f}% over {days_live} days)",
-               f"- 5% book: ${first5:,.0f} → ${last5:,.0f} "
-               f"({(last5/first5-1)*100:+.1f}% over {days_live} days)"]
-    else:
-        md += ["", "_Forward record starts accumulating from the next run. Today is the "
-               "baseline; come back after several sessions to compare live vs. backtest._"]
 
     # --- trade log: closed trades since deployment (8% primary book) ----------
     prim_trades = books["8pct"]["trade_log"]

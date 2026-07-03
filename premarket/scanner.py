@@ -11,6 +11,16 @@ from typing import List
 from sim.config import Config
 
 
+def is_common_stock(symbol: str) -> bool:
+    """Exclude warrants/units/rights — they trade thin and follow different rules.
+    Catches the suffix conventions seen in live watchlists: '.WS', '.U', '.R',
+    and 5-letter tickers ending in W/U/R (e.g. OPTXW, NTRBW)."""
+    s = symbol.upper()
+    if "." in s or "/" in s:
+        return False
+    return not (len(s) == 5 and s[-1] in "WUR")
+
+
 def rank_gappers(rows: List[dict], cfg: Config) -> List[dict]:
     """Pure: filter by price band + min gap %, then rank by gap descending.
 
@@ -68,6 +78,8 @@ def scan_live(cfg: Config) -> List[str]:
 
     out: List[str] = []
     for c in cands:
+        if not is_common_stock(c["symbol"]):
+            continue
         if not float_ok(c["symbol"], cfg):
             continue
         if cfg.pm_require_news and not has_recent_news(c["symbol"]):

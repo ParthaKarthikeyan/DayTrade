@@ -12,5 +12,8 @@ flask>=3.0
 # Optional offline data fallback (1-minute history, ~last 30 days)
 yfinance>=0.2
 
+# Crypto data (Coinbase public candles endpoint)
+requests>=2.31
+
 # Tests
 pytest>=7.0

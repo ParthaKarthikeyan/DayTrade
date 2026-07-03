@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DayTrade — Mission Control</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --line:#30363d; --text:#e6edf3;
+    --muted:#8b949e; --green:#2ea043; --red:#f85149; --accent:#58a6ff;
+    --gold:#d29922;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text)}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+         padding:14px 20px;border-bottom:1px solid var(--line)}
+  h1{font-size:18px;margin:0;color:var(--accent)}
+  .sub{color:var(--muted);font-size:12px}
+  .badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+  .badge.halt{background:rgba(248,81,73,.15);color:var(--red);border:1px solid var(--red)}
+  .badge.live{background:rgba(46,160,67,.15);color:var(--green);border:1px solid var(--green)}
+  .badge.goal{background:rgba(210,153,34,.15);color:var(--gold);border:1px solid var(--gold)}
+  .badge.idle{background:rgba(139,148,158,.12);color:var(--muted);border:1px solid var(--line)}
+  nav{display:flex;gap:6px;padding:10px 20px 0;flex-wrap:wrap}
+  nav button{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+             padding:7px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:13px}
+  nav button.on{color:var(--text);border-bottom-color:var(--bg);background:var(--bg);
+                font-weight:600}
+  .wrap{max-width:1150px;margin:0 auto;padding:16px 20px 60px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+  .card .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  .card .v{font-size:20px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+  .card .s{font-size:11px;color:var(--muted);margin-top:2px}
+  .green{color:var(--green)} .red{color:var(--red)} .gold{color:var(--gold)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+         padding:14px;margin-top:16px}
+  .panel h2{font-size:13px;margin:0 0 10px;color:var(--muted);text-transform:uppercase;
+            letter-spacing:.04em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+  .panel h2 .note{text-transform:none;letter-spacing:0;font-weight:400}
+  canvas{width:100%;height:240px;display:block}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13px}
+  th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  td.l{text-align:left;white-space:normal}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+  .empty{color:var(--muted);padding:12px 0}
+  .overflow{overflow-x:auto}
+  .view{display:none} .view.on{display:block}
+  .warn{color:var(--gold);font-size:12px;margin-top:8px}
+  .footnote{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.6}
+  a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>DayTrade Mission Control</h1>
+  <span class="sub">goal: <b style="color:var(--gold)">$100/day on $10k</b> · every book paper-trades a $10k bankroll</span>
+  <span id="liveBadge" class="badge idle" style="margin-left:auto">ledger only</span>
+  <span id="updated" class="sub"></span>
+</header>
+
+<nav id="tabs">
+  <button data-v="overview" class="on">Overview</button>
+  <button data-v="premarket">Premarket stocks</button>
+  <button data-v="crypto">Crypto 6h trend</button>
+  <button data-v="futures">Futures trend</button>
+  <button data-v="goal">Goal tracker</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============ OVERVIEW ============ -->
+  <div id="v-overview" class="view on">
+    <div class="cards" id="ov-cards"></div>
+    <div class="panel"><h2>All books — forward equity ($10k each)
+      <span class="note">solid = committed ledger · committed after each bot run</span></h2>
+      <canvas id="ov-chart"></canvas></div>
+    <div class="panel"><h2>Bot runs (GitHub Actions)</h2>
+      <div class="overflow"><table id="ov-runs">
+        <thead><tr><th>Workflow</th><th>Last run</th><th>Status</th><th>Link</th></tr></thead>
+        <tbody><tr><td class="empty" colspan="4">loading…</td></tr></tbody>
+      </table></div></div>
+    <p class="footnote">
+      Data comes straight from the committed <a
+      href="https://github.com/ParthaKarthikeyan/DayTrade/tree/master/paper_ledger">paper_ledger</a>
+      JSON files (the bots' durable track record) plus a near-live gist feed during
+      sessions. Everything here is <b>paper</b>. A book earns real capital only after
+      ≥30 forward sessions of positive expectancy with drawdown inside budget.
+    </p>
+  </div>
+
+  <!-- ============ PREMARKET ============ -->
+  <div id="v-premarket" class="view">
+    <div class="cards" id="pm-cards"></div>
+    <div class="panel" id="pm-live-panel" style="display:none">
+      <h2>Live session <span class="note" id="pm-live-note"></span></h2>
+      <canvas id="pm-live-chart"></canvas></div>
+    <div class="panel"><h2>Daily P&amp;L vs the $100 goal</h2><canvas id="pm-daily"></canvas></div>
+    <div class="panel"><h2>Book equity</h2><canvas id="pm-equity"></canvas></div>
+    <div class="panel"><h2>Sessions</h2>
+      <div class="overflow"><table id="pm-days">
+        <thead><tr><th>Date</th><th>Book start</th><th>Book end</th><th>P&amp;L $</th>
+          <th>P&amp;L %</th><th>Trades</th><th>Win %</th><th>Ended</th><th class="l">Watchlist</th></tr></thead>
+        <tbody></tbody></table></div></div>
+    <div class="panel"><h2>Trades (actual fills where available)
+      <span class="note">gap = bot's book P&amp;L − broker-fill P&amp;L; big gaps mean slippage the bot didn't see</span></h2>
+      <div class="overflow"><table id="pm-trades">
+        <thead><tr><th>Date</th><th>Exit</th><th>Symbol</th><th>Shares</th><th>Entry $</th>
+          <th>Exit $</th><th>P&amp;L $</th><th>Source</th></tr></thead>
+        <tbody></tbody></table></div>
+      <div id="pm-recon" class="warn"></div></div>
+  </div>
+
+  <!-- ============ CRYPTO ============ -->
+  <div id="v-crypto" class="view">
+    <div class="cards" id="cx-cards"></div>
+    <div class="panel"><h2>Book equity <span class="note">24/7 — the book that can earn on weekends</span></h2>
+      <canvas id="cx-equity"></canvas></div>
+    <div class="panel"><h2>Open positions</h2>
+      <div class="overflow"><table id="cx-open">
+        <thead><tr><th>Symbol</th><th>Units</th><th>Entry $</th><th>Last $</th><th>Unrealized $</th></tr></thead>
+        <tbody><tr><td class="empty" colspan="5">flat</td></tr></tbody></table></div></div>
+    <div class="panel"><h2>Closed trades</h2>
+      <div class="overflow"><table id="cx-trades">
+        <thead><tr><th>Exit</th><th>Symbol</th><th>Units</th><th>Entry $</th>
+          <th>Exit $</th><th>P&amp;L $</th><th>Reason</th></tr></thead>
+        <tbody></tbody></table></div></div>
+    <p class="footnote">Strategy: 6h Donchian(20/10) breakout + EMA(50/200) regime +
+      3×ATR chandelier, long/flat, 1% of book risked per trade — the only family that
+      survived the repo's cost-aware walk-forward research (BTC 4/5, ETH 4/5 folds
+      net of 20bps). No daily profit target here on purpose: a trend book pays via
+      the occasional multi-day runner; capping at +1% would amputate the winners.</p>
+  </div>
+
+  <!-- ============ FUTURES ============ -->
+  <div id="v-futures" class="view">
+    <div class="cards" id="fu-cards"></div>
+    <div class="panel"><h2>Forward equity since deployment
+      <span class="note">the replay before the deployment stamp is backtest, not results</span></h2>
+      <canvas id="fu-equity"></canvas></div>
+    <div class="panel"><h2>Open positions (8% book)</h2>
+      <div class="overflow"><table id="fu-open">
+        <thead><tr><th>Sleeve</th><th>Micro</th><th>Side</th><th>Qty</th><th>Entry</th>
+          <th>Stop</th><th>Unrealized $</th></tr></thead>
+        <tbody><tr><td class="empty" colspan="7">flat</td></tr></tbody></table></div></div>
+    <div class="panel"><h2>Closed trades since deployment (8% book)</h2>
+      <div class="overflow"><table id="fu-trades">
+        <thead><tr><th>Exit</th><th>Sleeve</th><th>Side</th><th>Qty</th><th>Entry</th>
+          <th>Exit</th><th>P&amp;L $</th><th>Reason</th></tr></thead>
+        <tbody></tbody></table></div></div>
+    <p class="footnote">Daily Donchian/EMA trend across S&amp;P, gold, crude, EUR and
+      BTC micros — a slow diversifier book (positions held for weeks), not a
+      daily-profit engine. Two parallel risk books (5% / 8% of current equity per
+      trade, margin-capped) so each drawdown is experienced on paper first.</p>
+  </div>
+
+  <!-- ============ GOAL ============ -->
+  <div id="v-goal" class="view">
+    <div class="cards" id="gl-cards"></div>
+    <div class="panel"><h2>Cumulative P&amp;L (all books) vs the 1%/day compound line</h2>
+      <canvas id="gl-chart"></canvas></div>
+    <div class="panel"><h2>Proving progress — 30 forward sessions each</h2>
+      <div class="overflow"><table id="gl-books">
+        <thead><tr><th>Book</th><th>Forward days</th><th>Total P&amp;L $</th>
+          <th>Avg $/day</th><th>Expectancy/trade $</th><th>Status</th></tr></thead>
+        <tbody></tbody></table></div>
+      <div class="footnote">
+        Promotion policy: a book earns more capital (or the first real dollar) only after
+        <b>≥30 forward sessions</b> with positive net expectancy and drawdown inside its
+        budget. The 1%/day line compounds $10k by 1% each session — it is the goal being
+        tested, not a promise; sustained 1%/day is ~12×/year and no book should be trusted
+        with real money until the forward record, not the backtest, supports it.
+      </div></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const REPO = "ParthaKarthikeyan/DayTrade";
+const RAW = `https://raw.githubusercontent.com/${REPO}/master/paper_ledger/`;
+const GOAL_DOLLARS = 100, BANKROLL = 10000, PROVE_DAYS = 30;
+const $ = id => document.getElementById(id);
+const fmt$ = v => (v == null || isNaN(v)) ? "—" :
+  (v < 0 ? "-$" : "$") + Math.abs(v).toLocaleString(undefined, {maximumFractionDigits: 2});
+const fmtSign = v => (v == null || isNaN(v)) ? "—" :
+  (v >= 0 ? "+" : "-") + "$" + Math.abs(v).toLocaleString(undefined, {maximumFractionDigits: 2});
+const cls = v => v > 0 ? "green" : (v < 0 ? "red" : "");
+
+// ---------- tabs ----------
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".view").forEach(v =>
+    v.classList.toggle("on", v.id === "v-" + b.dataset.v));
+});
+
+// ---------- fetch helpers ----------
+async function jget(url) {
+  try {
+    const r = await fetch(url, {cache: "no-store"});
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+
+// The gist id is read from config.json (committed) — the near-live feed is
+// optional and everything degrades to the committed ledgers without it.
+let GIST_ID = null;
+
+// ---------- tiny chart lib (no CDNs) ----------
+function drawChart(canvas, series, opts = {}) {
+  // series: [{points:[[label,y],...], color, dash?, fill?}], opts: {zero, money, bars}
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight || 240;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const c = canvas.getContext("2d"); c.scale(dpr, dpr);
+  c.clearRect(0, 0, w, h);
+  const padL = 56, padR = 10, padT = 10, padB = 22;
+  const all = series.flatMap(s => s.points.map(p => p[1])).filter(v => v != null && !isNaN(v));
+  if (!all.length) {
+    c.fillStyle = "#8b949e"; c.font = "13px sans-serif";
+    c.fillText("no data yet — check back after the next bot run", padL, h / 2);
+    return;
+  }
+  let lo = Math.min(...all), hi = Math.max(...all);
+  if (opts.zero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  if (hi === lo) { hi += 1; lo -= 1; }
+  const span = hi - lo; lo -= span * .07; hi += span * .07;
+  const n = Math.max(...series.map(s => s.points.length));
+  const X = i => padL + (n <= 1 ? 0 : i / (n - 1) * (w - padL - padR));
+  const Y = v => padT + (1 - (v - lo) / (hi - lo)) * (h - padT - padB);
+  // gridlines
+  c.strokeStyle = "#21262d"; c.fillStyle = "#8b949e"; c.font = "11px sans-serif";
+  for (let g = 0; g <= 4; g++) {
+    const v = lo + (hi - lo) * g / 4, y = Y(v);
+    c.beginPath(); c.moveTo(padL, y); c.lineTo(w - padR, y); c.stroke();
+    c.fillText(opts.money ? fmt$(v) : v.toFixed(1), 4, y + 4);
+  }
+  if (opts.zero && lo < 0 && hi > 0) {
+    c.strokeStyle = "#484f58"; c.beginPath();
+    c.moveTo(padL, Y(0)); c.lineTo(w - padR, Y(0)); c.stroke();
+  }
+  // x labels: first + last
+  const labels = series.find(s => s.points.length === n).points;
+  c.fillStyle = "#8b949e";
+  if (labels.length) {
+    c.fillText(String(labels[0][0]).slice(5), padL, h - 6);
+    const lastLbl = String(labels[labels.length - 1][0]).slice(5);
+    c.fillText(lastLbl, w - padR - c.measureText(lastLbl).width, h - 6);
+  }
+  for (const s of series) {
+    if (opts.bars && s.bars) {
+      const bw = Math.max(2, (w - padL - padR) / n * 0.6);
+      s.points.forEach((p, i) => {
+        if (p[1] == null) return;
+        c.fillStyle = p[1] >= 0 ? "#2ea043" : "#f85149";
+        const y0 = Y(0), y1 = Y(p[1]);
+        c.fillRect(X(i) - bw / 2, Math.min(y0, y1), bw, Math.max(1, Math.abs(y1 - y0)));
+      });
+      continue;
+    }
+    c.strokeStyle = s.color || "#58a6ff"; c.lineWidth = 2;
+    c.setLineDash(s.dash ? [5, 4] : []);
+    c.beginPath();
+    let started = false;
+    s.points.forEach((p, i) => {
+      if (p[1] == null) return;
+      const x = X(i), y = Y(p[1]);
+      started ? c.lineTo(x, y) : c.moveTo(x, y); started = true;
+    });
+    c.stroke(); c.setLineDash([]);
+  }
+}
+
+// ---------- normalizers (old + new ledger row formats) ----------
+const pmRow = r => ({
+  date: r.date,
+  start: r.book_start ?? r.start_equity, end: r.book_end ?? r.end_equity,
+  pnl: r.pnl, pnl_pct: r.pnl_pct, trades: r.trades, win: r.win_rate,
+  ended: r.stopped === "target" ? "🎯 banked" : (r.halted ? "⛔ loss cap" : "time"),
+  isBook: r.book_start != null,
+  watch: (r.watchlist || []).join(" "),
+});
+
+// ---------- state ----------
+const S = {pm: null, pmTr: null, fu: null, fuTr: null, cx: null, cxTr: null,
+           runs: null, live: {}};
+
+async function loadAll() {
+  const cfg = await jget("config.json");
+  if (cfg && cfg.gist_id) GIST_ID = cfg.gist_id;
+  [S.pm, S.pmTr, S.fu, S.fuTr, S.cx, S.cxTr, S.runs] = await Promise.all([
+    jget(RAW + "premarket_paper.json"), jget(RAW + "premarket_trades.json"),
+    jget(RAW + "futures_paper.json"), jget(RAW + "futures_trades.json"),
+    jget(RAW + "crypto_paper.json"), jget(RAW + "crypto_trades.json"),
+    jget(`https://api.github.com/repos/${REPO}/actions/runs?per_page=30`),
+  ]);
+  renderAll();
+}
+
+async function loadLive() {
+  if (!GIST_ID) return;
+  const g = await jget(`https://api.github.com/gists/${GIST_ID}`);
+  if (!g || !g.files) return;
+  let fresh = false;
+  for (const name of ["premarket_live.json", "crypto_live.json", "futures_live.json"]) {
+    const f = g.files[name];
+    if (!f) continue;
+    try {
+      const content = f.truncated ? await (await fetch(f.raw_url)).text() : f.content;
+      S.live[name] = JSON.parse(content);
+    } catch (e) { continue; }
+  }
+  const age = (Date.now() - new Date(g.updated_at)) / 60000;   // minutes
+  fresh = age < 5;
+  const b = $("liveBadge");
+  b.textContent = fresh ? "LIVE (gist)" : `last update ${age < 90 ? Math.round(age) + "m" : Math.round(age / 60) + "h"} ago`;
+  b.className = "badge " + (fresh ? "live" : "idle");
+  renderPMLive();
+}
+
+// ---------- renderers ----------
+function card(k, v, s = "", vcls = "") {
+  return `<div class="card"><div class="k">${k}</div>
+    <div class="v ${vcls}">${v}</div>${s ? `<div class="s">${s}</div>` : ""}</div>`;
+}
+
+function bookRows() {
+  // normalized per-book daily rows for overview + goal views (book-based only)
+  const out = {};
+  if (S.pm) out["Premarket"] = S.pm.history.map(pmRow).filter(r => r.isBook)
+    .map(r => ({date: r.date, pnl: r.pnl, end: r.end, trades: r.trades}));
+  if (S.cx) out["Crypto"] = S.cx.history.map(r => ({
+    date: r.date, pnl: r.pnl, end: r.book_end, trades: r.trades}));
+  if (S.fu) {
+    const dep = S.fu.deployment_date || "9999";
+    const rows = S.fu.history.filter(r => r.date >= dep && r["8pct"]);
+    out["Futures 8%"] = rows.map((r, i) => ({
+      date: r.date, end: r["8pct"].equity,
+      pnl: i ? r["8pct"].equity - rows[i - 1]["8pct"].equity : 0, trades: null}));
+  }
+  return out;
+}
+
+function renderOverview() {
+  const books = bookRows();
+  let cards = "", totalPnl = 0, anyDays = 0;
+  for (const [name, rows] of Object.entries(books)) {
+    if (!rows.length) { cards += card(name, "—", "no forward days yet"); continue; }
+    const last = rows[rows.length - 1];
+    const pnl = rows.reduce((a, r) => a + (r.pnl || 0), 0);
+    totalPnl += pnl; anyDays = Math.max(anyDays, rows.length);
+    cards += card(name, fmt$(last.end),
+      `${rows.length} fwd day(s) · ${fmtSign(pnl)}`, cls(pnl));
+  }
+  cards += card("All books P&L", fmtSign(totalPnl),
+    `goal pace: ${fmtSign(GOAL_DOLLARS * anyDays)} by now`, cls(totalPnl));
+  $("ov-cards").innerHTML = cards;
+
+  const colors = {"Premarket": "#58a6ff", "Crypto": "#d29922", "Futures 8%": "#bc8cff"};
+  const series = Object.entries(books).filter(([, r]) => r.length).map(([name, rows]) => ({
+    points: rows.map(r => [r.date, r.end]), color: colors[name]}));
+  drawChart($("ov-chart"), series, {money: true});
+
+  // workflow runs
+  const tb = $("ov-runs").querySelector("tbody");
+  if (S.runs && S.runs.workflow_runs) {
+    const seen = new Map();
+    for (const r of S.runs.workflow_runs)
+      if (!seen.has(r.name)) seen.set(r.name, r);
+    tb.innerHTML = [...seen.values()].map(r => {
+      const ok = r.conclusion === "success";
+      const st = r.status === "in_progress" ? "🔵 running"
+        : ok ? "🟢 success" : `🔴 ${r.conclusion || r.status}`;
+      return `<tr><td>${r.name}</td><td>${new Date(r.run_started_at).toLocaleString()}</td>
+        <td>${st}</td><td><a href="${r.html_url}" target="_blank">log</a></td></tr>`;
+    }).join("") || `<tr><td class="empty" colspan="4">no runs</td></tr>`;
+  } else {
+    tb.innerHTML = `<tr><td class="empty" colspan="4">couldn't reach the GitHub API</td></tr>`;
+  }
+}
+
+function renderPremarket() {
+  if (!S.pm) return;
+  const rows = S.pm.history.map(pmRow);
+  const bookRowsOnly = rows.filter(r => r.isBook);
+  const last = bookRowsOnly[bookRowsOnly.length - 1];
+  const pnl = bookRowsOnly.reduce((a, r) => a + (r.pnl || 0), 0);
+  const wins = bookRowsOnly.filter(r => r.pnl > 0).length;
+  $("pm-cards").innerHTML =
+    card("Book equity", last ? fmt$(last.end) : fmt$(BANKROLL),
+         last ? `as of ${last.date}` : "no $10k-book sessions yet") +
+    card("Forward P&L", fmtSign(pnl), `${bookRowsOnly.length} session(s)`, cls(pnl)) +
+    card("Green days", bookRowsOnly.length ? `${wins}/${bookRowsOnly.length}` : "—") +
+    card("Proving", `${Math.min(bookRowsOnly.length, PROVE_DAYS)}/${PROVE_DAYS}`,
+         "sessions toward promotion") +
+    card("Goal pace", last ? fmtSign(pnl - GOAL_DOLLARS * bookRowsOnly.length) : "—",
+         "vs $100 × sessions", cls(pnl - GOAL_DOLLARS * bookRowsOnly.length));
+
+  drawChart($("pm-daily"), [{points: bookRowsOnly.map(r => [r.date, r.pnl]), bars: true},
+    {points: bookRowsOnly.map(r => [r.date, GOAL_DOLLARS]), color: "#d29922", dash: true}],
+    {zero: true, money: true, bars: true});
+  drawChart($("pm-equity"), [{points: bookRowsOnly.map(r => [r.date, r.end]), color: "#58a6ff"}],
+    {money: true});
+
+  $("pm-days").querySelector("tbody").innerHTML = rows.slice().reverse().map(r => `
+    <tr><td>${r.date}${r.isBook ? "" : " *"}</td><td>${fmt$(r.start)}</td><td>${fmt$(r.end)}</td>
+    <td class="${cls(r.pnl)}">${fmtSign(r.pnl)}</td><td class="${cls(r.pnl)}">${r.pnl_pct ?? "—"}%</td>
+    <td>${r.trades ?? "—"}</td><td>${r.win ?? "—"}</td><td>${r.ended}</td>
+    <td class="l">${r.watch}</td></tr>`).join("")
+    || `<tr><td class="empty" colspan="9">no sessions yet</td></tr>`;
+  if (rows.some(r => !r.isBook))
+    $("pm-recon").textContent = "* rows before the $10k book existed traded the whole " +
+      "shared paper account — kept for the record, excluded from book stats.";
+
+  if (S.pmTr && S.pmTr.history) {
+    const blocks = S.pmTr.history.slice().reverse();
+    $("pm-trades").querySelector("tbody").innerHTML = blocks.flatMap(b =>
+      (b.trades || []).slice().reverse().map(t => `
+        <tr><td>${b.date}</td><td>${t.exit_time || "—"}</td><td>${t.symbol}</td>
+        <td>${t.shares}</td><td>${t.entry_price?.toFixed?.(2) ?? "—"}</td>
+        <td>${t.exit_price?.toFixed?.(2) ?? "—"}</td>
+        <td class="${cls(t.pnl)}">${fmtSign(t.pnl)}</td><td>${b.source || "—"}</td></tr>`))
+      .join("") || `<tr><td class="empty" colspan="8">no trades yet</td></tr>`;
+    const lastB = blocks[0];
+    if (lastB && lastB.reconciliation_gap != null && Math.abs(lastB.reconciliation_gap) > 1)
+      $("pm-recon").textContent =
+        `⚠ ${lastB.date}: book P&L ${fmtSign(lastB.book_pnl ?? lastB.account_pnl)} vs ` +
+        `broker fills ${fmtSign(lastB.fills_realized_pnl)} — gap ${fmtSign(lastB.reconciliation_gap)}.`;
+  }
+}
+
+function renderPMLive() {
+  const st = S.live["premarket_live.json"];
+  if (!st || !st.equity_curve || !st.equity_curve.length) return;
+  const today = new Date().toISOString().slice(0, 10);
+  if (!String(st.updated_at || "").startsWith(today)) return;   // stale session
+  $("pm-live-panel").style.display = "block";
+  $("pm-live-note").textContent =
+    `${st.updated_at} · book ${fmt$(st.equity)} (${fmtSign(st.pnl)})` +
+    (st.stopped === "target" ? " · 🎯 banked" : st.stopped === "loss_cap" ? " · ⛔ stopped" : "");
+  drawChart($("pm-live-chart"),
+    [{points: st.equity_curve.map(p => [String(p[0]).slice(11, 16), p[1]]), color: "#2ea043"}],
+    {money: true});
+}
+
+function renderCrypto() {
+  if (!S.cx) return;
+  const rows = S.cx.history || [];
+  const last = rows[rows.length - 1];
+  const bank = S.cx.bankroll || BANKROLL;
+  const eq = last ? last.book_end : bank;
+  const live = S.live["crypto_live.json"];
+  $("cx-cards").innerHTML =
+    card("Book equity", fmt$(live ? live.equity : eq),
+         live ? `live · ${live.updated_at} UTC` : (last ? `as of ${last.date}` : "")) +
+    card("Since deployment", fmtSign((live ? live.equity : eq) - bank),
+         S.cx.deployment_date ? `deployed ${S.cx.deployment_date}` : "", cls(eq - bank)) +
+    card("Open positions", String(Object.keys(S.cx.positions || {}).length)) +
+    card("Proving", `${Math.min(rows.length, PROVE_DAYS)}/${PROVE_DAYS}`, "days toward promotion") +
+    card("Daily brake", last && last.braked ? "ON (-2%)" : "off",
+         "", last && last.braked ? "red" : "");
+
+  drawChart($("cx-equity"), [{points: rows.map(r => [r.date, r.book_end]), color: "#d29922"}],
+    {money: true});
+
+  const lastPx = (live && live.last_prices) || {};
+  const open = Object.entries(S.cx.positions || {});
+  $("cx-open").querySelector("tbody").innerHTML = open.length ? open.map(([s, p]) => {
+    const lp = lastPx[s];
+    const un = lp ? p.units * (lp - p.entry) : null;
+    return `<tr><td>${s}</td><td>${p.units}</td><td>${p.entry.toLocaleString()}</td>
+      <td>${lp ? lp.toLocaleString() : "—"}</td>
+      <td class="${cls(un)}">${un != null ? fmtSign(un) : "—"}</td></tr>`;
+  }).join("") : `<tr><td class="empty" colspan="5">flat</td></tr>`;
+
+  const tr = (S.cxTr && S.cxTr.history) || [];
+  $("cx-trades").querySelector("tbody").innerHTML = tr.slice().reverse().map(t => `
+    <tr><td>${t.exit_time || t.date}</td><td>${t.symbol}</td><td>${t.units}</td>
+    <td>${t.entry_price?.toLocaleString?.() ?? "—"}</td>
+    <td>${t.exit_price?.toLocaleString?.() ?? "—"}</td>
+    <td class="${cls(t.pnl)}">${fmtSign(t.pnl)}</td><td>${t.reason || ""}</td></tr>`).join("")
+    || `<tr><td class="empty" colspan="7">no closed trades yet</td></tr>`;
+}
+
+function renderFutures() {
+  if (!S.fu) return;
+  const dep = S.fu.deployment_date || "9999";
+  const rows = S.fu.history.filter(r => r["8pct"]);
+  const fwd = rows.filter(r => r.date >= dep);
+  const last = rows[rows.length - 1];
+  const f8 = fwd.length ? fwd[fwd.length - 1]["8pct"].equity - fwd[0]["8pct"].equity : 0;
+  const f5 = fwd.length ? fwd[fwd.length - 1]["5pct"].equity - fwd[0]["5pct"].equity : 0;
+  $("fu-cards").innerHTML =
+    card("8% book (fwd)", fwd.length ? fmt$(fwd[fwd.length - 1]["8pct"].equity) : "—",
+         `${fwd.length} fwd day(s) · ${fmtSign(f8)}`, cls(f8)) +
+    card("5% book (fwd)", fwd.length ? fmt$(fwd[fwd.length - 1]["5pct"].equity) : "—",
+         `${fwd.length} fwd day(s) · ${fmtSign(f5)}`, cls(f5)) +
+    card("Deployed", dep, `rules v${S.fu.rules_version || 1}`) +
+    card("Backtest replay", last ? fmt$(last["8pct"].equity) : "—",
+         "context only — rules chosen on it") +
+    card("Max DD (replay 8%)", last ? last["8pct"].max_dd + "%" : "—");
+
+  drawChart($("fu-equity"),
+    [{points: fwd.map(r => [r.date, r["8pct"].equity]), color: "#bc8cff"},
+     {points: fwd.map(r => [r.date, r["5pct"].equity]), color: "#58a6ff"}],
+    {money: true});
+
+  const bk = S.fuTr && S.fuTr.books && S.fuTr.books["8pct"];
+  if (bk) {
+    $("fu-open").querySelector("tbody").innerHTML = (bk.open || []).map(p => `
+      <tr><td>${p.sleeve}</td><td>${p.micro}</td><td>${p.side}</td><td>${p.contracts}</td>
+      <td>${p.entry}</td><td>${p.stop}</td>
+      <td class="${cls(p.unrealized)}">${fmtSign(p.unrealized)}</td></tr>`).join("")
+      || `<tr><td class="empty" colspan="7">flat</td></tr>`;
+    const fwdTr = (bk.closed || []).filter(t => t.exit_time >= dep).reverse();
+    $("fu-trades").querySelector("tbody").innerHTML = fwdTr.map(t => `
+      <tr><td>${t.exit_time}</td><td>${t.sleeve}</td><td>${t.side}</td><td>${t.contracts}</td>
+      <td>${t.entry}</td><td>${t.exit}</td>
+      <td class="${cls(t.pnl)}">${fmtSign(t.pnl)}</td><td>${t.reason}</td></tr>`).join("")
+      || `<tr><td class="empty" colspan="8">none since deployment — open positions still running</td></tr>`;
+  }
+}
+
+function renderGoal() {
+  const books = bookRows();
+  // union of dates across books
+  const dates = [...new Set(Object.values(books).flat().map(r => r.date))].sort();
+  const daily = dates.map(d => Object.values(books).reduce((a, rows) => {
+    const r = rows.find(x => x.date === d); return a + (r ? (r.pnl || 0) : 0);
+  }, 0));
+  let cum = 0;
+  const cumPts = dates.map((d, i) => [d, (cum += daily[i])]);
+  const goalPts = dates.map((d, i) => [d, BANKROLL * (Math.pow(1.01, i + 1) - 1)]);
+
+  const total = cum, days = dates.length;
+  $("gl-cards").innerHTML =
+    card("Total P&L (all books)", fmtSign(total), `${days} day(s) tracked`, cls(total)) +
+    card("Avg per day", days ? fmtSign(total / days) : "—", "goal: +$100", cls(total)) +
+    card("1%/day line", days ? fmtSign(BANKROLL * (Math.pow(1.01, days) - 1)) : "—",
+         "where 1%/day compound would be", "gold") +
+    card("Gap to goal", days ? fmtSign(total - BANKROLL * (Math.pow(1.01, days) - 1)) : "—",
+         "", cls(total - BANKROLL * (Math.pow(1.01, days) - 1)));
+
+  drawChart($("gl-chart"), [
+    {points: cumPts, color: "#58a6ff"},
+    {points: goalPts, color: "#d29922", dash: true},
+  ], {zero: true, money: true});
+
+  $("gl-books").querySelector("tbody").innerHTML = Object.entries(books).map(([name, rows]) => {
+    const pnl = rows.reduce((a, r) => a + (r.pnl || 0), 0);
+    const nTr = rows.reduce((a, r) => a + (r.trades || 0), 0);
+    const st = rows.length >= PROVE_DAYS
+      ? (pnl > 0 ? "✅ eligible for promotion review" : "❌ 30 days, negative — revise")
+      : `proving ${rows.length}/${PROVE_DAYS}`;
+    return `<tr><td>${name}</td><td>${rows.length}</td>
+      <td class="${cls(pnl)}">${fmtSign(pnl)}</td>
+      <td class="${cls(pnl)}">${rows.length ? fmtSign(pnl / rows.length) : "—"}</td>
+      <td>${nTr ? fmtSign(pnl / nTr) : "—"}</td><td>${st}</td></tr>`;
+  }).join("") || `<tr><td class="empty" colspan="6">no forward data yet</td></tr>`;
+}
+
+function renderAll() {
+  $("updated").textContent = "refreshed " + new Date().toLocaleTimeString();
+  renderOverview(); renderPremarket(); renderCrypto(); renderFutures(); renderGoal();
+}
+
+window.addEventListener("resize", () => renderAll());
+loadAll().then(loadLive);
+// GitHub's unauthenticated API allows 60 req/hr/IP; these intervals keep the
+// gist poll + actions poll comfortably under it (~45/hr total).
+setInterval(loadAll, 300000);   // committed ledgers + workflow status: every 5 min
+setInterval(loadLive, 90000);   // gist live feed: every 90 s
+</script>
+</body>
+</html>

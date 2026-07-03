@@ -1,13 +1,45 @@
-# DayTrade — US-Stock Day-Trading Bot + Simulator
+# DayTrade — Paper-Trading Bots Chasing $100/Day on $10k
+
+The goal: **+1%/day on a $10k account (~$100/day)**. Nobody sustains that blindly —
+so this repo runs several candidate **$10k paper books in parallel**, measures each
+one's FORWARD record honestly (real fills, committed ledgers, no backtest flattery),
+and only promotes a book that proves itself.
+
+## The books (each trades a notional $10k)
+
+| Book | What it does | Schedule | Ledger |
+|---|---|---|---|
+| **Premarket stocks** | Gap-and-go momentum on low-float gappers, live Alpaca paper. Daily governor: bank the day at **+1.5%**, hard stop at **-2%**, max 5 trades. Marketable-limit orders only. | weekdays 07:00–11:35 ET | `paper_ledger/premarket_*.json` |
+| **Crypto 6h trend** | The research-validated 6h Donchian/EMA trend on BTC+ETH (the only family that survived cost-aware walk-forward), long/flat, live Alpaca crypto paper. Trades 24/7 — the book that can earn on weekends. | hourly cron | `paper_ledger/crypto_*.json` |
+| **Futures trend** | Diversified daily trend across S&P/gold/crude/EUR/BTC micros, deterministic replay, 5%+8% risk books. A slow diversifier, not a daily-profit engine. | weekdays 22:15 UTC | `paper_ledger/futures_*.json` |
+
+## Mission-control dashboard
+
+**https://parthakarthikeyan.github.io/DayTrade/** — equity curves per book, daily
+P&L vs the $100 goal line, trade tables with broker-fill reconciliation, workflow
+status, and a near-live feed during sessions (bots push state to a gist every
+~60s). Served from `docs/` by GitHub Pages; data comes straight from the committed
+ledgers, so it updates after every bot run with no server to maintain.
+
+## Promotion policy
+
+A book earns more capital — or the first real dollar — only after **≥30 forward
+sessions** with positive net expectancy on actual fills and drawdown inside its
+budget. Backtests choose candidates; only the forward ledger promotes them.
+(The US PDT rule was abolished effective 2026-06-04 — FINRA Regulatory Notice
+26-10 replaced it with risk-based intraday margin — so a real $10k stock account
+may day-trade freely, subject to the broker's phase-in. Verify with the broker
+before any live deployment.)
+
+---
+
+# The original ORB bot + simulator (below)
 
 An automated **stock** day-trading bot built around the classic **Opening Range
 Breakout (ORB)** strategy, with a hard two-layer risk engine (never lose more
 than ~5% of the account in a day) and a **real-time simulator seeded with $2000**
 so you can backtest it on a real trading day's 1-minute data before risking
 anything.
-
-> The old Forex/OANDA code (`app.py`, `streamlit_app.py`, `broker/`,
-> `price_action/`) is **deprecated** and unused by this bot.
 
 ## How it works (the whole loop)
 

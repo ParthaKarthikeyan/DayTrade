@@ -63,6 +63,25 @@ class Config:
     pm_require_news: bool = False       # require a recent news catalyst (weak free signal)
     pm_pullback_lookback: int = 3       # bars in the bull-flag before the breakout
 
+    # --- Premarket $10k book (the goal is judged on THIS, not the whole account) ---
+    # The Alpaca paper account is shared by several experiments and holds an arbitrary
+    # balance, so the bot trades a notional book seeded at pm_bankroll that compounds
+    # with its own committed ledger P&L. Sizing/caps all reference the book.
+    pm_bankroll: float = float(os.getenv("PM_BANKROLL", "10000"))
+    pm_daily_target_pct: float = 0.015  # bank the day: flatten + stop at +1.5% (goal 1% net)
+    pm_daily_max_loss_pct: float = 0.02 # daily stop: flatten + halt at -2% of the book
+    pm_max_trades_per_day: int = 5      # hard cap on round-trips per session
+    pm_loss_streak_pause: int = 2       # consecutive losers before a cooldown
+    pm_cooldown_min: int = 20           # minutes of no-new-entries after the streak
+    pm_max_position_pct: float = 0.5    # max notional per trade as a fraction of the book
+    pm_min_stop_pct: float = 0.005      # min stop distance (blocks 1-cent-stop all-ins)
+    # Execution honesty on thin gappers: marketable LIMIT orders, never market.
+    pm_limit_slip_pct: float = 0.004    # entry limit: signal price * (1 + this)
+    pm_exit_slip_pct: float = 0.01      # exit limit band below the trigger price
+    pm_fill_wait_s: int = 25            # poll a working order this long before cancelling
+    pm_max_spread_pct: float = 0.01     # skip entries when quoted spread/mid exceeds this
+    pm_min_bar_dollar_vol: float = 20_000.0  # avg $ volume/bar (recent) required to enter
+
     # --- Data / broker (Alpaca) ---
     data_feed: str = os.getenv("ALPACA_DATA_FEED", "iex")
     alpaca_key: str = os.getenv("ALPACA_API_KEY", "")
