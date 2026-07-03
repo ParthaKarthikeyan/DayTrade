@@ -41,7 +41,28 @@
         "WCT",
         "AHMA"
       ]
+    },
+    {
+      "date": "2026-07-03",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "CLRO",
+        "CWD",
+        "CMMB",
+        "SDEV",
+        "SNDQ",
+        "BNRG"
+      ],
+      "account_pnl": -86690.02
     }
   ],
-  "last_run": "2026-07-02"
+  "last_run": "2026-07-03",
+  "bankroll": 10000.0
 }
