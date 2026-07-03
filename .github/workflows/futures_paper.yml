@@ -3,7 +3,7 @@ name: Futures paper bot
 # Forward paper test for the diversified $10k futures trend system. Runs once each
 # weekday after the US session, replays the deployment rules on fresh daily bars in
 # whole micro contracts, records two paper books (5% / 8% risk), and commits the
-# updated ledger (logs/futures_paper.json) back so the forward record accumulates.
+# updated ledgers (paper_ledger/futures_*.json) back so the forward record accumulates.
 #
 # No broker keys needed — data is free yfinance daily bars. Scheduled workflows only
 # run from the DEFAULT branch, so to get the daily auto-run this file must live on
@@ -37,6 +37,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run futures paper bot
+        env:
+          # Optional near-live dashboard feed (no-op if unset)
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
         run: python run_futures_paper.py --cash "${{ inputs.cash || '10000' }}"
       - name: Commit forward ledger
         run: |

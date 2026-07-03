@@ -45,6 +45,11 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: "true"
           ALPACA_DATA_FEED: iex
+          PM_BANKROLL: "10000"    # the notional book the bot trades & is judged on
+          # Optional near-live dashboard feed (no-op if unset): a gists-scoped PAT
+          # and the id of the gist the dashboard polls.
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
           PYTHONUNBUFFERED: "1"   # stream prints live instead of block-buffering on the CI pipe
         run: |
           if [ -z "$ALPACA_API_KEY" ]; then

@@ -1,0 +1,65 @@
+name: Crypto paper bot
+
+# Live Alpaca-paper crypto bot for the research-validated 6h Donchian trend on
+# BTC + ETH ($10k book). Stateless per run: it evaluates the frozen rules on the
+# last completed 6h candle and orders any position difference, so an hourly cron
+# is just a polling frequency — signals only change when a 6h bar closes, and a
+# delayed/missed run self-heals on the next one. Crypto trades 24/7; this is the
+# book that can earn on weekends.
+#
+# Requires repo secrets: ALPACA_API_KEY, ALPACA_SECRET_KEY (paper keys).
+# Optional: GIST_TOKEN + GIST_ID for the near-live dashboard feed.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 * * * *"    # hourly at :10 (off the top-of-hour congestion)
+
+# Never let two runs trade the same book at once.
+concurrency:
+  group: crypto-paper-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # to commit the durable ledger back to the repo
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run crypto paper bot
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PAPER: "true"
+          CRYPTO_BANKROLL: "10000"
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          if [ -z "$ALPACA_API_KEY" ]; then
+            echo "::error::Missing ALPACA_API_KEY / ALPACA_SECRET_KEY repository secrets."
+            exit 1
+          fi
+          python run_crypto_paper.py
+      - name: Commit forward ledger
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add paper_ledger/crypto_paper.json paper_ledger/crypto_trades.json
+          if git diff --cached --quiet; then
+            echo "No ledger change to commit."
+          else
+            git commit -m "crypto paper bot: ledger update"
+            git pull --rebase origin master || true
+            git push origin HEAD:master
+          fi
