@@ -23,9 +23,14 @@ ledgers, so it updates after every bot run with no server to maintain.
 
 ## Promotion policy
 
-A book earns more capital — or the first real dollar — only after **≥30 forward
-sessions** with positive net expectancy on actual fills and drawdown inside its
-budget. Backtests choose candidates; only the forward ledger promotes them.
+**Validation window: the 10 trading sessions 2026-07-06 → 2026-07-17; go-live
+decision that weekend; live trading starts 2026-07-20.** A book goes live only
+with positive net expectancy on actual fills and drawdown inside its budget over
+the window; books that fail stay paper. Ten sessions is thin evidence — the
+compensating control is that live size starts small, keeps the same daily loss
+caps, and only grows on live results. Backtests choose candidates; only the
+forward ledger promotes them. *(Amended 2026-07-04 from ≥30 sessions: hard
+deadline set by the operator.)*
 (The US PDT rule was abolished effective 2026-06-04 — FINRA Regulatory Notice
 26-10 replaced it with risk-based intraday margin — so a real $10k stock account
 may day-trade freely, subject to the broker's phase-in. Verify with the broker
