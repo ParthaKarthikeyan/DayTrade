@@ -46,7 +46,7 @@ from sim.engine import _parse_hhmm
 from sim.state import build_live_state, write_state
 from sim.gist import GistPublisher
 from premarket.scanner import scan_live, is_common_stock
-from premarket.strategy import PMPosition, PremarketMomentum
+from premarket.strategy import PMPosition, make_strategy, split_signal
 
 VOL_LOOKBACK = 5
 FALLBACK_WATCHLIST = ["SOFI", "MARA", "RIOT", "PLUG", "NIO", "F", "SOUN", "BBAI"]
@@ -144,7 +144,7 @@ class PremarketPaperBot:
         self.stream = StockDataStream(cfg.alpaca_key, cfg.alpaca_secret,
                                       feed=DataFeed(cfg.data_feed))
         self.quotes = StockHistoricalDataClient(cfg.alpaca_key, cfg.alpaca_secret)
-        self.strat = PremarketMomentum(cfg)
+        self.strat = make_strategy(cfg)
         self.gist = GistPublisher()
 
         # The $10k book: compounds session to session via the committed ledger.
@@ -247,7 +247,7 @@ class PremarketPaperBot:
         return self.book_start + self._book_realized() + self._unrealized()
 
     # --- trade lifecycle (pending-order state machine, advanced per bar) ---
-    def _try_enter(self, symbol, signal_price, stop, ts):
+    def _try_enter(self, symbol, signal_price, stop, ts, target=None):
         # enforce a minimum stop distance so sizing can't go near-all-in
         stop = min(stop, signal_price * (1.0 - self.cfg.pm_min_stop_pct))
         limit = signal_price * (1.0 + self.cfg.pm_limit_slip_pct)
@@ -264,7 +264,8 @@ class PremarketPaperBot:
             return
         self.trades_taken += 1
         self.pending_entry = {"id": o.id, "symbol": symbol, "stop": stop,
-                              "signal": signal_price, "submitted": ts}
+                              "target": target, "signal": signal_price,
+                              "submitted": ts}
 
     def _advance_entry(self, ts):
         pe = self.pending_entry
@@ -276,7 +277,8 @@ class PremarketPaperBot:
         if status == "filled" or (status in TERMINAL and filled >= 1):
             px = float(o.filled_avg_price or pe["signal"])
             self.pos = PMPosition(symbol=pe["symbol"], entry=px, entry_time=ts,
-                                  shares=int(filled), stop=pe["stop"], high_water=px)
+                                  shares=int(filled), stop=pe["stop"],
+                                  high_water=px, target=pe.get("target"))
             print(f"[fill] entry {int(filled)} {pe['symbol']} @ {px:.2f}")
             self.pending_entry = None
         elif status in TERMINAL:
@@ -381,6 +383,8 @@ class PremarketPaperBot:
                 reason = self.strat.exit_reason(self.pos, b, prev_bar, vwap)
                 if reason == "stop":
                     self._start_exit(min(self.pos.stop, b["c"]), "stop", ts)
+                elif reason == "target":
+                    self._start_exit(self.pos.target, "target", ts)
                 elif reason:
                     self._start_exit(b["c"], reason, ts)
                 elif b["c"] > self.pos.entry and prev_bar is not None:
@@ -407,16 +411,16 @@ class PremarketPaperBot:
                      and (self.cooldown_until is None or ts >= self.cooldown_until)
                      and vol_avg is not None)
         if can_enter:
-            window = hist[-(self.cfg.pm_pullback_lookback + 1):]
-            sig_stop = self.strat.entry_signal(window, vwap, vol_avg)
-            if sig_stop is not None:
+            sig = self.strat.entry_signal(hist, vwap, vol_avg)
+            if sig is not None:
+                stop, target = split_signal(sig)
                 # liquidity gates: recent $ volume and a sane quoted spread
                 recent = hist[max(0, i - VOL_LOOKBACK):i + 1]
                 dollar_vol = sum(x["c"] * x["v"] for x in recent) / len(recent)
                 if dollar_vol < self.cfg.pm_min_bar_dollar_vol:
                     print(f"[skip] {s} avg ${dollar_vol:,.0f}/bar — too thin")
                 elif self._spread_ok(s):
-                    self._try_enter(s, b["c"], sig_stop, ts)
+                    self._try_enter(s, b["c"], stop, ts, target)
                 else:
                     print(f"[skip] {s} spread too wide")
 
@@ -439,6 +443,7 @@ class PremarketPaperBot:
         st["stopped"] = self.stopped
         st["trades_taken"] = self.trades_taken
         st["watchlist"] = self.watch
+        st["strategy"] = self.cfg.pm_strategy
         return st
 
     def _write_state(self, ts):
@@ -510,6 +515,7 @@ class PremarketPaperBot:
             "pnl_pct": round(pnl / self.book_start * 100, 2) if self.book_start else 0.0,
             "trades": len(self.completed),
             "win_rate": round(wr, 1),
+            "strategy": self.cfg.pm_strategy,  # entry style this row was traded with
             "stopped": self.stopped,          # 'target' | 'loss_cap' | None
             "halted": self.stopped == "loss_cap",
             "watchlist": self.watch,

@@ -19,8 +19,8 @@ from premarket.universe import DEFAULT_UNIVERSE
 def format_markdown(s: dict) -> str:
     n = s["notes"]
     out = [f"# Premarket gap-and-go backtest ({s['start']} → {s['end']})", "",
-           f"$ {s['start_cash']:,.0f} start · long-only · $1–$10 gappers · "
-           f"premarket→open+2h · instant-cut exits.", "",
+           f"$ {s['start_cash']:,.0f} start · **{s.get('strategy', 'flag')}** entry · "
+           f"long-only · $1–$10 gappers · premarket→open+2h · instant-cut exits.", "",
            "| Metric | Value |", "|---|--:|",
            f"| Final equity | ${s['final_equity']:,.2f} |",
            f"| Total return | {s['total_return']:+.2f}% |",
@@ -56,12 +56,15 @@ def main():
     p.add_argument("--end", default=default_end.isoformat())
     p.add_argument("--cash", type=float, default=CONFIG.start_cash)
     p.add_argument("--min-gap", type=float, default=CONFIG.pm_min_gap_pct)
+    p.add_argument("--strategy", choices=["flag", "first_pullback"],
+                   default=CONFIG.pm_strategy)
     p.add_argument("--universe-file", help="optional: one ticker per line")
     args = p.parse_args()
 
     cfg = CONFIG
     cfg.start_cash = args.cash
     cfg.pm_min_gap_pct = args.min_gap
+    cfg.pm_strategy = args.strategy
 
     universe = DEFAULT_UNIVERSE
     if args.universe_file:

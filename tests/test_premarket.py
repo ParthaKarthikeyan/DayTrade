@@ -7,7 +7,8 @@ import pytest
 
 from premarket.backtest import simulate_symbol_day
 from premarket.scanner import rank_gappers
-from premarket.strategy import PMPosition, PremarketMomentum
+from premarket.strategy import (FirstPullback, PMPosition, PremarketMomentum,
+                                make_strategy, split_signal)
 from sim.config import CONFIG
 
 
@@ -19,6 +20,7 @@ def cfg(**over):
     c.pm_min_breakout_vol_mult = 1.0
     c.pm_price_min, c.pm_price_max, c.pm_min_gap_pct, c.pm_top_n = 1.0, 10.0, 5.0, 5
     c.daily_max_loss_pct = 0.05
+    c.pm_strategy = "flag"      # legacy tests exercise the flag entry
     for k, v in over.items():
         setattr(c, k, v)
     return c
@@ -66,6 +68,91 @@ def test_exit_priority():
     assert s.exit_reason(pos, {"l": 2.95, "c": 2.88}, {"l": 2.90}, 2.99) == "momentum_break"
     assert s.exit_reason(pos, {"l": 2.95, "c": 2.93}, {"l": 2.80}, 2.99) == "lost_vwap"
     assert s.exit_reason(pos, {"l": 2.95, "c": 3.05}, {"l": 2.80}, 2.99) is None
+
+
+# --- first-pullback (Ross Cameron) setup ----------------------------------
+def fpb(o, h, l, c, v=1000):
+    return {"o": o, "h": h, "l": l, "c": c, "v": v}
+
+
+def fp_hist(pull_lows=(3.32, 3.26), entry=fpb(3.28, 3.37, 3.27, 3.31, 3000)):
+    """Flat base -> 3-bar squeeze to 3.52 -> two red pullback bars -> entry bar."""
+    base = [fpb(3.0, 3.02, 2.98, 3.0)] * 6
+    leg = [fpb(3.00, 3.17, 2.99, 3.15, 2000),
+           fpb(3.15, 3.32, 3.14, 3.30, 2500),
+           fpb(3.30, 3.52, 3.29, 3.50, 3000)]
+    pull = [fpb(3.50, 3.50, pull_lows[0], pull_lows[0] + 0.02, 1200),
+            fpb(3.34, 3.35, pull_lows[1], pull_lows[1] + 0.02, 1000)]
+    return base + leg + pull + [entry]
+
+
+def test_first_pullback_signal():
+    s = FirstPullback(cfg())
+    sig = s.entry_signal(fp_hist(), vwap=3.10, vol_avg=1500)
+    assert sig is not None
+    assert sig["stop"] == pytest.approx(3.26)     # low of the pullback
+    assert sig["target"] == pytest.approx(3.52)   # retest of the session high
+
+
+def test_first_pullback_rejects_deep_retracement():
+    # pullback below 50% of the 2.98 -> 3.52 leg (3.25) = damaged goods, skip
+    s = FirstPullback(cfg())
+    hist = fp_hist(pull_lows=(3.30, 3.10),
+                   entry=fpb(3.12, 3.40, 3.11, 3.35, 3000))
+    assert s.entry_signal(hist, vwap=3.10, vol_avg=1500) is None
+
+
+def test_first_pullback_needs_a_red_candle():
+    s = FirstPullback(cfg())
+    hist = fp_hist()
+    for b in hist[-3:-1]:                          # make the pullback all-green
+        b["c"] = b["o"] + 0.01
+    assert s.entry_signal(hist, vwap=3.10, vol_avg=1500) is None
+
+
+def test_first_pullback_needs_two_to_one():
+    # entry so close to the session high that the retest pays < 2R -> skip
+    s = FirstPullback(cfg())
+    hist = fp_hist(pull_lows=(3.46, 3.44),
+                   entry=fpb(3.46, 3.51, 3.45, 3.50, 3000))
+    assert s.entry_signal(hist, vwap=3.10, vol_avg=1500) is None
+
+
+def test_first_pullback_macd_gate():
+    s = FirstPullback(cfg())
+    falling = [{"c": 10.0 - i * 0.05} for i in range(40)]
+    rising = [{"c": 5.0 + i * 0.05} for i in range(40)]
+    assert not s._macd_ok(falling)
+    assert s._macd_ok(rising)
+    assert s._macd_ok(falling[:10])                # too few bars: gate skipped
+
+
+def test_first_pullback_target_exit():
+    s = FirstPullback(cfg())
+    pos = PMPosition("X", entry=3.31, entry_time=None, shares=100, stop=3.26,
+                     high_water=3.31, target=3.52)
+    assert s.exit_reason(pos, {"h": 3.53, "l": 3.42, "c": 3.50}, {"l": 3.30}, 3.2) == "target"
+    assert s.exit_reason(pos, {"h": 3.40, "l": 3.35, "c": 3.38}, {"l": 3.30}, 3.2) is None
+
+
+def test_make_strategy_and_split_signal():
+    assert isinstance(make_strategy(cfg(pm_strategy="first_pullback")), FirstPullback)
+    flag = make_strategy(cfg())
+    assert isinstance(flag, PremarketMomentum) and not isinstance(flag, FirstPullback)
+    assert split_signal(3.05) == (3.05, None)
+    assert split_signal({"stop": 3.26, "target": 3.52}) == (3.26, 3.52)
+
+
+def test_first_pullback_day_end_to_end():
+    rows = fp_hist() + [fpb(3.31, 3.45, 3.30, 3.43, 2500),
+                        fpb(3.43, 3.55, 3.42, 3.53, 2500)]
+    idx = pd.date_range("2026-06-26 07:30", periods=len(rows), freq="1min",
+                        tz="America/New_York")
+    bars = [{"t": t, **r} for t, r in zip(idx, rows)]
+    trades, end_eq, halted = simulate_symbol_day(
+        bars, "TST", 2000.0, cfg(pm_strategy="first_pullback"))
+    assert trades and trades[0]["reason"] == "target"
+    assert end_eq > 2000.0 and not halted
 
 
 # --- end-to-end day ------------------------------------------------------

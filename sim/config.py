@@ -62,6 +62,16 @@ class Config:
     pm_max_float_shares: float = 10_000_000   # low-float filter (yfinance, fail-open)
     pm_require_news: bool = False       # require a recent news catalyst (weak free signal)
     pm_pullback_lookback: int = 3       # bars in the bull-flag before the breakout
+    # Entry style: "flag" (consolidation breakout) or "first_pullback"
+    # (Ross Cameron: squeeze -> 1-N red-candle pullback holding >= 50% of the
+    # leg -> first candle to make a new high; stop = pullback low; target =
+    # session-high retest at >= pm_fp_min_rr : 1, MACD not crossed down).
+    pm_strategy: str = os.getenv("PM_STRATEGY", "first_pullback")
+    pm_fp_leg_lookback: int = 10        # bars before the high that define the leg's low
+    pm_fp_min_leg_pct: float = 0.02     # leg must be >= this (2%) to matter
+    pm_fp_max_pullback_bars: int = 5    # pullback older than this is stale
+    pm_fp_min_rr: float = 2.0           # target must pay >= 2x the risk
+    pm_fp_macd: bool = True             # require MACD line above its signal line
 
     # --- Premarket $10k book (the goal is judged on THIS, not the whole account) ---
     # The Alpaca paper account is shared by several experiments and holds an arbitrary

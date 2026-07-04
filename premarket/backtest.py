@@ -22,7 +22,7 @@ import pandas as pd
 
 from sim.config import Config
 from sim.engine import _parse_hhmm
-from .strategy import PMPosition, PremarketMomentum
+from .strategy import PMPosition, make_strategy, split_signal
 
 PM_SLIPPAGE = 0.0025          # 25 bps — small-cap spreads; still optimistic vs reality
 VOL_LOOKBACK = 5             # bars used for the breakout volume average
@@ -93,7 +93,7 @@ def watchlist_for_day(daily: pd.DataFrame, universe: List[str], day: pd.Timestam
 # ----------------------------- per-day simulation --------------------------
 def simulate_symbol_day(bars: List[dict], symbol: str, start_equity: float,
                         cfg: Config) -> Tuple[List[dict], float, bool]:
-    strat = PremarketMomentum(cfg)
+    strat = make_strategy(cfg)
     no_new = _parse_hhmm(cfg.pm_no_new_after)
     flatten = _parse_hhmm(cfg.pm_flatten_at)
 
@@ -132,6 +132,8 @@ def simulate_symbol_day(bars: List[dict], symbol: str, start_equity: float,
                 reason = strat.exit_reason(pos, bar, prev_bar, vwap)
                 if reason == "stop":
                     close(pos.stop, "stop", t)
+                elif reason == "target":
+                    close(pos.target, "target", t)         # sell into the retest
                 elif reason:
                     close(bar["c"], reason, t)
                 elif bar["c"] > pos.entry:                 # in profit -> trail
@@ -145,21 +147,21 @@ def simulate_symbol_day(bars: List[dict], symbol: str, start_equity: float,
             if pos is not None:
                 close(bar["c"], "breaker", t)
 
-        # 3) entry (one position, before the cutoff) — bull-flag breakout
-        sig_stop = None
+        # 3) entry (one position, before the cutoff)
+        sig = None
         if pos is None and not halted and t.time() <= no_new and vol_avg is not None:
-            sig_stop = strat.entry_signal(bars[max(0, i - cfg.pm_pullback_lookback):i + 1],
-                                          vwap, vol_avg)
-        if sig_stop is not None:
+            sig = strat.entry_signal(bars[:i + 1], vwap, vol_avg)
+        if sig is not None:
+            stop, target = split_signal(sig)
             entry = bar["c"] * (1 + PM_SLIPPAGE)
-            stop = sig_stop
             rps = entry - stop
             if rps > 0:
                 shares = int((equity * cfg.risk_per_trade_pct) // rps)
                 shares = min(shares, int(equity // entry))
                 if shares >= 1:
                     pos = PMPosition(symbol=symbol, entry=entry, entry_time=t,
-                                     shares=shares, stop=stop, high_water=entry)
+                                     shares=shares, stop=stop, high_water=entry,
+                                     target=target)
 
         session_high = max(session_high, bar["h"])
         prev_bar = bar
@@ -217,6 +219,7 @@ def summarize(cfg, per_day, trades, notes, start, end) -> dict:
     active = [p for p in per_day if p["symbol"]]
     return {
         "start": start, "end": end, "start_cash": cfg.start_cash,
+        "strategy": getattr(cfg, "pm_strategy", "flag"),
         "final_equity": eq[-1], "total_return": (eq[-1] / cfg.start_cash - 1) * 100,
         "days": len(per_day), "days_traded": len(active),
         "trades": len(trades), "win_rate": (len(wins) / len(trades) * 100) if trades else 0,
