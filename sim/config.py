@@ -72,6 +72,11 @@ class Config:
     pm_fp_max_pullback_bars: int = 5    # pullback older than this is stale
     pm_fp_min_rr: float = 2.0           # target must pay >= 2x the risk
     pm_fp_macd: bool = True             # require MACD line above its signal line
+    # Overnight research pass before the session (premarket/prescan.py): news
+    # since yesterday's close (free Alpaca/Benzinga feed) -> price-band filter
+    # -> seeded into the watchlist next to the 7:00 live movers scan.
+    pm_prescan: bool = _flag("PM_PRESCAN", "true")
+    pm_prescan_min_gap_pct: float = 3.0  # news name must also be moving >= this %
 
     # --- Premarket $10k book (the goal is judged on THIS, not the whole account) ---
     # The Alpaca paper account is shared by several experiments and holds an arbitrary

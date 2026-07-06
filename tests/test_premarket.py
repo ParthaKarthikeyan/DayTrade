@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from premarket.backtest import simulate_symbol_day
+from premarket.prescan import count_symbol_headlines, rank_candidates
 from premarket.scanner import rank_gappers
 from premarket.strategy import (FirstPullback, PMPosition, PremarketMomentum,
                                 make_strategy, split_signal)
@@ -43,6 +44,32 @@ def test_rank_gappers_filters_and_sorts():
     ]
     out = rank_gappers(rows, cfg())
     assert [r["symbol"] for r in out] == ["D", "A"]
+
+
+# --- overnight prescan (pure parts) ---------------------------------------
+def test_count_symbol_headlines_newest_first():
+    articles = [  # newest first, as the API returns them
+        {"headline": "FDA approves", "symbols": ["ABC", "XYZ"]},
+        {"headline": "Offering priced", "symbols": ["ABC"]},
+    ]
+    out = count_symbol_headlines(articles)
+    assert out["ABC"] == {"count": 2, "headline": "FDA approves"}
+    assert out["XYZ"]["count"] == 1
+
+
+def test_rank_candidates_filters_and_sorts():
+    c = cfg()  # band $1-$10, prescan min gap 3.0
+    news = {s: {"count": 3, "headline": "h"} for s in
+            ["GAPS", "BIGG", "FLAT", "ABCDW", "NOSNAP", "RUNNER"]}
+    snaps = {
+        "GAPS":  {"price": 4.00, "prev_close": 3.50},   # +14% keep
+        "BIGG":  {"price": 50.0, "prev_close": 40.0},   # out of band
+        "FLAT":  {"price": 3.00, "prev_close": 2.99},   # catalyst, no move
+        "ABCDW": {"price": 2.00, "prev_close": 1.00},   # warrant-style ticker
+        "RUNNER": {"price": 5.00, "prev_close": 4.00},  # +25% keep, ranks first
+    }
+    out = rank_candidates(news, snaps, c)
+    assert [r["symbol"] for r in out] == ["RUNNER", "GAPS"]
 
 
 # --- strategy primitives -------------------------------------------------

@@ -45,11 +45,13 @@ from sim.config import CONFIG
 from sim.engine import _parse_hhmm
 from sim.state import build_live_state, write_state
 from sim.gist import GistPublisher
+from premarket.prescan import overnight_research, research_md
 from premarket.scanner import scan_live, is_common_stock
 from premarket.strategy import PMPosition, make_strategy, split_signal
 
 VOL_LOOKBACK = 5
 FALLBACK_WATCHLIST = ["SOFI", "MARA", "RIOT", "PLUG", "NIO", "F", "SOUN", "BBAI"]
+MAX_WATCH = 15   # stream subscription cap (free tier allows 30; leave headroom)
 
 # Durable forward record, committed back by the workflow so the track record
 # survives the ephemeral runner. NOT under logs/ (which is gitignored). One row
@@ -61,6 +63,17 @@ TRADES = os.path.join("paper_ledger", "premarket_trades.json")
 
 # Order states that end an order's life (nothing more will fill).
 TERMINAL = {"filled", "canceled", "cancelled", "expired", "rejected", "done_for_day"}
+
+
+def _append_summary(md: str):
+    """Write a markdown block to the GitHub Actions job summary (no-op locally)."""
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if path:
+        try:
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(md + "\n\n")
+        except OSError:
+            pass
 
 
 def _load_ledger(path: str) -> dict:
@@ -156,6 +169,7 @@ class PremarketPaperBot:
         self._order_seq = 0
 
         self.watch = []                # today's scanned watchlist (for the recap)
+        self.research = []             # overnight news candidates (for the recap/gist)
         self.bars = {}                 # symbol -> list of bar dicts
         self.cum = {}                  # symbol -> [cum_pv, cum_vol]
         self.session_high = {}         # symbol -> float
@@ -444,6 +458,7 @@ class PremarketPaperBot:
         st["trades_taken"] = self.trades_taken
         st["watchlist"] = self.watch
         st["strategy"] = self.cfg.pm_strategy
+        st["research"] = self.research
         return st
 
     def _write_state(self, ts):
@@ -648,13 +663,29 @@ class PremarketPaperBot:
         os._exit(0)
 
     def run(self):
+        # Overnight research first: news-catalyst candidates since yesterday's
+        # close. This must never stop the session — it only seeds the watchlist.
+        if self.cfg.pm_prescan:
+            try:
+                self.research = overnight_research(self.cfg)
+            except Exception as e:
+                print(f"[prescan] failed ({e}); continuing with the live scan only")
+        md = research_md(self.research, self._now_et())
+        print(md)
+        _append_summary(md)
+
         try:
             watch = scan_live(self.cfg)
         except Exception as e:
             print(f"[scan] screener unavailable ({e}); using fallback watchlist")
-            watch = FALLBACK_WATCHLIST
+            watch = []
+        # confirmed movers first, then news names the screener hasn't surfaced yet
+        for r in self.research:
+            if r["symbol"] not in watch:
+                watch.append(r["symbol"])
+        watch = watch[:MAX_WATCH]
         if not watch:
-            print("[scan] no gappers found; using fallback watchlist")
+            print("[scan] no gappers or news candidates; using fallback watchlist")
             watch = FALLBACK_WATCHLIST
         self.watch = watch
         print(f"Premarket paper bot  book=${self.book_start:,.2f} "
