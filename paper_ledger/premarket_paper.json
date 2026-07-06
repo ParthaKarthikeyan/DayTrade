@@ -61,8 +61,35 @@
         "BNRG"
       ],
       "account_pnl": -86690.02
+    },
+    {
+      "date": "2026-07-06",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "CLRO",
+        "CWD",
+        "CMMB",
+        "SDEV",
+        "SNDQ",
+        "BNRG",
+        "LHSW",
+        "DSY",
+        "SEER",
+        "SLBT",
+        "LUCY",
+        "CLVT"
+      ],
+      "account_pnl": 0.0
     }
   ],
-  "last_run": "2026-07-03",
+  "last_run": "2026-07-06",
   "bankroll": 10000.0
 }
