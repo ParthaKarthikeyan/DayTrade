@@ -6,15 +6,24 @@ name: Premarket paper bot
 # Scheduled workflows only run from the DEFAULT branch, so this must be on master.
 # Requires repo secrets: ALPACA_API_KEY, ALPACA_SECRET_KEY (paper keys).
 
+# TRIGGERING (updated 2026-07-06 after a 3.5h queue delay cost a session):
+# GitHub `schedule` events are best-effort and can queue for HOURS on busy
+# mornings, so the PRIMARY trigger is an external scheduler (cron-job.org)
+# calling the workflow_dispatch API at 06:35 and a retry at 06:50 ET —
+# dispatches start within seconds. The cron below is a LAST-RESORT fallback;
+# the concurrency group + the bot's own window checks guarantee exactly one
+# traded session per day no matter how many triggers fire.
+#
+# NOTE the 6-hour hard cap on hosted runners: a job that boots at 05:23 ET
+# would be killed at ~11:23 ET, BEFORE the 11:35 flatten + ledger write.
+# Trigger times must keep boot-to-flatten under ~5.5h (06:35 boot -> 5h0m).
+
 on:
-  workflow_dispatch:        # run manually any time (it self-skips outside the window)
+  workflow_dispatch:        # PRIMARY: external scheduler hits this via the API
   schedule:
-    # Fire EARLY with a big buffer. GitHub's scheduled queue can delay a run by
-    # minutes to a few hours; the bot itself then idles until pm_session_start
-    # (07:00 ET) before trading, so the actual session start is consistent no
-    # matter when the runner boots. 09:23 UTC = 05:23 ET (EDT); the odd minute
-    # avoids the top-of-hour scheduling congestion that caused the worst delays.
-    - cron: "23 9 * * 1-5"
+    # Fallback only. 10:40 UTC = 06:40 ET during EDT (07:40 ET off-season,
+    # still inside the premarket window). Odd minute avoids peak congestion.
+    - cron: "40 10 * * 1-5"
 
 # Alpaca's free tier allows only ONE live data websocket per account. If a manual
 # run overlaps the scheduled run, the second connection gets HTTP 429
@@ -30,7 +39,9 @@ permissions:
 jobs:
   trade:
     runs-on: ubuntu-latest
-    timeout-minutes: 420     # covers an early boot + idle-wait through the 11:35 ET flatten
+    timeout-minutes: 350     # hosted runners hard-cap at 360; stay under it so
+                             # our own timeout (not the platform's kill) ends a
+                             # runaway job and the ledger commit step still runs
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
