@@ -88,8 +88,36 @@
         "CLVT"
       ],
       "account_pnl": 0.0
+    },
+    {
+      "date": "2026-07-07",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "LHSW",
+        "ZCMD",
+        "LUCY",
+        "KIDZ",
+        "INLF",
+        "WBX",
+        "CRDX",
+        "YYGH",
+        "TDTH",
+        "ALGS",
+        "WRAP",
+        "BJDX",
+        "GVH"
+      ],
+      "account_pnl": -9647.85
     }
   ],
-  "last_run": "2026-07-06",
+  "last_run": "2026-07-07",
   "bankroll": 10000.0
 }
