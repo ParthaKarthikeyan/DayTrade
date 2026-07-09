@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-07-08",
+  "generated": "2026-07-09",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -15,8 +15,8 @@
           "entry_time": "2019-08-30",
           "entry": 1.099,
           "exit_time": "2019-09-13",
-          "exit": 1.1096,
-          "pnl": -269.0,
+          "exit": 1.1095,
+          "pnl": -268.96,
           "reason": "stop"
         },
         {
@@ -51,11 +51,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-10-28",
-          "entry": 3036.25,
+          "entry_time": "2019-10-30",
+          "entry": 3047.75,
           "exit_time": "2019-12-03",
           "exit": 3096.754,
-          "pnl": 300.52,
+          "pnl": 243.02,
           "reason": "stop"
         },
         {
@@ -392,7 +392,7 @@
           "entry_time": "2021-07-30",
           "entry": 42235.5469,
           "exit_time": "2021-09-07",
-          "exit": 46927.9491,
+          "exit": 46927.9778,
           "pnl": 467.24,
           "reason": "stop"
         },
@@ -479,12 +479,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 3,
+          "contracts": 2,
           "entry_time": "2021-11-10",
           "entry": 1.1485,
           "exit_time": "2021-12-31",
           "exit": 1.1378,
-          "pnl": 393.53,
+          "pnl": 262.35,
           "reason": "stop"
         },
         {
@@ -1887,8 +1887,8 @@
           "side": "short",
           "contracts": 9,
           "entry": 1.1364,
-          "stop": 1.1503,
-          "unrealized": -945.0
+          "stop": 1.15,
+          "unrealized": -1102.5
         }
       ]
     },
@@ -1904,8 +1904,8 @@
           "entry_time": "2019-08-07",
           "entry": 51.09,
           "exit_time": "2019-08-13",
-          "exit": 57.3211,
-          "pnl": -625.11,
+          "exit": 57.3756,
+          "pnl": -630.56,
           "reason": "stop"
         },
         {
@@ -1914,11 +1914,11 @@
           "micro": "MGC",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-08-05",
-          "entry": 1464.6,
+          "entry_time": "2019-08-06",
+          "entry": 1472.4,
           "exit_time": "2019-09-10",
-          "exit": 1495.8361,
-          "pnl": 310.36,
+          "exit": 1495.7691,
+          "pnl": 231.69,
           "reason": "stop"
         },
         {
@@ -1930,8 +1930,8 @@
           "entry_time": "2019-08-30",
           "entry": 1.099,
           "exit_time": "2019-09-13",
-          "exit": 1.1096,
-          "pnl": -403.5,
+          "exit": 1.1095,
+          "pnl": -403.44,
           "reason": "stop"
         },
         {
@@ -1956,7 +1956,7 @@
           "entry_time": "2019-10-02",
           "entry": 2880.5,
           "exit_time": "2019-10-11",
-          "exit": 2985.5716,
+          "exit": 2985.572,
           "pnl": -527.36,
           "reason": "stop"
         },
@@ -1969,8 +1969,8 @@
           "entry_time": "2019-10-02",
           "entry": 52.64,
           "exit_time": "2019-10-23",
-          "exit": 55.7936,
-          "pnl": -317.36,
+          "exit": 55.7937,
+          "pnl": -317.37,
           "reason": "stop"
         },
         {
@@ -1992,11 +1992,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-10-28",
-          "entry": 3036.25,
+          "entry_time": "2019-10-30",
+          "entry": 3047.75,
           "exit_time": "2019-12-03",
           "exit": 3096.754,
-          "pnl": 300.52,
+          "pnl": 243.02,
           "reason": "stop"
         },
         {
@@ -2057,11 +2057,11 @@
           "micro": "MCL",
           "side": "short",
           "contracts": 1,
-          "entry_time": "2020-02-04",
-          "entry": 49.61,
+          "entry_time": "2020-02-03",
+          "entry": 50.11,
           "exit_time": "2020-02-19",
           "exit": 53.29,
-          "pnl": -370.0,
+          "pnl": -320.0,
           "reason": "exit_break"
         },
         {
@@ -2161,11 +2161,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2020-07-21",
-          "entry": 3251.25,
+          "entry_time": "2020-08-03",
+          "entry": 3288.5,
           "exit_time": "2020-09-03",
           "exit": 3466.6007,
-          "pnl": 1074.75,
+          "pnl": 888.5,
           "reason": "stop"
         },
         {
@@ -2277,12 +2277,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 4,
+          "contracts": 3,
           "entry_time": "2020-11-25",
           "entry": 1.1921,
           "exit_time": "2021-01-11",
           "exit": 1.2164,
-          "pnl": 1204.5,
+          "pnl": 903.38,
           "reason": "exit_break"
         },
         {
@@ -2316,12 +2316,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 4,
+          "contracts": 3,
           "entry_time": "2021-02-25",
           "entry": 1.2189,
           "exit_time": "2021-03-04",
           "exit": 1.1987,
-          "pnl": -1017.41,
+          "pnl": -763.06,
           "reason": "stop"
         },
         {
@@ -2407,12 +2407,12 @@
           "ticker": "ES=F",
           "micro": "MES",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2021-06-10",
           "entry": 4238.0,
           "exit_time": "2021-06-21",
           "exit": 4168.4395,
-          "pnl": -699.6,
+          "pnl": -349.8,
           "reason": "stop"
         },
         {
@@ -2476,7 +2476,7 @@
           "entry_time": "2021-07-30",
           "entry": 42235.5469,
           "exit_time": "2021-09-07",
-          "exit": 46927.9491,
+          "exit": 46927.9778,
           "pnl": 467.24,
           "reason": "stop"
         },
@@ -4205,8 +4205,8 @@
           "side": "short",
           "contracts": 24,
           "entry": 1.1364,
-          "stop": 1.1503,
-          "unrealized": -2519.99
+          "stop": 1.15,
+          "unrealized": -2939.99
         }
       ]
     }

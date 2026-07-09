@@ -121,8 +121,23 @@
         "max_dd": 26.28,
         "open_positions": 1
       }
+    },
+    {
+      "date": "2026-07-09",
+      "5pct": {
+        "equity": 44259.77,
+        "ret_pct": 342.6,
+        "max_dd": 17.45,
+        "open_positions": 1
+      },
+      "8pct": {
+        "equity": 69102.88,
+        "ret_pct": 591.03,
+        "max_dd": 26.26,
+        "open_positions": 1
+      }
     }
   ],
-  "last_run": "2026-07-08",
+  "last_run": "2026-07-09",
   "rules_version": 2
 }
