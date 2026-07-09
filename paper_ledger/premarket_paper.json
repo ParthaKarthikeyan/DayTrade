@@ -136,8 +136,31 @@
         "BJDX"
       ],
       "account_pnl": 96.66
+    },
+    {
+      "date": "2026-07-09",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "VTAK",
+        "NVVE",
+        "TVRD",
+        "BKYI",
+        "FRTT",
+        "IOTR",
+        "SKYQ",
+        "ZTG"
+      ],
+      "account_pnl": 231.48
     }
   ],
-  "last_run": "2026-07-08",
+  "last_run": "2026-07-09",
   "bankroll": 10000.0
 }
