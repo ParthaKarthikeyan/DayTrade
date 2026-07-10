@@ -1,0 +1,586 @@
+{
+ "strategy": "qqq_sweep_reversal",
+ "symbol": "QQQ",
+ "verdict": "REJECTED",
+ "sessions": 288,
+ "window": [
+  "2025-05-16",
+  "2026-07-10"
+ ],
+ "cost_bps_side_base": 1.0,
+ "cost_bps_side_stress": 2.0,
+ "best": {
+  "params": {
+   "rr": 2.0,
+   "reclaim_bars": 3,
+   "body_mult": 1.25,
+   "session_end": "10:30",
+   "be_at_1r": false,
+   "allow_short": true
+  },
+  "base": {
+   "net": 276.04,
+   "end_equity": 10276.04,
+   "sessions": 277,
+   "skipped": 11,
+   "trades": 300,
+   "win_rate": 37.7,
+   "avg_r": -0.01,
+   "pf": 1.04,
+   "max_dd_pct": 10.52,
+   "per_session": 1.0
+  },
+  "stress": {
+   "net": -943.14,
+   "end_equity": 9056.86,
+   "sessions": 277,
+   "skipped": 11,
+   "trades": 297,
+   "win_rate": 35.7,
+   "avg_r": -0.13,
+   "pf": 0.87,
+   "max_dd_pct": 16.14,
+   "per_session": -3.4
+  },
+  "fold_nets": [
+   19.5,
+   -564.39,
+   271.13,
+   -380.93,
+   -303.6
+  ],
+  "folds_positive": 2,
+  "passed": false,
+  "neighbors_passing": 0
+ },
+ "top": [
+  {
+   "params": {
+    "rr": 2.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": false,
+    "allow_short": true
+   },
+   "base": {
+    "net": 276.04,
+    "end_equity": 10276.04,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 300,
+    "win_rate": 37.7,
+    "avg_r": -0.01,
+    "pf": 1.04,
+    "max_dd_pct": 10.52,
+    "per_session": 1.0
+   },
+   "stress": {
+    "net": -943.14,
+    "end_equity": 9056.86,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 297,
+    "win_rate": 35.7,
+    "avg_r": -0.13,
+    "pf": 0.87,
+    "max_dd_pct": 16.14,
+    "per_session": -3.4
+   },
+   "fold_nets": [
+    19.5,
+    -564.39,
+    271.13,
+    -380.93,
+    -303.6
+   ],
+   "folds_positive": 2,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": true,
+    "allow_short": true
+   },
+   "base": {
+    "net": -13.46,
+    "end_equity": 9986.54,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 299,
+    "win_rate": 25.8,
+    "avg_r": -0.02,
+    "pf": 1.0,
+    "max_dd_pct": 11.3,
+    "per_session": -0.05
+   },
+   "stress": {
+    "net": -1013.03,
+    "end_equity": 8986.97,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 295,
+    "win_rate": 25.4,
+    "avg_r": -0.15,
+    "pf": 0.85,
+    "max_dd_pct": 17.31,
+    "per_session": -3.66
+   },
+   "fold_nets": [
+    72.23,
+    -465.01,
+    553.8,
+    -639.49,
+    -527.62
+   ],
+   "folds_positive": 2,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": false,
+    "allow_short": false
+   },
+   "base": {
+    "net": -394.69,
+    "end_equity": 9605.31,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 171,
+    "win_rate": 31.0,
+    "avg_r": -0.15,
+    "pf": 0.91,
+    "max_dd_pct": 9.09,
+    "per_session": -1.42
+   },
+   "stress": {
+    "net": -1046.4,
+    "end_equity": 8953.6,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 169,
+    "win_rate": 30.2,
+    "avg_r": -0.27,
+    "pf": 0.77,
+    "max_dd_pct": 13.55,
+    "per_session": -3.78
+   },
+   "fold_nets": [
+    56.06,
+    -139.62,
+    -275.02,
+    -460.81,
+    -266.35
+   ],
+   "folds_positive": 1,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 3,
+    "body_mult": 0.75,
+    "session_end": "10:30",
+    "be_at_1r": false,
+    "allow_short": false
+   },
+   "base": {
+    "net": -305.9,
+    "end_equity": 9694.1,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 199,
+    "win_rate": 30.7,
+    "avg_r": -0.16,
+    "pf": 0.93,
+    "max_dd_pct": 8.43,
+    "per_session": -1.1
+   },
+   "stress": {
+    "net": -1095.41,
+    "end_equity": 8904.59,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 197,
+    "win_rate": 29.4,
+    "avg_r": -0.29,
+    "pf": 0.78,
+    "max_dd_pct": 14.61,
+    "per_session": -3.95
+   },
+   "fold_nets": [
+    -40.94,
+    -215.71,
+    -391.72,
+    -469.34,
+    -20.74
+   ],
+   "folds_positive": 0,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": false,
+    "allow_short": true
+   },
+   "base": {
+    "net": 605.38,
+    "end_equity": 10605.38,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 288,
+    "win_rate": 34.0,
+    "avg_r": 0.02,
+    "pf": 1.08,
+    "max_dd_pct": 9.33,
+    "per_session": 2.19
+   },
+   "stress": {
+    "net": -1099.94,
+    "end_equity": 8900.06,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 285,
+    "win_rate": 31.2,
+    "avg_r": -0.16,
+    "pf": 0.85,
+    "max_dd_pct": 17.75,
+    "per_session": -3.97
+   },
+   "fold_nets": [
+    40.58,
+    -457.27,
+    112.97,
+    -497.91,
+    -333.62
+   ],
+   "folds_positive": 2,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 2.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": false,
+    "allow_short": false
+   },
+   "base": {
+    "net": -382.05,
+    "end_equity": 9617.95,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 172,
+    "win_rate": 33.1,
+    "avg_r": -0.17,
+    "pf": 0.91,
+    "max_dd_pct": 9.09,
+    "per_session": -1.38
+   },
+   "stress": {
+    "net": -1119.32,
+    "end_equity": 8880.68,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 172,
+    "win_rate": 31.4,
+    "avg_r": -0.29,
+    "pf": 0.75,
+    "max_dd_pct": 14.93,
+    "per_session": -4.04
+   },
+   "fold_nets": [
+    -47.69,
+    -232.43,
+    -292.46,
+    -427.81,
+    -168.61
+   ],
+   "folds_positive": 0,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 5,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": true,
+    "allow_short": false
+   },
+   "base": {
+    "net": -695.45,
+    "end_equity": 9304.55,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 182,
+    "win_rate": 23.1,
+    "avg_r": -0.19,
+    "pf": 0.83,
+    "max_dd_pct": 11.9,
+    "per_session": -2.51
+   },
+   "stress": {
+    "net": -1188.67,
+    "end_equity": 8811.33,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 179,
+    "win_rate": 24.6,
+    "avg_r": -0.28,
+    "pf": 0.73,
+    "max_dd_pct": 14.47,
+    "per_session": -4.29
+   },
+   "fold_nets": [
+    -74.64,
+    -140.65,
+    -159.36,
+    -303.66,
+    -563.4
+   ],
+   "folds_positive": 0,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 5,
+    "body_mult": 0.75,
+    "session_end": "10:30",
+    "be_at_1r": true,
+    "allow_short": false
+   },
+   "base": {
+    "net": -406.88,
+    "end_equity": 9593.12,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 210,
+    "win_rate": 23.3,
+    "avg_r": -0.17,
+    "pf": 0.91,
+    "max_dd_pct": 10.15,
+    "per_session": -1.47
+   },
+   "stress": {
+    "net": -1196.43,
+    "end_equity": 8803.57,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 207,
+    "win_rate": 23.2,
+    "avg_r": -0.31,
+    "pf": 0.75,
+    "max_dd_pct": 14.85,
+    "per_session": -4.32
+   },
+   "fold_nets": [
+    -147.91,
+    -213.83,
+    -291.01,
+    -297.31,
+    -307.16
+   ],
+   "folds_positive": 0,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 2.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": true,
+    "allow_short": false
+   },
+   "base": {
+    "net": -618.15,
+    "end_equity": 9381.85,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 174,
+    "win_rate": 27.0,
+    "avg_r": -0.17,
+    "pf": 0.83,
+    "max_dd_pct": 11.28,
+    "per_session": -2.23
+   },
+   "stress": {
+    "net": -1216.78,
+    "end_equity": 8783.22,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 174,
+    "win_rate": 27.0,
+    "avg_r": -0.28,
+    "pf": 0.7,
+    "max_dd_pct": 15.8,
+    "per_session": -4.39
+   },
+   "fold_nets": [
+    -121.79,
+    -178.72,
+    -292.39,
+    -472.65,
+    -211.33
+   ],
+   "folds_positive": 0,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 2.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": true,
+    "allow_short": true
+   },
+   "base": {
+    "net": -317.23,
+    "end_equity": 9682.77,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 307,
+    "win_rate": 29.3,
+    "avg_r": -0.06,
+    "pf": 0.95,
+    "max_dd_pct": 12.92,
+    "per_session": -1.15
+   },
+   "stress": {
+    "net": -1218.03,
+    "end_equity": 8781.97,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 303,
+    "win_rate": 29.0,
+    "avg_r": -0.16,
+    "pf": 0.82,
+    "max_dd_pct": 18.94,
+    "per_session": -4.4
+   },
+   "fold_nets": [
+    19.37,
+    -620.7,
+    304.09,
+    -527.54,
+    -425.67
+   ],
+   "folds_positive": 2,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 3,
+    "body_mult": 1.25,
+    "session_end": "10:30",
+    "be_at_1r": true,
+    "allow_short": false
+   },
+   "base": {
+    "net": -668.53,
+    "end_equity": 9331.47,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 173,
+    "win_rate": 23.7,
+    "avg_r": -0.16,
+    "pf": 0.82,
+    "max_dd_pct": 12.35,
+    "per_session": -2.41
+   },
+   "stress": {
+    "net": -1233.25,
+    "end_equity": 8766.75,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 171,
+    "win_rate": 24.6,
+    "avg_r": -0.27,
+    "pf": 0.7,
+    "max_dd_pct": 15.66,
+    "per_session": -4.45
+   },
+   "fold_nets": [
+    -24.92,
+    -85.41,
+    -288.29,
+    -599.44,
+    -290.49
+   ],
+   "folds_positive": 0,
+   "passed": false,
+   "neighbors_passing": 0
+  },
+  {
+   "params": {
+    "rr": 3.0,
+    "reclaim_bars": 3,
+    "body_mult": 0.75,
+    "session_end": "10:30",
+    "be_at_1r": true,
+    "allow_short": false
+   },
+   "base": {
+    "net": -460.98,
+    "end_equity": 9539.02,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 202,
+    "win_rate": 23.8,
+    "avg_r": -0.15,
+    "pf": 0.88,
+    "max_dd_pct": 11.22,
+    "per_session": -1.66
+   },
+   "stress": {
+    "net": -1256.1,
+    "end_equity": 8743.9,
+    "sessions": 277,
+    "skipped": 11,
+    "trades": 199,
+    "win_rate": 23.1,
+    "avg_r": -0.3,
+    "pf": 0.71,
+    "max_dd_pct": 16.87,
+    "per_session": -4.53
+   },
+   "fold_nets": [
+    -73.3,
+    -161.92,
+    -453.69,
+    -592.04,
+    -30.83
+   ],
+   "folds_positive": 0,
+   "passed": false,
+   "neighbors_passing": 0
+  }
+ ]
+}
