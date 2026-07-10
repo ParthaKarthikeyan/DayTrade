@@ -1,0 +1,50 @@
+name: Sweep-reversal research
+
+# One-shot Gate-A-style research for the QQQ opening-hour sweep-reversal book
+# (the "1-minute scalping" video, mechanized). Manual dispatch only — this is
+# research, not a scheduled bot. Needs the ALPACA_API_KEY/ALPACA_SECRET_KEY
+# repo secrets for ~14 months of IEX 1-minute history.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: sweep-research
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # commits the verdict JSON back to the repo
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Offline tests first
+        run: python -m pytest tests/test_sweep.py -q
+      - name: Run research grid
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: python run_sweep_research.py
+      - name: Commit verdict
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add paper_ledger/sweep_research.json
+          if git diff --cached --quiet; then
+            echo "No verdict change to commit."
+          else
+            git commit -m "sweep research: QQQ sweep-reversal verdict"
+            git pull --rebase origin master || true
+            git push origin HEAD:master
+          fi
