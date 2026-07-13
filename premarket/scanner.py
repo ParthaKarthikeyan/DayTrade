@@ -14,9 +14,11 @@ from sim.config import Config
 def is_common_stock(symbol: str) -> bool:
     """Exclude warrants/units/rights — they trade thin and follow different rules.
     Catches the suffix conventions seen in live watchlists: '.WS', '.U', '.R',
-    and 5-letter tickers ending in W/U/R (e.g. OPTXW, NTRBW)."""
+    and 5-letter tickers ending in W/U/R (e.g. OPTXW, NTRBW). Also rejects
+    exchange-prefixed foreign listings from news feeds (e.g. 'TSX:ATZ') — one
+    of those in a snapshot batch 400s the whole request."""
     s = symbol.upper()
-    if "." in s or "/" in s:
+    if "." in s or "/" in s or ":" in s:
         return False
     return not (len(s) == 5 and s[-1] in "WUR")
 

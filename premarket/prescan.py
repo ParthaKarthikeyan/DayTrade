@@ -112,8 +112,11 @@ def overnight_research(cfg: Config, now_et: Optional[datetime] = None) -> List[d
         prior_close -= timedelta(days=prior_close.weekday() - 4)
     articles = fetch_overnight_news(cfg, prior_close)
     news = count_symbol_headlines(articles)
-    # snapshot the most-covered names first — coverage correlates with interest
-    symbols = sorted(news, key=lambda s: news[s]["count"], reverse=True)[:MAX_SYMBOLS]
+    # snapshot the most-covered names first — coverage correlates with interest.
+    # Filter BEFORE batching: one malformed news symbol ('TSX:ATZ', 'BRK.B')
+    # in a snapshot request 400s the entire 50-symbol batch.
+    symbols = sorted((s for s in news if is_common_stock(s)),
+                     key=lambda s: news[s]["count"], reverse=True)[:MAX_SYMBOLS]
     snaps = fetch_snapshots(cfg, symbols)
     rows = rank_candidates(news, snaps, cfg)
     print(f"[prescan] {len(articles)} headlines since {prior_close:%Y-%m-%d %H:%M} ET "

@@ -57,6 +57,15 @@ def test_count_symbol_headlines_newest_first():
     assert out["XYZ"]["count"] == 1
 
 
+def test_is_common_stock_rejects_foreign_prefixed():
+    from premarket.scanner import is_common_stock
+    # exchange-prefixed news symbols 400 the snapshot batch if let through
+    assert not is_common_stock("TSX:ATZ")
+    assert not is_common_stock("BRK.B")
+    assert not is_common_stock("OPTXW")
+    assert is_common_stock("VRAX")
+
+
 def test_rank_candidates_filters_and_sorts():
     c = cfg()  # band $1-$10, prescan min gap 3.0
     news = {s: {"count": 3, "headline": "h"} for s in
