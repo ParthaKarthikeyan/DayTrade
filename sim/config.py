@@ -90,6 +90,11 @@ class Config:
     pm_cooldown_min: int = 20           # minutes of no-new-entries after the streak
     pm_max_position_pct: float = 0.5    # max notional per trade as a fraction of the book
     pm_min_stop_pct: float = 0.005      # min stop distance (blocks 1-cent-stop all-ins)
+    # Bars: "yahoo" polls the consolidated all-venue tape (~1-2 min lag);
+    # "iex_stream" is the old Alpaca websocket, which for low-float small caps
+    # delivered almost no bars (IEX-executed trades only). See yahoo_feed.py.
+    pm_data_source: str = os.getenv("PM_DATA_SOURCE", "yahoo")
+    pm_poll_seconds: int = 60           # yahoo poll cadence (bars complete per minute)
     # Execution honesty on thin gappers: marketable LIMIT orders, never market.
     pm_limit_slip_pct: float = 0.004    # entry limit: signal price * (1 + this)
     pm_exit_slip_pct: float = 0.01      # exit limit band below the trigger price

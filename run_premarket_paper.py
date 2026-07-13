@@ -24,9 +24,13 @@ unfilled exits are re-submitted deeper until they fill.
 Run on a schedule (see .github/workflows/premarket_paper.yml) or manually:
     python run_premarket_paper.py
 
-Honest caveat: on Alpaca's free IEX feed, premarket prints for small caps are
-thin, so live signals may be sparse until the regular session opens. The full
-SIP feed (paid) fixes that. Validate forward over several sessions.
+DATA (changed 2026-07-13 after four blind sessions): bars come from polling
+Yahoo's consolidated tape (premarket/yahoo_feed.py) — the free Alpaca stream
+carries only IEX-executed trades, which for these low-float names meant ~36
+bars per session and zero premarket. Yahoo covers all venues at the cost of
+~1-2 min signal latency. PM_DATA_SOURCE=iex_stream flips back to the old
+websocket if Yahoo ever throttles us out. Execution stays on Alpaca either
+way; paper fills still simulate against IEX quotes (free tier).
 """
 
 import argparse
@@ -48,6 +52,7 @@ from sim.gist import GistPublisher
 from premarket.prescan import overnight_research, research_md
 from premarket.scanner import scan_live, is_common_stock
 from premarket.strategy import PMPosition, make_strategy, split_signal
+from premarket.yahoo_feed import fetch_day_bars, new_completed_bars
 
 VOL_LOOKBACK = 5
 FALLBACK_WATCHLIST = ["SOFI", "MARA", "RIOT", "PLUG", "NIO", "F", "SOUN", "BBAI"]
@@ -277,9 +282,12 @@ class PremarketPaperBot:
             print(f"[buy ] {symbol} rejected: {e}")
             return
         self.trades_taken += 1
+        # Stamp with WALL time, not bar time: yahoo bars lag the clock by
+        # ~1-2 min, and the fill-wait math must not inherit that lag (it
+        # would cancel a fresh order on the very next poll cycle).
         self.pending_entry = {"id": o.id, "symbol": symbol, "stop": stop,
                               "target": target, "signal": signal_price,
-                              "submitted": ts}
+                              "submitted": pd.Timestamp(self._now_et())}
 
     def _advance_entry(self, ts):
         pe = self.pending_entry
@@ -310,7 +318,8 @@ class PremarketPaperBot:
             print(f"[sell] {self.pos.symbol} rejected: {e}")
             return
         self.pending_exit = {"id": o.id, "reason": reason, "trigger": price,
-                             "submitted": ts, "attempts": 1}
+                             "submitted": pd.Timestamp(self._now_et()),
+                             "attempts": 1}
 
     def _record_close(self, shares, exit_px, reason, ts):
         pos = self.pos
@@ -354,7 +363,8 @@ class PremarketPaperBot:
                 try:
                     o2 = self._submit_limit(self.pos.symbol, self.pos.shares, "sell", deeper)
                     self.pending_exit = {"id": o2.id, "reason": px["reason"],
-                                         "trigger": px["trigger"], "submitted": ts,
+                                         "trigger": px["trigger"],
+                                         "submitted": pd.Timestamp(self._now_et()),
                                          "attempts": px["attempts"] + 1}
                 except Exception as e:
                     print(f"[sell] resubmit failed: {e}")
@@ -366,10 +376,17 @@ class PremarketPaperBot:
 
     # --- per-bar logic ----------------------------------------------------
     async def on_bar(self, bar):
-        s = bar.symbol
+        """Websocket path (PM_DATA_SOURCE=iex_stream): adapt and process."""
         ts = pd.Timestamp(bar.timestamp).tz_convert(self.cfg.timezone)
         b = {"o": float(bar.open), "h": float(bar.high), "l": float(bar.low),
              "c": float(bar.close), "v": float(bar.volume), "t": ts}
+        self._process_bar(bar.symbol, b)
+        self._write_state(ts)
+
+    def _process_bar(self, s, b):
+        """One completed 1-minute bar through the whole decision stack.
+        Source-agnostic: the Yahoo poller and the websocket both land here."""
+        ts = b["t"]
         self.bars.setdefault(s, []).append(b)
         self.last_close[s] = b["c"]
         cum = self.cum.setdefault(s, [0.0, 0.0])
@@ -441,7 +458,6 @@ class PremarketPaperBot:
         self.session_high[s] = max(sh, b["h"])
         self.equity_curve.append([ts.strftime("%Y-%m-%d %H:%M:%S"),
                                   round(self._book_equity(), 2)])
-        self._write_state(ts)
 
     def _state_dict(self, ts):
         p = self.pos
@@ -625,6 +641,46 @@ class PremarketPaperBot:
         except OSError as e:
             print(f"[trades] failed to write trade log: {e}")
 
+    # --- yahoo polling loop (default data path) ----------------------------
+    def _run_yahoo_loop(self):
+        """Poll the consolidated tape and dispatch newly completed minutes.
+        The loop owns the clock: it flattens at pm_flatten_at itself (no Timer
+        thread), and it advances working orders every cycle even when a
+        symbol's tape stalls — a stuck limit order must not outlive its bar."""
+        poll = max(30, int(self.cfg.pm_poll_seconds))
+        start_t = _parse_hhmm(self.cfg.pm_session_start)
+        last_ts = {}                      # symbol -> last dispatched bar time
+        print(f"[feed] polling yahoo every {poll}s "
+              f"({len(self.watch)} symbols, consolidated tape, ~1-2 min lag)")
+        while True:
+            now = self._now_et()
+            if now.time() >= self.flatten:
+                break
+            began = time.monotonic()
+            frames = fetch_day_bars(self.watch, self.cfg.timezone)
+            dispatched = 0
+            for s in self.watch:
+                for b in new_completed_bars(frames.get(s), last_ts.get(s),
+                                            pd.Timestamp(now), start_t,
+                                            self.flatten):
+                    self._process_bar(s, b)
+                    last_ts[s] = b["t"]
+                    dispatched += 1
+            # keep order state moving between bars of a thin tape
+            ts = pd.Timestamp(self._now_et())
+            if self.pending_entry is not None:
+                self._advance_entry(ts)
+            if self.pos is not None and self.pending_exit is not None:
+                lc = self.last_close.get(self.pos.symbol)
+                if lc is not None:
+                    self._advance_exit({"c": lc}, ts)
+            if dispatched:
+                self._write_state(ts)
+            elif not frames:
+                print("[feed] empty poll (throttled or pre-tape); retrying")
+            time.sleep(max(5.0, poll - (time.monotonic() - began)))
+        self._end_session()
+
     # --- session control --------------------------------------------------
     def _flatten_own(self):
         """Close ONLY this bot's position/orders — the paper account is shared, so
@@ -689,19 +745,23 @@ class PremarketPaperBot:
             watch = FALLBACK_WATCHLIST
         self.watch = watch
         print(f"Premarket paper bot  book=${self.book_start:,.2f} "
-              f"(account ${self.acct_start:,.2f} shared)  watching {watch}")
+              f"(account ${self.acct_start:,.2f} shared)  watching {watch}  "
+              f"feed={self.cfg.pm_data_source}")
 
-        for s in watch:
-            self.stream.subscribe_bars(self.on_bar, s)
-
-        # Stop the session at the flatten time.
-        now = self._now_et()
-        flat_dt = now.replace(hour=self.flatten.hour, minute=self.flatten.minute,
-                              second=0, microsecond=0)
-        secs = max(30, (flat_dt - now).total_seconds())
-        threading.Timer(secs, self._end_session).start()
-        print(f"[session] will flatten and exit in {int(secs/60)} min")
-        self.stream.run()
+        if self.cfg.pm_data_source == "iex_stream":
+            for s in watch:
+                self.stream.subscribe_bars(self.on_bar, s)
+            # Stop the session at the flatten time.
+            now = self._now_et()
+            flat_dt = now.replace(hour=self.flatten.hour,
+                                  minute=self.flatten.minute,
+                                  second=0, microsecond=0)
+            secs = max(30, (flat_dt - now).total_seconds())
+            threading.Timer(secs, self._end_session).start()
+            print(f"[session] will flatten and exit in {int(secs/60)} min")
+            self.stream.run()
+        else:
+            self._run_yahoo_loop()       # owns the clock; flattens itself
 
 
 def main():

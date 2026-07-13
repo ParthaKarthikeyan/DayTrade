@@ -55,7 +55,11 @@ jobs:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: "true"
-          ALPACA_DATA_FEED: iex
+          ALPACA_DATA_FEED: iex   # execution/quotes; BARS come from Yahoo (below)
+          # Consolidated all-venue 1m bars via Yahoo polling — the IEX stream
+          # left the bot blind on low-float names (36 bars/session, 2026-07-10).
+          # Set to "iex_stream" to fall back to the old websocket.
+          PM_DATA_SOURCE: yahoo
           PM_BANKROLL: "10000"    # the notional book the bot trades & is judged on
           # Optional near-live dashboard feed (no-op if unset): a gists-scoped PAT
           # and the id of the gist the dashboard polls.
