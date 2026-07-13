@@ -65,15 +65,20 @@ def fetch_day_bars(symbols: List[str], tz: str = ET) -> Dict[str, pd.DataFrame]:
 def new_completed_bars(df: pd.DataFrame, after: Optional[pd.Timestamp],
                        now: pd.Timestamp, start_t: dtime,
                        end_t: dtime) -> List[dict]:
-    """Bars newer than `after`, inside [start_t, end_t], and fully CLOSED
-    (Yahoo stamps a bar at its minute's START and mutates it until the minute
-    ends — dispatching it early would hand the strategy a moving candle)."""
+    """Bars newer than `after`, from TODAY only, inside [start_t, end_t], and
+    fully CLOSED (Yahoo stamps a bar at its minute's START and mutates it until
+    the minute ends — dispatching it early would hand the strategy a moving
+    candle). The date pin matters at 07:00 boot: period="1d" returns the most
+    recent trading day, which before today's tape exists is YESTERDAY — those
+    bars pass the time-of-day filter and must not be traded as live."""
     if df is None or df.empty:
         return []
     if df.index.tz is None:
         df = df.tz_localize(ET)
     bars = []
     for t, r in df.iterrows():
+        if t.date() != now.date():
+            continue
         if after is not None and t <= after:
             continue
         if not (start_t <= t.time() <= end_t):

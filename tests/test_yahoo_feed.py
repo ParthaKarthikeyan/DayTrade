@@ -55,3 +55,11 @@ def test_empty_frame_is_no_bars():
     assert new_completed_bars(None, None,
                               pd.Timestamp("2026-07-13 09:00", tz=ET),
                               START, END) == []
+
+
+def test_yesterdays_session_is_never_dispatched():
+    # At 07:00 boot Yahoo's period="1d" may still serve the PRIOR session;
+    # its bars pass the time-of-day filter and must be dropped by date.
+    df = make_df(["07:30", "09:30", "10:00"])          # stamped 2026-07-13
+    next_morning = pd.Timestamp("2026-07-14 07:05:00", tz=ET)
+    assert new_completed_bars(df, None, next_morning, START, END) == []
