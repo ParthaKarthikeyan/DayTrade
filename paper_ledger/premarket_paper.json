@@ -200,8 +200,33 @@
         "PMA"
       ],
       "account_pnl": 15.32
+    },
+    {
+      "date": "2026-07-14",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "SOBR",
+        "MIMI",
+        "SLMT",
+        "EHGO",
+        "SNDQ",
+        "SKYQ",
+        "AGEN",
+        "SHPH",
+        "VMAR",
+        "SPRO"
+      ],
+      "account_pnl": 142.7
     }
   ],
-  "last_run": "2026-07-13",
+  "last_run": "2026-07-14",
   "bankroll": 10000.0
 }
