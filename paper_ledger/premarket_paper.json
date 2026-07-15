@@ -225,8 +225,35 @@
         "SPRO"
       ],
       "account_pnl": 142.7
+    },
+    {
+      "date": "2026-07-15",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "NXTC",
+        "LEDS",
+        "CRMT",
+        "BMGL",
+        "AXTL",
+        "AXTX",
+        "AXTU",
+        "PDC",
+        "XCUR",
+        "ASTI",
+        "SHMD",
+        "OWL"
+      ],
+      "account_pnl": -395.19
     }
   ],
-  "last_run": "2026-07-14",
+  "last_run": "2026-07-15",
   "bankroll": 10000.0
 }
