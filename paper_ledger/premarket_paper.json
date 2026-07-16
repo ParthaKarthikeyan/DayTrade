@@ -252,8 +252,32 @@
         "OWL"
       ],
       "account_pnl": -395.19
+    },
+    {
+      "date": "2026-07-16",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "CPHI",
+        "SOBR",
+        "LBGJ",
+        "PYPG",
+        "WAI",
+        "CNEY",
+        "KUST",
+        "TGHL",
+        "EOSE"
+      ],
+      "account_pnl": -77.75
     }
   ],
-  "last_run": "2026-07-15",
+  "last_run": "2026-07-16",
   "bankroll": 10000.0
 }
