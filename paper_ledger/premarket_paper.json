@@ -318,8 +318,35 @@
         "BIYA"
       ],
       "account_pnl": 87.96
+    },
+    {
+      "date": "2026-07-21",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "ZYBT",
+        "MF",
+        "ADVB",
+        "IREG",
+        "GMM",
+        "CIFG",
+        "ONCO",
+        "AGPU",
+        "HIHO",
+        "AMC",
+        "SLAI",
+        "ACHR"
+      ],
+      "account_pnl": 178.72
     }
   ],
-  "last_run": "2026-07-20",
+  "last_run": "2026-07-21",
   "bankroll": 10000.0
 }
