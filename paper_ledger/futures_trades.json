@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-07-20",
+  "generated": "2026-07-21",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -392,8 +392,8 @@
           "entry_time": "2021-09-05",
           "entry": 51753.4102,
           "exit_time": "2021-09-07",
-          "exit": 46927.2638,
-          "pnl": -484.61,
+          "exit": 46922.3328,
+          "pnl": -485.11,
           "reason": "stop"
         },
         {
@@ -1783,8 +1783,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 7620.25,
-          "stop": 7397.1269,
-          "unrealized": -710.0
+          "stop": 7386.4366,
+          "unrealized": -400.0
         },
         {
           "sleeve": "Crude oil",
@@ -1793,8 +1793,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 82.49,
-          "stop": 73.28,
-          "unrealized": 17.0
+          "stop": 74.9167,
+          "unrealized": 219.0
         }
       ]
     },
@@ -2353,11 +2353,11 @@
           "micro": "MBT",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2021-08-09",
-          "entry": 46365.4023,
+          "entry_time": "2021-08-13",
+          "entry": 47793.3203,
           "exit_time": "2021-09-07",
-          "exit": 46927.2638,
-          "pnl": 54.19,
+          "exit": 46922.3328,
+          "pnl": -89.1,
           "reason": "stop"
         },
         {
@@ -2408,7 +2408,7 @@
           "entry_time": "2021-10-05",
           "entry": 51514.8125,
           "exit_time": "2021-10-27",
-          "exit": 58413.8417,
+          "exit": 58413.8366,
           "pnl": 687.9,
           "reason": "stop"
         },
@@ -2434,7 +2434,7 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61173.3475,
+          "exit": 61173.3472,
           "pnl": -641.35,
           "reason": "stop"
         },
@@ -2950,12 +2950,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 6,
+          "contracts": 5,
           "entry_time": "2023-06-20",
           "entry": 28327.4883,
           "exit_time": "2023-07-18",
           "exit": 29585.3849,
-          "pnl": 742.74,
+          "pnl": 618.95,
           "reason": "stop"
         },
         {
@@ -2976,12 +2976,12 @@
           "ticker": "GC=F",
           "micro": "MGC",
           "side": "long",
-          "contracts": 1,
+          "contracts": 2,
           "entry_time": "2023-07-18",
           "entry": 1977.2,
           "exit_time": "2023-07-27",
           "exit": 1945.4,
-          "pnl": -320.0,
+          "pnl": -640.0,
           "reason": "exit_break"
         },
         {
@@ -3028,12 +3028,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 9,
+          "contracts": 8,
           "entry_time": "2023-10-16",
           "entry": 28519.4668,
           "exit_time": "2023-10-23",
           "exit": 30613.1303,
-          "pnl": 1866.3,
+          "pnl": 1658.93,
           "reason": "stop"
         },
         {
@@ -3041,12 +3041,12 @@
           "ticker": "GC=F",
           "micro": "MGC",
           "side": "long",
-          "contracts": 1,
+          "contracts": 2,
           "entry_time": "2023-10-19",
           "entry": 1968.4,
           "exit_time": "2023-11-07",
           "exit": 1963.8107,
-          "pnl": -47.89,
+          "pnl": -95.79,
           "reason": "stop"
         },
         {
@@ -3067,12 +3067,12 @@
           "ticker": "GC=F",
           "micro": "MGC",
           "side": "long",
-          "contracts": 5,
+          "contracts": 4,
           "entry_time": "2023-11-27",
           "entry": 2011.8,
           "exit_time": "2023-12-04",
           "exit": 2037.5714,
-          "pnl": 1278.57,
+          "pnl": 1022.85,
           "reason": "stop"
         },
         {
@@ -3132,12 +3132,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 5,
+          "contracts": 4,
           "entry_time": "2024-01-02",
           "entry": 44957.9688,
           "exit_time": "2024-01-12",
           "exit": 42024.6087,
-          "pnl": -1476.68,
+          "pnl": -1181.34,
           "reason": "stop"
         },
         {
@@ -3184,12 +3184,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 3,
+          "contracts": 2,
           "entry_time": "2024-03-11",
           "entry": 72123.9062,
           "exit_time": "2024-03-19",
           "exit": 63581.0011,
-          "pnl": -2568.87,
+          "pnl": -1712.58,
           "reason": "stop"
         },
         {
@@ -3418,12 +3418,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 3,
+          "contracts": 4,
           "entry_time": "2024-09-18",
           "entry": 61649.6797,
           "exit_time": "2024-10-01",
           "exit": 61338.4149,
-          "pnl": -99.38,
+          "pnl": -132.51,
           "reason": "stop"
         },
         {
@@ -4098,8 +4098,8 @@
           "side": "long",
           "contracts": 4,
           "entry": 7620.25,
-          "stop": 7397.1269,
-          "unrealized": -2840.0
+          "stop": 7386.4366,
+          "unrealized": -1600.0
         },
         {
           "sleeve": "Crude oil",
@@ -4108,8 +4108,8 @@
           "side": "long",
           "contracts": 5,
           "entry": 82.49,
-          "stop": 73.28,
-          "unrealized": 85.0
+          "stop": 74.9167,
+          "unrealized": 1095.0
         }
       ]
     }
