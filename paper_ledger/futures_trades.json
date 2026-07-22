@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-07-21",
+  "generated": "2026-07-22",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -392,8 +392,8 @@
           "entry_time": "2021-09-05",
           "entry": 51753.4102,
           "exit_time": "2021-09-07",
-          "exit": 46922.3328,
-          "pnl": -485.11,
+          "exit": 46930.9523,
+          "pnl": -484.25,
           "reason": "stop"
         },
         {
@@ -1783,8 +1783,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 7620.25,
-          "stop": 7386.4366,
-          "unrealized": -400.0
+          "stop": 7400.3318,
+          "unrealized": -510.0
         },
         {
           "sleeve": "Crude oil",
@@ -1793,8 +1793,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 82.49,
-          "stop": 74.9167,
-          "unrealized": 219.0
+          "stop": 77.2407,
+          "unrealized": 542.0
         }
       ]
     },
@@ -2356,8 +2356,8 @@
           "entry_time": "2021-08-13",
           "entry": 47793.3203,
           "exit_time": "2021-09-07",
-          "exit": 46922.3328,
-          "pnl": -89.1,
+          "exit": 46930.9523,
+          "pnl": -88.24,
           "reason": "stop"
         },
         {
@@ -2408,7 +2408,7 @@
           "entry_time": "2021-10-05",
           "entry": 51514.8125,
           "exit_time": "2021-10-27",
-          "exit": 58413.8366,
+          "exit": 58413.8455,
           "pnl": 687.9,
           "reason": "stop"
         },
@@ -2434,7 +2434,7 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61173.3472,
+          "exit": 61173.3477,
           "pnl": -641.35,
           "reason": "stop"
         },
@@ -4098,8 +4098,8 @@
           "side": "long",
           "contracts": 4,
           "entry": 7620.25,
-          "stop": 7386.4366,
-          "unrealized": -1600.0
+          "stop": 7400.3318,
+          "unrealized": -2040.0
         },
         {
           "sleeve": "Crude oil",
@@ -4108,8 +4108,8 @@
           "side": "long",
           "contracts": 5,
           "entry": 82.49,
-          "stop": 74.9167,
-          "unrealized": 1095.0
+          "stop": 77.2407,
+          "unrealized": 2710.0
         }
       ]
     }
