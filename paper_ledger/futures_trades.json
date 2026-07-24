@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-07-23",
+  "generated": "2026-07-24",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -15,8 +15,8 @@
           "entry_time": "2019-08-30",
           "entry": 1.099,
           "exit_time": "2019-09-13",
-          "exit": 1.1096,
-          "pnl": -270.1,
+          "exit": 1.1095,
+          "pnl": -267.99,
           "reason": "stop"
         },
         {
@@ -42,7 +42,7 @@
           "entry": 1.1015,
           "exit_time": "2019-11-19",
           "exit": 1.109,
-          "pnl": -285.97,
+          "pnl": -285.96,
           "reason": "stop"
         },
         {
@@ -51,11 +51,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-11-04",
-          "entry": 3075.75,
+          "entry_time": "2019-11-07",
+          "entry": 3086.0,
           "exit_time": "2019-12-03",
           "exit": 3096.754,
-          "pnl": 103.02,
+          "pnl": 51.77,
           "reason": "stop"
         },
         {
@@ -116,11 +116,11 @@
           "micro": "M6E",
           "side": "short",
           "contracts": 3,
-          "entry_time": "2020-01-23",
-          "entry": 1.107,
+          "entry_time": "2020-01-27",
+          "entry": 1.103,
           "exit_time": "2020-02-26",
           "exit": 1.0918,
-          "pnl": 564.03,
+          "pnl": 414.03,
           "reason": "stop"
         },
         {
@@ -142,11 +142,11 @@
           "micro": "MGC",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2020-06-30",
-          "entry": 1793.0,
+          "entry_time": "2020-07-21",
+          "entry": 1842.4,
           "exit_time": "2020-08-11",
           "exit": 1971.3724,
-          "pnl": 1781.72,
+          "pnl": 1287.72,
           "reason": "stop"
         },
         {
@@ -220,11 +220,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2020-12-17",
-          "entry": 3721.25,
+          "entry_time": "2020-12-18",
+          "entry": 3726.25,
           "exit_time": "2020-12-21",
-          "exit": 3614.4282,
-          "pnl": -536.11,
+          "exit": 3607.4282,
+          "pnl": -596.11,
           "reason": "stop"
         },
         {
@@ -272,11 +272,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2021-04-08",
-          "entry": 4089.0,
+          "entry_time": "2021-04-09",
+          "entry": 4119.5,
           "exit_time": "2021-05-11",
           "exit": 4108.6182,
-          "pnl": 96.09,
+          "pnl": -56.41,
           "reason": "stop"
         },
         {
@@ -310,12 +310,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 3,
+          "contracts": 2,
           "entry_time": "2021-04-19",
           "entry": 1.2018,
           "exit_time": "2021-06-03",
           "exit": 1.2127,
-          "pnl": 406.5,
+          "pnl": 271.0,
           "reason": "exit_break"
         },
         {
@@ -392,8 +392,8 @@
           "entry_time": "2021-09-05",
           "entry": 51753.4102,
           "exit_time": "2021-09-07",
-          "exit": 46928.0764,
-          "pnl": -484.53,
+          "exit": 46930.2715,
+          "pnl": -484.31,
           "reason": "stop"
         },
         {
@@ -415,11 +415,11 @@
           "micro": "MGC",
           "side": "short",
           "contracts": 1,
-          "entry_time": "2021-09-16",
-          "entry": 1754.6,
+          "entry_time": "2021-09-28",
+          "entry": 1735.8,
           "exit_time": "2021-10-08",
           "exit": 1776.1576,
-          "pnl": -217.58,
+          "pnl": -405.58,
           "reason": "stop"
         },
         {
@@ -441,11 +441,11 @@
           "micro": "MCL",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2021-09-15",
-          "entry": 72.61,
+          "entry_time": "2021-09-23",
+          "entry": 73.3,
           "exit_time": "2021-11-04",
           "exit": 78.8236,
-          "pnl": 619.36,
+          "pnl": 550.36,
           "reason": "stop"
         },
         {
@@ -459,19 +459,6 @@
           "exit_time": "2021-11-22",
           "exit": 1823.8081,
           "pnl": -460.92,
-          "reason": "stop"
-        },
-        {
-          "sleeve": "S&P 500",
-          "ticker": "ES=F",
-          "micro": "MES",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2021-11-04",
-          "entry": 4673.25,
-          "exit_time": "2021-11-26",
-          "exit": 4618.4989,
-          "pnl": -275.76,
           "reason": "stop"
         },
         {
@@ -544,12 +531,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2022-04-12",
           "entry": 1.0832,
           "exit_time": "2022-05-19",
           "exit": 1.06,
-          "pnl": 575.4,
+          "pnl": 287.7,
           "reason": "stop"
         },
         {
@@ -622,12 +609,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2022-08-18",
           "entry": 1.0109,
           "exit_time": "2022-09-12",
           "exit": 1.0189,
-          "pnl": -203.76,
+          "pnl": -101.88,
           "reason": "stop"
         },
         {
@@ -687,12 +674,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2023-01-12",
           "entry": 1.085,
           "exit_time": "2023-02-03",
           "exit": 1.081,
-          "pnl": -105.25,
+          "pnl": -52.63,
           "reason": "exit_break"
         },
         {
@@ -722,29 +709,16 @@
           "reason": "stop"
         },
         {
-          "sleeve": "Gold",
-          "ticker": "GC=F",
-          "micro": "MGC",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2023-03-13",
-          "entry": 1911.7,
-          "exit_time": "2023-04-27",
-          "exit": 1980.0444,
-          "pnl": 681.44,
-          "reason": "stop"
-        },
-        {
           "sleeve": "Euro FX",
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2023-03-21",
           "entry": 1.0782,
           "exit_time": "2023-05-11",
           "exit": 1.092,
-          "pnl": 341.0,
+          "pnl": 170.5,
           "reason": "exit_break"
         },
         {
@@ -792,11 +766,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2023-05-18",
-          "entry": 4212.0,
+          "entry_time": "2023-06-12",
+          "entry": 4342.75,
           "exit_time": "2023-08-02",
           "exit": 4537.25,
-          "pnl": 1624.25,
+          "pnl": 970.5,
           "reason": "exit_break"
         },
         {
@@ -817,12 +791,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 3,
+          "contracts": 2,
           "entry_time": "2023-10-03",
           "entry": 1.0481,
           "exit_time": "2023-10-23",
           "exit": 1.0641,
-          "pnl": -606.3,
+          "pnl": -404.2,
           "reason": "stop"
         },
         {
@@ -830,12 +804,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 4,
+          "contracts": 3,
           "entry_time": "2023-10-16",
           "entry": 28519.4668,
           "exit_time": "2023-10-23",
           "exit": 30613.1303,
-          "pnl": 829.47,
+          "pnl": 622.1,
           "reason": "stop"
         },
         {
@@ -869,12 +843,12 @@
           "ticker": "GC=F",
           "micro": "MGC",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2023-11-27",
           "entry": 2011.8,
           "exit_time": "2023-12-04",
           "exit": 2037.5714,
-          "pnl": 511.43,
+          "pnl": 255.71,
           "reason": "stop"
         },
         {
@@ -896,11 +870,11 @@
           "micro": "MCL",
           "side": "short",
           "contracts": 1,
-          "entry_time": "2023-12-06",
-          "entry": 69.38,
+          "entry_time": "2023-12-12",
+          "entry": 68.61,
           "exit_time": "2023-12-20",
           "exit": 75.2546,
-          "pnl": -589.46,
+          "pnl": -666.46,
           "reason": "stop"
         },
         {
@@ -908,12 +882,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 3,
+          "contracts": 2,
           "entry_time": "2023-12-22",
           "entry": 1.1026,
           "exit_time": "2024-01-03",
           "exit": 1.094,
-          "pnl": -326.81,
+          "pnl": -217.88,
           "reason": "stop"
         },
         {
@@ -922,11 +896,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2023-11-10",
-          "entry": 4430.5,
+          "entry_time": "2023-11-20",
+          "entry": 4562.25,
           "exit_time": "2024-01-04",
           "exit": 4729.5,
-          "pnl": 1493.0,
+          "pnl": 834.25,
           "reason": "exit_break"
         },
         {
@@ -934,12 +908,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2024-01-02",
           "entry": 44957.9688,
           "exit_time": "2024-01-12",
           "exit": 42024.6087,
-          "pnl": -590.67,
+          "pnl": -295.34,
           "reason": "stop"
         },
         {
@@ -973,25 +947,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 6,
+          "contracts": 5,
           "entry_time": "2024-03-06",
           "entry": 1.0902,
           "exit_time": "2024-03-19",
           "exit": 1.0847,
-          "pnl": -424.69,
-          "reason": "stop"
-        },
-        {
-          "sleeve": "Bitcoin",
-          "ticker": "BTC-USD",
-          "micro": "MBT",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2024-03-11",
-          "entry": 72123.9062,
-          "exit_time": "2024-03-19",
-          "exit": 63581.0011,
-          "pnl": -856.29,
+          "pnl": -353.91,
           "reason": "stop"
         },
         {
@@ -1000,11 +961,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2024-02-22",
-          "entry": 5097.75,
+          "entry_time": "2024-03-01",
+          "entry": 5146.0,
           "exit_time": "2024-04-04",
           "exit": 5193.2989,
-          "pnl": 475.74,
+          "pnl": 234.49,
           "reason": "stop"
         },
         {
@@ -1012,12 +973,12 @@
           "ticker": "CL=F",
           "micro": "MCL",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2024-04-02",
           "entry": 85.15,
           "exit_time": "2024-04-17",
           "exit": 82.69,
-          "pnl": -496.0,
+          "pnl": -248.0,
           "reason": "exit_break"
         },
         {
@@ -1077,12 +1038,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 4,
+          "contracts": 3,
           "entry_time": "2024-06-14",
           "entry": 1.0699,
           "exit_time": "2024-07-03",
           "exit": 1.0785,
-          "pnl": -438.0,
+          "pnl": -328.5,
           "reason": "exit_break"
         },
         {
@@ -1181,12 +1142,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 5,
+          "contracts": 4,
           "entry_time": "2024-08-14",
           "entry": 1.1019,
           "exit_time": "2024-09-10",
           "exit": 1.1034,
-          "pnl": 85.78,
+          "pnl": 68.62,
           "reason": "stop"
         },
         {
@@ -1221,11 +1182,11 @@
           "micro": "MGC",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2024-08-16",
-          "entry": 2498.6001,
+          "entry_time": "2024-09-12",
+          "entry": 2551.2,
           "exit_time": "2024-10-08",
           "exit": 2615.0,
-          "pnl": 1162.0,
+          "pnl": 636.0,
           "reason": "exit_break"
         },
         {
@@ -1234,11 +1195,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2024-09-24",
-          "entry": 5792.0,
+          "entry_time": "2024-09-26",
+          "entry": 5804.5,
           "exit_time": "2024-10-31",
           "exit": 5767.2361,
-          "pnl": -125.82,
+          "pnl": -188.32,
           "reason": "stop"
         },
         {
@@ -1268,19 +1229,6 @@
           "reason": "stop"
         },
         {
-          "sleeve": "S&P 500",
-          "ticker": "ES=F",
-          "micro": "MES",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2024-11-08",
-          "entry": 6025.25,
-          "exit_time": "2024-11-19",
-          "exit": 5866.2773,
-          "pnl": -796.86,
-          "reason": "stop"
-        },
-        {
           "sleeve": "Euro FX",
           "ticker": "6E=F",
           "micro": "M6E",
@@ -1291,19 +1239,6 @@
           "exit_time": "2024-12-06",
           "exit": 1.0607,
           "pnl": -155.95,
-          "reason": "stop"
-        },
-        {
-          "sleeve": "Gold",
-          "ticker": "GC=F",
-          "micro": "MGC",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2024-12-11",
-          "entry": 2733.8,
-          "exit_time": "2024-12-17",
-          "exit": 2636.6357,
-          "pnl": -973.64,
           "reason": "stop"
         },
         {
@@ -1390,11 +1325,11 @@
           "micro": "MGC",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2025-03-14",
-          "entry": 2994.5,
+          "entry_time": "2025-03-18",
+          "entry": 3035.1001,
           "exit_time": "2025-04-03",
           "exit": 3062.5903,
-          "pnl": 678.9,
+          "pnl": 272.9,
           "reason": "stop"
         },
         {
@@ -1415,12 +1350,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2025-04-10",
           "entry": 1.1217,
           "exit_time": "2025-05-01",
           "exit": 1.129,
-          "pnl": 176.35,
+          "pnl": 88.18,
           "reason": "stop"
         },
         {
@@ -1441,12 +1376,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 3,
+          "contracts": 2,
           "entry_time": "2025-06-02",
           "entry": 1.1452,
           "exit_time": "2025-07-15",
           "exit": 1.1643,
-          "pnl": 708.42,
+          "pnl": 472.28,
           "reason": "stop"
         },
         {
@@ -1468,11 +1403,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2025-06-10",
-          "entry": 6045.0,
+          "entry_time": "2025-06-27",
+          "entry": 6223.75,
           "exit_time": "2025-08-01",
           "exit": 6316.3571,
-          "pnl": 1354.79,
+          "pnl": 461.04,
           "reason": "stop"
         },
         {
@@ -1506,12 +1441,12 @@
           "ticker": "CL=F",
           "micro": "MCL",
           "side": "short",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2025-08-06",
           "entry": 64.35,
           "exit_time": "2025-08-25",
           "exit": 64.8,
-          "pnl": -94.0,
+          "pnl": -47.0,
           "reason": "exit_break"
         },
         {
@@ -1545,12 +1480,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 4,
+          "contracts": 3,
           "entry_time": "2025-09-08",
           "entry": 1.1767,
           "exit_time": "2025-09-25",
           "exit": 1.171,
-          "pnl": -292.9,
+          "pnl": -219.67,
           "reason": "stop"
         },
         {
@@ -1585,11 +1520,11 @@
           "micro": "MGC",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2025-09-02",
-          "entry": 3549.3999,
+          "entry_time": "2025-09-16",
+          "entry": 3688.8999,
           "exit_time": "2025-10-22",
           "exit": 4078.9644,
-          "pnl": 5293.64,
+          "pnl": 3898.64,
           "reason": "stop"
         },
         {
@@ -1611,24 +1546,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2025-10-24",
-          "entry": 6827.0,
+          "entry_time": "2025-10-28",
+          "entry": 6925.75,
           "exit_time": "2025-11-07",
           "exit": 6716.9686,
-          "pnl": -552.16,
-          "reason": "stop"
-        },
-        {
-          "sleeve": "Bitcoin",
-          "ticker": "BTC-USD",
-          "micro": "MBT",
-          "side": "short",
-          "contracts": 1,
-          "entry_time": "2025-11-17",
-          "entry": 92093.875,
-          "exit_time": "2025-11-28",
-          "exit": 91535.5826,
-          "pnl": 53.83,
+          "pnl": -1045.91,
           "reason": "stop"
         },
         {
@@ -1649,12 +1571,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 7,
+          "contracts": 6,
           "entry_time": "2025-12-03",
           "entry": 1.1681,
           "exit_time": "2026-01-05",
           "exit": 1.1696,
-          "pnl": 119.01,
+          "pnl": 102.01,
           "reason": "stop"
         },
         {
@@ -1663,11 +1585,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2025-12-22",
-          "entry": 6930.25,
+          "entry_time": "2025-12-23",
+          "entry": 6961.0,
           "exit_time": "2026-01-20",
           "exit": 6854.9124,
-          "pnl": -378.69,
+          "pnl": -532.44,
           "reason": "stop"
         },
         {
@@ -1675,12 +1597,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 5,
+          "contracts": 4,
           "entry_time": "2026-01-23",
           "entry": 1.1824,
           "exit_time": "2026-02-02",
           "exit": 1.1801,
-          "pnl": -152.44,
+          "pnl": -121.95,
           "reason": "stop"
         },
         {
@@ -1688,12 +1610,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "short",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2026-01-25",
           "entry": 86572.2188,
           "exit_time": "2026-02-21",
           "exit": 68295.6659,
-          "pnl": 3651.31,
+          "pnl": 1825.66,
           "reason": "stop"
         },
         {
@@ -1714,12 +1636,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "long",
-          "contracts": 5,
+          "contracts": 4,
           "entry_time": "2026-04-10",
           "entry": 1.1731,
           "exit_time": "2026-04-29",
           "exit": 1.1686,
-          "pnl": -292.3,
+          "pnl": -233.84,
           "reason": "stop"
         },
         {
@@ -1728,11 +1650,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2026-04-16",
-          "entry": 7077.0,
+          "entry_time": "2026-04-27",
+          "entry": 7206.0,
           "exit_time": "2026-06-05",
           "exit": 7424.0358,
-          "pnl": 1733.18,
+          "pnl": 1088.18,
           "reason": "stop"
         },
         {
@@ -1753,12 +1675,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 7,
+          "contracts": 6,
           "entry_time": "2026-06-24",
           "entry": 1.1364,
           "exit_time": "2026-07-15",
           "exit": 1.1494,
-          "pnl": -1159.22,
+          "pnl": -993.61,
           "reason": "stop"
         },
         {
@@ -1770,8 +1692,8 @@
           "entry_time": "2026-07-10",
           "entry": 7620.25,
           "exit_time": "2026-07-23",
-          "exit": 7452.75,
-          "pnl": -839.5,
+          "exit": 7445.0,
+          "pnl": -878.25,
           "reason": "exit_break"
         }
       ],
@@ -1783,8 +1705,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 82.49,
-          "stop": 80.4209,
-          "unrealized": 967.0
+          "stop": 80.9249,
+          "unrealized": 798.0
         }
       ]
     },
@@ -1800,8 +1722,8 @@
           "entry_time": "2019-09-04",
           "entry": 1550.3,
           "exit_time": "2019-09-10",
-          "exit": 1493.139,
-          "pnl": -573.61,
+          "exit": 1493.361,
+          "pnl": -571.39,
           "reason": "stop"
         },
         {
@@ -1813,8 +1735,8 @@
           "entry_time": "2019-08-30",
           "entry": 1.099,
           "exit_time": "2019-09-13",
-          "exit": 1.1096,
-          "pnl": -405.15,
+          "exit": 1.1095,
+          "pnl": -401.99,
           "reason": "stop"
         },
         {
@@ -1839,21 +1761,8 @@
           "entry_time": "2019-10-02",
           "entry": 2880.5,
           "exit_time": "2019-10-11",
-          "exit": 2985.5669,
-          "pnl": -527.33,
-          "reason": "stop"
-        },
-        {
-          "sleeve": "Crude oil",
-          "ticker": "CL=F",
-          "micro": "MCL",
-          "side": "short",
-          "contracts": 1,
-          "entry_time": "2019-10-02",
-          "entry": 52.64,
-          "exit_time": "2019-10-23",
-          "exit": 55.7936,
-          "pnl": -317.36,
+          "exit": 2985.5745,
+          "pnl": -527.37,
           "reason": "stop"
         },
         {
@@ -1866,7 +1775,7 @@
           "entry": 1.1015,
           "exit_time": "2019-11-19",
           "exit": 1.109,
-          "pnl": -381.29,
+          "pnl": -381.28,
           "reason": "stop"
         },
         {
@@ -1875,11 +1784,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-11-04",
-          "entry": 3075.75,
+          "entry_time": "2019-11-07",
+          "entry": 3086.0,
           "exit_time": "2019-12-03",
           "exit": 3096.754,
-          "pnl": 103.02,
+          "pnl": 51.77,
           "reason": "stop"
         },
         {
@@ -1901,11 +1810,11 @@
           "micro": "MCL",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2019-12-06",
-          "entry": 59.2,
+          "entry_time": "2019-11-21",
+          "entry": 58.58,
           "exit_time": "2020-01-08",
           "exit": 60.6485,
-          "pnl": 142.85,
+          "pnl": 204.85,
           "reason": "stop"
         },
         {
@@ -1953,11 +1862,11 @@
           "micro": "M6E",
           "side": "short",
           "contracts": 4,
-          "entry_time": "2020-01-23",
-          "entry": 1.107,
+          "entry_time": "2020-01-27",
+          "entry": 1.103,
           "exit_time": "2020-02-26",
           "exit": 1.0918,
-          "pnl": 752.03,
+          "pnl": 552.04,
           "reason": "stop"
         },
         {
@@ -2346,8 +2255,8 @@
           "entry_time": "2021-08-13",
           "entry": 47793.3203,
           "exit_time": "2021-09-07",
-          "exit": 46928.0764,
-          "pnl": -88.52,
+          "exit": 46930.2715,
+          "pnl": -88.3,
           "reason": "stop"
         },
         {
@@ -2398,7 +2307,7 @@
           "entry_time": "2021-10-05",
           "entry": 51514.8125,
           "exit_time": "2021-10-27",
-          "exit": 58413.8425,
+          "exit": 58413.8448,
           "pnl": 687.9,
           "reason": "stop"
         },
@@ -2424,7 +2333,7 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61173.3475,
+          "exit": 61173.3476,
           "pnl": -641.35,
           "reason": "stop"
         },
@@ -2459,12 +2368,25 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 4,
+          "contracts": 5,
           "entry_time": "2021-11-10",
           "entry": 1.1485,
           "exit_time": "2021-12-31",
           "exit": 1.1378,
-          "pnl": 524.71,
+          "pnl": 655.89,
+          "reason": "stop"
+        },
+        {
+          "sleeve": "S&P 500",
+          "ticker": "ES=F",
+          "micro": "MES",
+          "side": "long",
+          "contracts": 1,
+          "entry_time": "2021-12-27",
+          "entry": 4782.25,
+          "exit_time": "2022-01-10",
+          "exit": 4652.3983,
+          "pnl": -651.26,
           "reason": "stop"
         },
         {
@@ -2564,11 +2486,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2022-03-28",
-          "entry": 4568.0,
+          "entry_time": "2022-03-29",
+          "entry": 4625.5,
           "exit_time": "2022-04-11",
-          "exit": 4418.0381,
-          "pnl": -751.81,
+          "exit": 4414.5381,
+          "pnl": -1056.81,
           "reason": "stop"
         },
         {
@@ -2621,19 +2543,6 @@
           "exit_time": "2022-05-30",
           "exit": 29948.1935,
           "pnl": 1629.85,
-          "reason": "stop"
-        },
-        {
-          "sleeve": "Crude oil",
-          "ticker": "CL=F",
-          "micro": "MCL",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2022-06-08",
-          "entry": 122.11,
-          "exit_time": "2022-06-17",
-          "exit": 110.7399,
-          "pnl": -1139.01,
           "reason": "stop"
         },
         {
@@ -2836,12 +2745,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "short",
-          "contracts": 7,
+          "contracts": 8,
           "entry_time": "2023-02-10",
           "entry": 21651.1836,
           "exit_time": "2023-02-15",
           "exit": 23107.0721,
-          "pnl": -1033.12,
+          "pnl": -1180.71,
           "reason": "stop"
         },
         {
@@ -2901,12 +2810,12 @@
           "ticker": "CL=F",
           "micro": "MCL",
           "side": "short",
-          "contracts": 1,
+          "contracts": 2,
           "entry_time": "2023-05-02",
           "entry": 71.66,
           "exit_time": "2023-05-08",
           "exit": 73.232,
-          "pnl": -159.2,
+          "pnl": -318.39,
           "reason": "stop"
         },
         {
@@ -3525,12 +3434,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 10,
+          "contracts": 11,
           "entry_time": "2025-01-02",
           "entry": 1.0253,
           "exit_time": "2025-01-21",
           "exit": 1.0411,
-          "pnl": -1988.98,
+          "pnl": -2187.87,
           "reason": "stop"
         },
         {
@@ -4075,8 +3984,8 @@
           "entry_time": "2026-07-10",
           "entry": 7620.25,
           "exit_time": "2026-07-23",
-          "exit": 7452.75,
-          "pnl": -3358.0,
+          "exit": 7445.0,
+          "pnl": -3513.0,
           "reason": "exit_break"
         }
       ],
@@ -4088,8 +3997,8 @@
           "side": "long",
           "contracts": 5,
           "entry": 82.49,
-          "stop": 80.4209,
-          "unrealized": 4835.0
+          "stop": 80.9249,
+          "unrealized": 3990.0
         }
       ]
     }
