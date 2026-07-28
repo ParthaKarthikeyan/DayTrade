@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-07-27",
+  "generated": "2026-07-28",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -392,8 +392,8 @@
           "entry_time": "2021-09-05",
           "entry": 51753.4102,
           "exit_time": "2021-09-07",
-          "exit": 46920.7137,
-          "pnl": -485.27,
+          "exit": 46929.305,
+          "pnl": -484.41,
           "reason": "stop"
         },
         {
@@ -1773,20 +1773,22 @@
           "exit": 7445.0,
           "pnl": -878.25,
           "reason": "exit_break"
-        }
-      ],
-      "open": [
+        },
         {
           "sleeve": "Crude oil",
           "ticker": "CL=F",
           "micro": "MCL",
           "side": "long",
           "contracts": 1,
+          "entry_time": "2026-07-17",
           "entry": 82.49,
-          "stop": 80.9249,
-          "unrealized": -46.0
+          "exit_time": "2026-07-28",
+          "exit": 80.9249,
+          "pnl": -158.51,
+          "reason": "stop"
         }
-      ]
+      ],
+      "open": []
     },
     "8pct": {
       "risk_pct": 0.08,
@@ -2346,8 +2348,8 @@
           "entry_time": "2021-08-20",
           "entry": 49339.1758,
           "exit_time": "2021-09-07",
-          "exit": 46920.7137,
-          "pnl": -243.85,
+          "exit": 46929.305,
+          "pnl": -242.99,
           "reason": "stop"
         },
         {
@@ -2398,7 +2400,7 @@
           "entry_time": "2021-10-05",
           "entry": 51514.8125,
           "exit_time": "2021-10-27",
-          "exit": 58413.8349,
+          "exit": 58413.8438,
           "pnl": 687.9,
           "reason": "stop"
         },
@@ -2424,7 +2426,7 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61173.3472,
+          "exit": 61173.3476,
           "pnl": -641.35,
           "reason": "stop"
         },
@@ -4078,20 +4080,22 @@
           "exit": 7445.0,
           "pnl": -3513.0,
           "reason": "exit_break"
-        }
-      ],
-      "open": [
+        },
         {
           "sleeve": "Crude oil",
           "ticker": "CL=F",
           "micro": "MCL",
           "side": "long",
           "contracts": 5,
+          "entry_time": "2026-07-17",
           "entry": 82.49,
-          "stop": 80.9249,
-          "unrealized": -230.0
+          "exit_time": "2026-07-28",
+          "exit": 80.9249,
+          "pnl": -792.55,
+          "reason": "stop"
         }
-      ]
+      ],
+      "open": []
     }
   }
 }
