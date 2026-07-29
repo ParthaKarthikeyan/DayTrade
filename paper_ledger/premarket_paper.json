@@ -470,8 +470,32 @@
         "FIEE"
       ],
       "account_pnl": 98.24
+    },
+    {
+      "date": "2026-07-29",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "EGG",
+        "INLF",
+        "BIYA",
+        "CNET",
+        "RYOJ",
+        "APUS",
+        "AMIX",
+        "CLVT",
+        "STFS"
+      ],
+      "account_pnl": -258.72
     }
   ],
-  "last_run": "2026-07-28",
+  "last_run": "2026-07-29",
   "bankroll": 10000.0
 }
