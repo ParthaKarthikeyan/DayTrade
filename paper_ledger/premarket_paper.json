@@ -494,8 +494,29 @@
         "STFS"
       ],
       "account_pnl": -258.72
+    },
+    {
+      "date": "2026-07-30",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "NCRA",
+        "SPRC",
+        "AMIX",
+        "STFS",
+        "NUWE",
+        "DCX"
+      ],
+      "account_pnl": 544.74
     }
   ],
-  "last_run": "2026-07-29",
+  "last_run": "2026-07-30",
   "bankroll": 10000.0
 }
