@@ -544,8 +544,32 @@
         "BBAI"
       ],
       "account_pnl": -377.62
+    },
+    {
+      "date": "2026-08-03",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "AXTU",
+        "AXTL",
+        "AXTX",
+        "ZTG",
+        "SCYX",
+        "UPC",
+        "PWCM",
+        "FFAI",
+        "SGLY"
+      ],
+      "account_pnl": 134.0
     }
   ],
-  "last_run": "2026-07-31",
+  "last_run": "2026-08-03",
   "bankroll": 10000.0
 }
