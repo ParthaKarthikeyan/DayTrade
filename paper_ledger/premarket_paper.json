@@ -649,8 +649,35 @@
         "SOUN"
       ],
       "account_pnl": 267.93
+    },
+    {
+      "date": "2026-08-07",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "XHLD",
+        "CLRO",
+        "CELZ",
+        "AZI",
+        "WLDS",
+        "PAVS",
+        "MTSG",
+        "CJMB",
+        "PETZ",
+        "INDI",
+        "CVRX",
+        "RCEL"
+      ],
+      "account_pnl": -39.38
     }
   ],
-  "last_run": "2026-08-06",
+  "last_run": "2026-08-07",
   "bankroll": 10000.0
 }
