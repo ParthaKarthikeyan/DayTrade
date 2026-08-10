@@ -676,8 +676,37 @@
         "RCEL"
       ],
       "account_pnl": -39.38
+    },
+    {
+      "date": "2026-08-10",
+      "book_start": 10000.0,
+      "book_end": 10000.0,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "YJ",
+        "MB",
+        "NAMI",
+        "HUIZ",
+        "AXTL",
+        "AXTU",
+        "SPAX",
+        "SPCH",
+        "OKLL",
+        "QNTM",
+        "BKYI",
+        "PLUG",
+        "AIRS",
+        "STDN"
+      ],
+      "account_pnl": -400.69
     }
   ],
-  "last_run": "2026-08-07",
+  "last_run": "2026-08-10",
   "bankroll": 10000.0
 }
