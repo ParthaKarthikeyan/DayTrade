@@ -504,7 +504,47 @@
       "trade_count": 0,
       "trades": [],
       "fills": []
+    },
+    {
+      "date": "2026-08-13",
+      "source": "alpaca_fills",
+      "book_pnl": 49.17,
+      "fills_realized_pnl": 49.17,
+      "reconciliation_gap": 0.0,
+      "account_pnl": -29.2,
+      "stopped": null,
+      "fill_count": 2,
+      "trade_count": 1,
+      "trades": [
+        {
+          "symbol": "CRWU",
+          "side": "long",
+          "shares": 741,
+          "entry_time": "13:45:09",
+          "entry_price": 6.71,
+          "exit_time": "13:46:09",
+          "exit_price": 6.7764,
+          "pnl": 49.17,
+          "date": "2026-08-13"
+        }
+      ],
+      "fills": [
+        {
+          "time": "13:45:09",
+          "symbol": "CRWU",
+          "side": "buy",
+          "qty": 741.0,
+          "price": 6.71
+        },
+        {
+          "time": "13:46:09",
+          "symbol": "CRWU",
+          "side": "sell",
+          "qty": 741.0,
+          "price": 6.776356
+        }
+      ]
     }
   ],
-  "last_run": "2026-08-12"
+  "last_run": "2026-08-13"
 }
