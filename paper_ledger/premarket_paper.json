@@ -794,8 +794,38 @@
         "QTI"
       ],
       "account_pnl": -29.2
+    },
+    {
+      "date": "2026-08-14",
+      "book_start": 10049.17,
+      "book_end": 10049.17,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "DFSC",
+        "GXAI",
+        "HCTI",
+        "LEXX",
+        "LNSR",
+        "CDTG",
+        "JUNS",
+        "PRHI",
+        "SNDG",
+        "SNDC",
+        "FFAI",
+        "CAPR",
+        "NMAX",
+        "MRLN",
+        "SRTS"
+      ],
+      "account_pnl": -49.17
     }
   ],
-  "last_run": "2026-08-13",
+  "last_run": "2026-08-14",
   "bankroll": 10000.0
 }
