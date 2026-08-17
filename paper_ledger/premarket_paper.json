@@ -824,8 +824,38 @@
         "SRTS"
       ],
       "account_pnl": -49.17
+    },
+    {
+      "date": "2026-08-17",
+      "book_start": 10049.17,
+      "book_end": 10049.17,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "WETO",
+        "HHS",
+        "SST",
+        "AEYE",
+        "MODD",
+        "NTHI",
+        "SXTC",
+        "AAOG",
+        "CDTG",
+        "DFSC",
+        "XPON",
+        "KEEL",
+        "SPCE",
+        "BTDR",
+        "HIVE"
+      ],
+      "account_pnl": 20.61
     }
   ],
-  "last_run": "2026-08-14",
+  "last_run": "2026-08-17",
   "bankroll": 10000.0
 }
