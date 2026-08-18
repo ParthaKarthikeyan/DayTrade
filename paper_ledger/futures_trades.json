@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-08-17",
+  "generated": "2026-08-18",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -1679,8 +1679,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 7822.5,
-          "stop": 7625.5452,
-          "unrealized": -288.75
+          "stop": 7623.5259,
+          "unrealized": -551.25
         }
       ]
     },
@@ -2221,19 +2221,6 @@
           "reason": "stop"
         },
         {
-          "sleeve": "Bitcoin",
-          "ticker": "BTC-USD",
-          "micro": "MBT",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2021-09-06",
-          "entry": 52633.5352,
-          "exit_time": "2021-09-07",
-          "exit": 46815.5028,
-          "pnl": -583.8,
-          "reason": "stop"
-        },
-        {
           "sleeve": "S&P 500",
           "ticker": "ES=F",
           "micro": "MES",
@@ -2281,8 +2268,8 @@
           "entry_time": "2021-10-05",
           "entry": 51514.8125,
           "exit_time": "2021-10-27",
-          "exit": 58413.7956,
-          "pnl": 687.9,
+          "exit": 58413.9808,
+          "pnl": 687.92,
           "reason": "stop"
         },
         {
@@ -2307,7 +2294,7 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61173.3452,
+          "exit": 61173.3544,
           "pnl": -641.35,
           "reason": "stop"
         },
@@ -2330,11 +2317,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2021-10-19",
-          "entry": 4511.25,
+          "entry_time": "2021-10-18",
+          "entry": 4477.5,
           "exit_time": "2021-11-26",
           "exit": 4618.4989,
-          "pnl": 534.24,
+          "pnl": 702.99,
           "reason": "stop"
         },
         {
@@ -2439,6 +2426,19 @@
           "exit_time": "2022-03-17",
           "exit": 1.1143,
           "pnl": -578.67,
+          "reason": "stop"
+        },
+        {
+          "sleeve": "S&P 500",
+          "ticker": "ES=F",
+          "micro": "MES",
+          "side": "long",
+          "contracts": 1,
+          "entry_time": "2022-03-28",
+          "entry": 4568.0,
+          "exit_time": "2022-04-11",
+          "exit": 4418.0381,
+          "pnl": -751.81,
           "reason": "stop"
         },
         {
@@ -3971,8 +3971,8 @@
           "side": "long",
           "contracts": 2,
           "entry": 7765.5,
-          "stop": 7632.2952,
-          "unrealized": -7.5
+          "stop": 7630.2759,
+          "unrealized": -532.5
         }
       ]
     }
