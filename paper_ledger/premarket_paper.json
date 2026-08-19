@@ -883,8 +883,36 @@
         "ELWT"
       ],
       "account_pnl": 237.67
+    },
+    {
+      "date": "2026-08-19",
+      "book_start": 10049.17,
+      "book_end": 10049.17,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "XOS",
+        "SLE",
+        "GNLN",
+        "PSIG",
+        "SXTC",
+        "AAOZ",
+        "MODD",
+        "JFU",
+        "CBRZ",
+        "CAST",
+        "TNON",
+        "MSS",
+        "AXIL"
+      ],
+      "account_pnl": 1380.09
     }
   ],
-  "last_run": "2026-08-18",
+  "last_run": "2026-08-19",
   "bankroll": 10000.0
 }
