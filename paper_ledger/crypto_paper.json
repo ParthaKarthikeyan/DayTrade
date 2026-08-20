@@ -2,15 +2,8 @@
   "deployment_date": "2026-07-03",
   "rules_version": 1,
   "bankroll": 10000.0,
-  "cash": 8921.17763128,
-  "positions": {
-    "ETH/USD": {
-      "units": 0.475536,
-      "entry": 2268.64,
-      "entry_time": "2026-08-19 18:00:00+00:00",
-      "signal_price": 2251.69
-    }
-  },
+  "cash": 9986.694978255999,
+  "positions": {},
   "history": [
     {
       "date": "2026-07-03",
@@ -495,11 +488,11 @@
     {
       "date": "2026-08-20",
       "book_start": 10000.0,
-      "book_end": 9991.94,
-      "pnl": -8.06,
-      "pnl_pct": -0.08,
-      "trades": 0,
-      "open_positions": 1,
+      "book_end": 9986.69,
+      "pnl": -13.31,
+      "pnl_pct": -0.13,
+      "trades": 1,
+      "open_positions": 0,
       "braked": false
     }
   ],
@@ -507,5 +500,5 @@
     "date": "2026-08-20",
     "equity": 10000.0
   },
-  "last_run": "2026-08-20 01:49"
+  "last_run": "2026-08-20 03:08"
 }

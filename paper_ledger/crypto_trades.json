@@ -1,6 +1,19 @@
 {
-  "history": [],
-  "last_run": "2026-08-20 01:49",
+  "history": [
+    {
+      "date": "2026-08-20",
+      "symbol": "ETH/USD",
+      "side": "long",
+      "units": 0.475536,
+      "entry_time": "2026-08-19 18:00:00+00:00",
+      "entry_price": 2268.64,
+      "exit_time": "2026-08-20 03:08",
+      "exit_price": 2240.67,
+      "pnl": -13.3,
+      "reason": "stop"
+    }
+  ],
+  "last_run": "2026-08-20 03:08",
   "rules_version": 1,
   "deployment_date": "2026-07-04",
   "positions": {}
