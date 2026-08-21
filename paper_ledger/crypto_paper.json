@@ -2,8 +2,15 @@
   "deployment_date": "2026-07-03",
   "rules_version": 1,
   "bankroll": 10000.0,
-  "cash": 9986.694978255999,
-  "positions": {},
+  "cash": 8285.409115755998,
+  "positions": {
+    "BTC/USD": {
+      "units": 0.022575,
+      "entry": 75361.5,
+      "entry_time": "2026-08-20 18:00:00+00:00",
+      "signal_price": 73011.87
+    }
+  },
   "history": [
     {
       "date": "2026-07-03",
@@ -494,11 +501,21 @@
       "trades": 1,
       "open_positions": 0,
       "braked": false
+    },
+    {
+      "date": "2026-08-21",
+      "book_start": 9986.69,
+      "book_end": 9933.65,
+      "pnl": -53.04,
+      "pnl_pct": -0.53,
+      "trades": 0,
+      "open_positions": 1,
+      "braked": false
     }
   ],
   "day_anchor": {
-    "date": "2026-08-20",
-    "equity": 10000.0
+    "date": "2026-08-21",
+    "equity": 9986.69
   },
-  "last_run": "2026-08-20 03:08"
+  "last_run": "2026-08-21 01:55"
 }
