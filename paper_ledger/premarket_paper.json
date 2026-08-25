@@ -994,8 +994,32 @@
         "GGR"
       ],
       "account_pnl": 1865.51
+    },
+    {
+      "date": "2026-08-25",
+      "book_start": 10049.17,
+      "book_end": 10049.17,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "DAIC",
+        "XPON",
+        "LUCY",
+        "PMI",
+        "BTCT",
+        "TJGC",
+        "INCR",
+        "WLDS",
+        "MCRP"
+      ],
+      "account_pnl": -215.75
     }
   ],
-  "last_run": "2026-08-24",
+  "last_run": "2026-08-25",
   "bankroll": 10000.0
 }
