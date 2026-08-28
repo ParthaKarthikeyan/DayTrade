@@ -11,9 +11,33 @@
       "exit_price": 2240.67,
       "pnl": -13.3,
       "reason": "stop"
+    },
+    {
+      "date": "2026-08-28",
+      "symbol": "BTC/USD",
+      "side": "long",
+      "units": 0.022575,
+      "entry_time": "2026-08-20 18:00:00+00:00",
+      "entry_price": 75361.5,
+      "exit_time": "2026-08-28 18:37",
+      "exit_price": 77409.7,
+      "pnl": 46.24,
+      "reason": "stop"
+    },
+    {
+      "date": "2026-08-28",
+      "symbol": "ETH/USD",
+      "side": "long",
+      "units": 0.413333,
+      "entry_time": "2026-08-21 18:00:00+00:00",
+      "entry_price": 2516.47,
+      "exit_time": "2026-08-28 18:37",
+      "exit_price": 2425.2,
+      "pnl": -37.72,
+      "reason": "stop"
     }
   ],
-  "last_run": "2026-08-28 05:21",
+  "last_run": "2026-08-28 18:37",
   "rules_version": 1,
   "deployment_date": "2026-07-04",
   "positions": {}
