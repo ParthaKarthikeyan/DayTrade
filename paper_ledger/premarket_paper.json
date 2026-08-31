@@ -1097,8 +1097,26 @@
         "NA"
       ],
       "account_pnl": 35.83
+    },
+    {
+      "date": "2026-08-31",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "WCT",
+        "SWVL",
+        "NCNA"
+      ],
+      "account_pnl": 36.11
     }
   ],
-  "last_run": "2026-08-28",
+  "last_run": "2026-08-31",
   "bankroll": 10000.0
 }
