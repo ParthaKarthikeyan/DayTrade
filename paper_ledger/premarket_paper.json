@@ -1115,8 +1115,34 @@
         "NCNA"
       ],
       "account_pnl": 36.11
+    },
+    {
+      "date": "2026-09-01",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "AEHL",
+        "NCRA",
+        "YDDL",
+        "SQFT",
+        "GPRO",
+        "LABT",
+        "WETO",
+        "PETZ",
+        "CANG",
+        "BRNX",
+        "RUBI"
+      ],
+      "account_pnl": -328.94
     }
   ],
-  "last_run": "2026-08-31",
+  "last_run": "2026-09-01",
   "bankroll": 10000.0
 }
