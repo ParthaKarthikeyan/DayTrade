@@ -614,11 +614,21 @@
       "trades": 0,
       "open_positions": 0,
       "braked": false
+    },
+    {
+      "date": "2026-09-02",
+      "book_start": 9995.21,
+      "book_end": 9995.21,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "open_positions": 0,
+      "braked": false
     }
   ],
   "day_anchor": {
-    "date": "2026-09-01",
+    "date": "2026-09-02",
     "equity": 9995.21
   },
-  "last_run": "2026-09-01 05:02"
+  "last_run": "2026-09-02 00:09"
 }
