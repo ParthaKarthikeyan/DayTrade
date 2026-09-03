@@ -1164,8 +1164,33 @@
         "SST"
       ],
       "account_pnl": 634.89
+    },
+    {
+      "date": "2026-09-03",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "BIAF",
+        "EOSU",
+        "EO",
+        "SWVL",
+        "NCPL",
+        "LHSW",
+        "GYGY",
+        "YQ",
+        "CANG",
+        "SCNI"
+      ],
+      "account_pnl": 2933.68
     }
   ],
-  "last_run": "2026-09-02",
+  "last_run": "2026-09-03",
   "bankroll": 10000.0
 }
