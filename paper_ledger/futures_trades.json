@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-09-03",
+  "generated": "2026-09-04",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -1796,8 +1796,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 90.22,
-          "stop": 81.4595,
-          "unrealized": 43.0
+          "stop": 82.8878,
+          "unrealized": 160.0
         }
       ]
     },
@@ -2372,8 +2372,8 @@
           "entry_time": "2021-10-15",
           "entry": 61593.9492,
           "exit_time": "2021-10-27",
-          "exit": 58412.737,
-          "pnl": -320.12,
+          "exit": 58415.9844,
+          "pnl": -319.8,
           "reason": "stop"
         },
         {
@@ -2398,8 +2398,8 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61173.2928,
-          "pnl": -641.35,
+          "exit": 61173.4536,
+          "pnl": -641.34,
           "reason": "stop"
         },
         {
@@ -4101,8 +4101,8 @@
           "side": "long",
           "contracts": 6,
           "entry": 90.22,
-          "stop": 81.4595,
-          "unrealized": 258.0
+          "stop": 82.8878,
+          "unrealized": 960.0
         }
       ]
     }
