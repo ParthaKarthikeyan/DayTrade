@@ -1207,8 +1207,30 @@
         "CIFG"
       ],
       "account_pnl": -2142.77
+    },
+    {
+      "date": "2026-09-07",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "IMRN",
+        "CDTG",
+        "ONCO",
+        "GRI",
+        "AEHG",
+        "GPRO",
+        "AMC"
+      ],
+      "account_pnl": -509.24
     }
   ],
-  "last_run": "2026-09-04",
+  "last_run": "2026-09-07",
   "bankroll": 10000.0
 }
