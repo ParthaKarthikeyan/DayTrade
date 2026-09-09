@@ -1256,8 +1256,36 @@
         "GLND"
       ],
       "account_pnl": -93.13
+    },
+    {
+      "date": "2026-09-09",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "SST",
+        "SWVL",
+        "SMUP",
+        "SMU",
+        "YQ",
+        "AXTX",
+        "AXTL",
+        "GCDT",
+        "SUNE",
+        "ANY",
+        "FEED",
+        "AIIO",
+        "FTEK"
+      ],
+      "account_pnl": -302.58
     }
   ],
-  "last_run": "2026-09-08",
+  "last_run": "2026-09-09",
   "bankroll": 10000.0
 }
