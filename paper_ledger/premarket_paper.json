@@ -1284,8 +1284,27 @@
         "FTEK"
       ],
       "account_pnl": -302.58
+    },
+    {
+      "date": "2026-09-10",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "SUNE",
+        "YMAT",
+        "FTFT",
+        "PCLA"
+      ],
+      "account_pnl": -813.9
     }
   ],
-  "last_run": "2026-09-09",
+  "last_run": "2026-09-10",
   "bankroll": 10000.0
 }
