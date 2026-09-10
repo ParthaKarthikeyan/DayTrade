@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-09-09",
+  "generated": "2026-09-10",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -1783,8 +1783,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 90.22,
-          "stop": 84.3937,
-          "unrealized": 424.0
+          "stop": 86.6904,
+          "unrealized": 671.0
         }
       ]
     },
@@ -2356,11 +2356,11 @@
           "micro": "MBT",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2021-10-11",
-          "entry": 57484.7891,
+          "entry_time": "2021-10-05",
+          "entry": 51514.8125,
           "exit_time": "2021-10-27",
-          "exit": 58419.3594,
-          "pnl": 91.46,
+          "exit": 58414.1125,
+          "pnl": 687.93,
           "reason": "stop"
         },
         {
@@ -2385,8 +2385,8 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61173.6208,
-          "pnl": -641.32,
+          "exit": 61173.3609,
+          "pnl": -641.35,
           "reason": "stop"
         },
         {
@@ -2525,11 +2525,11 @@
           "micro": "MES",
           "side": "long",
           "contracts": 1,
-          "entry_time": "2022-03-28",
-          "entry": 4568.0,
+          "entry_time": "2022-03-25",
+          "entry": 4536.5,
           "exit_time": "2022-04-11",
           "exit": 4418.0381,
-          "pnl": -751.81,
+          "pnl": -594.31,
           "reason": "stop"
         },
         {
@@ -2797,12 +2797,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "short",
-          "contracts": 7,
+          "contracts": 8,
           "entry_time": "2023-02-10",
           "entry": 21651.1836,
           "exit_time": "2023-02-15",
           "exit": 23107.0721,
-          "pnl": -1033.12,
+          "pnl": -1180.71,
           "reason": "stop"
         },
         {
@@ -2862,12 +2862,12 @@
           "ticker": "CL=F",
           "micro": "MCL",
           "side": "short",
-          "contracts": 1,
+          "contracts": 2,
           "entry_time": "2023-05-02",
           "entry": 71.66,
           "exit_time": "2023-05-08",
           "exit": 73.232,
-          "pnl": -159.2,
+          "pnl": -318.39,
           "reason": "stop"
         },
         {
@@ -2888,12 +2888,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 5,
+          "contracts": 6,
           "entry_time": "2023-06-20",
           "entry": 28327.4883,
           "exit_time": "2023-07-18",
           "exit": 29585.3849,
-          "pnl": 618.95,
+          "pnl": 742.74,
           "reason": "stop"
         },
         {
@@ -2914,12 +2914,12 @@
           "ticker": "GC=F",
           "micro": "MGC",
           "side": "long",
-          "contracts": 2,
+          "contracts": 1,
           "entry_time": "2023-07-18",
           "entry": 1977.2,
           "exit_time": "2023-07-27",
           "exit": 1945.4,
-          "pnl": -640.0,
+          "pnl": -320.0,
           "reason": "exit_break"
         },
         {
@@ -2966,12 +2966,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 8,
+          "contracts": 9,
           "entry_time": "2023-10-16",
           "entry": 28519.4668,
           "exit_time": "2023-10-23",
           "exit": 30613.1303,
-          "pnl": 1658.93,
+          "pnl": 1866.3,
           "reason": "stop"
         },
         {
@@ -3005,12 +3005,12 @@
           "ticker": "GC=F",
           "micro": "MGC",
           "side": "long",
-          "contracts": 4,
+          "contracts": 5,
           "entry_time": "2023-11-27",
           "entry": 2011.8,
           "exit_time": "2023-12-04",
           "exit": 2037.5714,
-          "pnl": 1022.85,
+          "pnl": 1278.57,
           "reason": "stop"
         },
         {
@@ -3070,12 +3070,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 4,
+          "contracts": 5,
           "entry_time": "2024-01-02",
           "entry": 44957.9688,
           "exit_time": "2024-01-12",
           "exit": 42024.6087,
-          "pnl": -1181.34,
+          "pnl": -1476.68,
           "reason": "stop"
         },
         {
@@ -3122,12 +3122,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 2,
+          "contracts": 3,
           "entry_time": "2024-03-11",
           "entry": 72123.9062,
           "exit_time": "2024-03-19",
           "exit": 63581.0011,
-          "pnl": -1712.58,
+          "pnl": -2568.87,
           "reason": "stop"
         },
         {
@@ -3356,12 +3356,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "long",
-          "contracts": 3,
+          "contracts": 4,
           "entry_time": "2024-09-18",
           "entry": 61649.6797,
           "exit_time": "2024-10-01",
           "exit": 61338.4149,
-          "pnl": -99.38,
+          "pnl": -132.51,
           "reason": "stop"
         },
         {
@@ -4075,8 +4075,8 @@
           "side": "long",
           "contracts": 4,
           "entry": 90.22,
-          "stop": 84.3937,
-          "unrealized": 1696.0
+          "stop": 86.6904,
+          "unrealized": 2684.0
         }
       ]
     }
