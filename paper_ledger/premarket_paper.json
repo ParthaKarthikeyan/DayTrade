@@ -1451,8 +1451,29 @@
         "HCAT"
       ],
       "account_pnl": 2154.55
+    },
+    {
+      "date": "2026-09-21",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "IMCC",
+        "ZTG",
+        "TNMG",
+        "HUHU",
+        "PRPL",
+        "SUIL"
+      ],
+      "account_pnl": 960.11
     }
   ],
-  "last_run": "2026-09-18",
+  "last_run": "2026-09-21",
   "bankroll": 10000.0
 }
