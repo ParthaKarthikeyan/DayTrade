@@ -1472,8 +1472,38 @@
         "SUIL"
       ],
       "account_pnl": 960.11
+    },
+    {
+      "date": "2026-09-22",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "GRML",
+        "CRMU",
+        "CRMX",
+        "NCPL",
+        "TGL",
+        "HUBC",
+        "AUUD",
+        "AXTX",
+        "TOPS",
+        "QNME",
+        "VRME",
+        "SLMT",
+        "GDC",
+        "STI",
+        "WAVE"
+      ],
+      "account_pnl": 202.23
     }
   ],
-  "last_run": "2026-09-21",
+  "last_run": "2026-09-22",
   "bankroll": 10000.0
 }
