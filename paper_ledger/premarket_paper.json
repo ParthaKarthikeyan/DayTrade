@@ -1556,8 +1556,37 @@
         "ACON"
       ],
       "account_pnl": 861.35
+    },
+    {
+      "date": "2026-09-25",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "APUS",
+        "PMAX",
+        "STAK",
+        "PFSA",
+        "FOFO",
+        "SPHL",
+        "AVX",
+        "WETO",
+        "EZGO",
+        "VBIO",
+        "INLF",
+        "PRME",
+        "AIFU",
+        "ONDS"
+      ],
+      "account_pnl": -1041.14
     }
   ],
-  "last_run": "2026-09-24",
+  "last_run": "2026-09-25",
   "bankroll": 10000.0
 }
