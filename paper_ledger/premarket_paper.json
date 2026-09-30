@@ -1632,8 +1632,33 @@
         "BKYI"
       ],
       "account_pnl": -1060.49
+    },
+    {
+      "date": "2026-09-30",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "BKYI",
+        "DXST",
+        "SSTI",
+        "MSGY",
+        "PFSA",
+        "SLE",
+        "SDEV",
+        "UPC",
+        "BIYA",
+        "EGG"
+      ],
+      "account_pnl": -344.82
     }
   ],
-  "last_run": "2026-09-29",
+  "last_run": "2026-09-30",
   "bankroll": 10000.0
 }
