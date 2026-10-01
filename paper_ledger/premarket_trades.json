@@ -1013,7 +1013,20 @@
       "trade_count": 0,
       "trades": [],
       "fills": []
+    },
+    {
+      "date": "2026-10-01",
+      "source": "local_mirror",
+      "book_pnl": 0,
+      "fills_realized_pnl": 0,
+      "reconciliation_gap": 0,
+      "account_pnl": -517.86,
+      "stopped": null,
+      "fill_count": 0,
+      "trade_count": 0,
+      "trades": [],
+      "fills": []
     }
   ],
-  "last_run": "2026-09-30"
+  "last_run": "2026-10-01"
 }
