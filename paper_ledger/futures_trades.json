@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-09-30",
+  "generated": "2026-10-01",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -418,7 +418,7 @@
           "entry_time": "2022-01-07",
           "entry": 41557.9023,
           "exit_time": "2022-02-01",
-          "exit": 38393.0911,
+          "exit": 38393.0912,
           "pnl": 314.48,
           "reason": "stop"
         },
@@ -1406,8 +1406,8 @@
           "side": "short",
           "contracts": 4,
           "entry": 1.1535,
-          "stop": 1.1489,
-          "unrealized": 817.5
+          "stop": 1.1453,
+          "unrealized": 830.0
         },
         {
           "sleeve": "Bitcoin",
@@ -1416,8 +1416,8 @@
           "side": "long",
           "contracts": 1,
           "entry": 86602.9141,
-          "stop": 81532.8422,
-          "unrealized": -321.01
+          "stop": 81693.029,
+          "unrealized": -302.29
         }
       ]
     },
@@ -1971,19 +1971,6 @@
           "reason": "stop"
         },
         {
-          "sleeve": "Bitcoin",
-          "ticker": "BTC-USD",
-          "micro": "MBT",
-          "side": "long",
-          "contracts": 1,
-          "entry_time": "2021-10-20",
-          "entry": 65992.8359,
-          "exit_time": "2021-10-27",
-          "exit": 58482.3867,
-          "pnl": -753.04,
-          "reason": "exit_break"
-        },
-        {
           "sleeve": "Crude oil",
           "ticker": "CL=F",
           "micro": "MCL",
@@ -2005,8 +1992,8 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61172.1539,
-          "pnl": -641.47,
+          "exit": 61160.3288,
+          "pnl": -642.65,
           "reason": "stop"
         },
         {
@@ -2067,11 +2054,11 @@
           "micro": "MBT",
           "side": "short",
           "contracts": 2,
-          "entry_time": "2022-01-07",
-          "entry": 41557.9023,
+          "entry_time": "2022-01-05",
+          "entry": 43569.0039,
           "exit_time": "2022-02-01",
-          "exit": 38393.0911,
-          "pnl": 628.96,
+          "exit": 38393.0912,
+          "pnl": 1031.18,
           "reason": "stop"
         },
         {
@@ -2079,12 +2066,12 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 6,
+          "contracts": 7,
           "entry_time": "2022-01-26",
           "entry": 1.1258,
           "exit_time": "2022-02-02",
           "exit": 1.1325,
-          "pnl": -513.7,
+          "pnl": -599.32,
           "reason": "stop"
         },
         {
@@ -2144,12 +2131,12 @@
           "ticker": "BTC-USD",
           "micro": "MBT",
           "side": "short",
-          "contracts": 3,
+          "contracts": 4,
           "entry_time": "2022-04-11",
           "entry": 39521.9023,
           "exit_time": "2022-04-21",
           "exit": 42807.8407,
-          "pnl": -991.78,
+          "pnl": -1322.38,
           "reason": "stop"
         },
         {
@@ -2170,12 +2157,25 @@
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
-          "contracts": 6,
+          "contracts": 7,
           "entry_time": "2022-04-12",
           "entry": 1.0832,
           "exit_time": "2022-05-19",
           "exit": 1.06,
-          "pnl": 1726.19,
+          "pnl": 2013.88,
+          "reason": "stop"
+        },
+        {
+          "sleeve": "S&P 500",
+          "ticker": "ES=F",
+          "micro": "MES",
+          "side": "short",
+          "contracts": 1,
+          "entry_time": "2022-05-11",
+          "entry": 3930.25,
+          "exit_time": "2022-05-27",
+          "exit": 4134.2441,
+          "pnl": -1021.97,
           "reason": "stop"
         },
         {
@@ -3708,8 +3708,8 @@
           "side": "short",
           "contracts": 27,
           "entry": 1.1535,
-          "stop": 1.1489,
-          "unrealized": 5518.1
+          "stop": 1.1453,
+          "unrealized": 5602.5
         },
         {
           "sleeve": "S&P 500",
@@ -3718,8 +3718,8 @@
           "side": "long",
           "contracts": 3,
           "entry": 7833.5,
-          "stop": 7633.5983,
-          "unrealized": -1365.0
+          "stop": 7637.0252,
+          "unrealized": -1413.75
         },
         {
           "sleeve": "Bitcoin",
@@ -3728,8 +3728,8 @@
           "side": "long",
           "contracts": 6,
           "entry": 86602.9141,
-          "stop": 81532.8422,
-          "unrealized": -1926.08
+          "stop": 81693.029,
+          "unrealized": -1813.75
         }
       ]
     }
