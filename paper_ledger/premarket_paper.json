@@ -1681,8 +1681,32 @@
         "VWAV"
       ],
       "account_pnl": -517.86
+    },
+    {
+      "date": "2026-10-02",
+      "book_start": 9986.24,
+      "book_end": 9986.24,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "trades": 0,
+      "win_rate": 0.0,
+      "strategy": "first_pullback",
+      "stopped": null,
+      "halted": false,
+      "watchlist": [
+        "SSM",
+        "NXL",
+        "VEEA",
+        "NAMM",
+        "BIRD",
+        "MEDS",
+        "NCPL",
+        "SORA",
+        "ELUT"
+      ],
+      "account_pnl": -1451.87
     }
   ],
-  "last_run": "2026-10-01",
+  "last_run": "2026-10-02",
   "bankroll": 10000.0
 }
