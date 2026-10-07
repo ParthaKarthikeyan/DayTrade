@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-10-06",
+  "generated": "2026-10-07",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -977,8 +977,8 @@
           "side": "short",
           "contracts": 2,
           "entry": 1.1535,
-          "stop": 1.1382,
-          "unrealized": 716.25
+          "stop": 1.1359,
+          "unrealized": 651.25
         }
       ]
     },
@@ -1553,8 +1553,8 @@
           "entry_time": "2021-11-08",
           "entry": 67566.8281,
           "exit_time": "2021-11-16",
-          "exit": 61147.8065,
-          "pnl": -643.9,
+          "exit": 61184.788,
+          "pnl": -640.2,
           "reason": "stop"
         },
         {
@@ -1618,7 +1618,7 @@
           "entry_time": "2022-01-05",
           "entry": 43569.0039,
           "exit_time": "2022-02-01",
-          "exit": 38393.0914,
+          "exit": 38393.0909,
           "pnl": 1031.18,
           "reason": "stop"
         },
@@ -3256,8 +3256,8 @@
           "side": "short",
           "contracts": 27,
           "entry": 1.1535,
-          "stop": 1.1382,
-          "unrealized": 9669.35
+          "stop": 1.1359,
+          "unrealized": 8791.87
         },
         {
           "sleeve": "S&P 500",
@@ -3266,8 +3266,8 @@
           "side": "long",
           "contracts": 3,
           "entry": 7833.5,
-          "stop": 7617.5252,
-          "unrealized": -33.75
+          "stop": 7649.7695,
+          "unrealized": 708.75
         },
         {
           "sleeve": "Bitcoin",
@@ -3276,8 +3276,8 @@
           "side": "long",
           "contracts": 6,
           "entry": 86602.9141,
-          "stop": 81446.806,
-          "unrealized": -661.21
+          "stop": 81657.0417,
+          "unrealized": -778.54
         }
       ]
     }
