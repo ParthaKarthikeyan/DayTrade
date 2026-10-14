@@ -1039,7 +1039,47 @@
       "trade_count": 0,
       "trades": [],
       "fills": []
+    },
+    {
+      "date": "2026-10-14",
+      "source": "alpaca_fills",
+      "book_pnl": -10.81,
+      "fills_realized_pnl": -10.81,
+      "reconciliation_gap": 0.0,
+      "account_pnl": 10.75,
+      "stopped": null,
+      "fill_count": 2,
+      "trade_count": 1,
+      "trades": [
+        {
+          "symbol": "CORD",
+          "side": "long",
+          "shares": 1081,
+          "entry_time": "15:25:18",
+          "entry_price": 4.58,
+          "exit_time": "15:26:12",
+          "exit_price": 4.57,
+          "pnl": -10.81,
+          "date": "2026-10-14"
+        }
+      ],
+      "fills": [
+        {
+          "time": "15:25:18",
+          "symbol": "CORD",
+          "side": "buy",
+          "qty": 1081.0,
+          "price": 4.58
+        },
+        {
+          "time": "15:26:12",
+          "symbol": "CORD",
+          "side": "sell",
+          "qty": 1081.0,
+          "price": 4.57
+        }
+      ]
     }
   ],
-  "last_run": "2026-10-02"
+  "last_run": "2026-10-14"
 }
