@@ -1118,7 +1118,28 @@
       "trade_count": 0,
       "trades": [],
       "fills": []
+    },
+    {
+      "date": "2026-10-21",
+      "source": "alpaca_fills",
+      "book_pnl": 29.27,
+      "fills_realized_pnl": 0,
+      "reconciliation_gap": 29.27,
+      "account_pnl": 238.89,
+      "stopped": "target",
+      "fill_count": 1,
+      "trade_count": 0,
+      "trades": [],
+      "fills": [
+        {
+          "time": "15:33:03",
+          "symbol": "SPHL",
+          "side": "buy",
+          "qty": 979.0,
+          "price": 3.55
+        }
+      ]
     }
   ],
-  "last_run": "2026-10-20"
+  "last_run": "2026-10-21"
 }

@@ -1796,8 +1796,28 @@
         "BULL"
       ],
       "account_pnl": -55.82
+    },
+    {
+      "date": "2026-10-21",
+      "book_start": 9975.43,
+      "book_end": 10004.7,
+      "pnl": 29.27,
+      "pnl_pct": 0.29,
+      "trades": 1,
+      "win_rate": 100.0,
+      "strategy": "first_pullback",
+      "stopped": "target",
+      "halted": false,
+      "watchlist": [
+        "POM",
+        "AHT",
+        "SPHL",
+        "AMOD",
+        "AIIR"
+      ],
+      "account_pnl": 238.89
     }
   ],
-  "last_run": "2026-10-20",
+  "last_run": "2026-10-21",
   "bankroll": 10000.0
 }
