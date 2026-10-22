@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-10-21",
+  "generated": "2026-10-22",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -392,7 +392,7 @@
           "entry_time": "2022-01-07",
           "entry": 41557.9023,
           "exit_time": "2022-02-01",
-          "exit": 38393.0927,
+          "exit": 38393.0917,
           "pnl": 314.48,
           "reason": "stop"
         },
@@ -1432,8 +1432,8 @@
           "side": "short",
           "contracts": 5,
           "entry": 1.1535,
-          "stop": 1.1302,
-          "unrealized": 1771.87
+          "stop": 1.1285,
+          "unrealized": 1734.38
         }
       ]
     },
@@ -2008,8 +2008,8 @@
           "entry_time": "2021-11-26",
           "entry": 53569.7656,
           "exit_time": "2021-12-23",
-          "exit": 49682.1238,
-          "pnl": 386.76,
+          "exit": 49681.7491,
+          "pnl": 386.8,
           "reason": "stop"
         },
         {
@@ -2060,7 +2060,7 @@
           "entry_time": "2022-01-05",
           "entry": 43569.0039,
           "exit_time": "2022-02-01",
-          "exit": 38393.0927,
+          "exit": 38393.0917,
           "pnl": 1031.18,
           "reason": "stop"
         },
@@ -3737,8 +3737,8 @@
           "side": "short",
           "contracts": 27,
           "entry": 1.1535,
-          "stop": 1.1302,
-          "unrealized": 9568.12
+          "stop": 1.1285,
+          "unrealized": 9365.63
         },
         {
           "sleeve": "Crude oil",
@@ -3747,8 +3747,8 @@
           "side": "long",
           "contracts": 3,
           "entry": 103.66,
-          "stop": 91.0965,
-          "unrealized": -1533.0
+          "stop": 96.1429,
+          "unrealized": -1668.0
         }
       ]
     }
