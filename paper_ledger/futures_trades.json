@@ -1,6 +1,6 @@
 {
   "deployment_date": "2026-07-03",
-  "generated": "2026-11-04",
+  "generated": "2026-11-05",
   "cash": 10000.0,
   "books": {
     "5pct": {
@@ -353,7 +353,7 @@
           "entry_time": "2022-01-07",
           "entry": 41557.9023,
           "exit_time": "2022-02-01",
-          "exit": 38393.0876,
+          "exit": 38393.082,
           "pnl": 314.48,
           "reason": "stop"
         },
@@ -1383,20 +1383,22 @@
           "exit": 81253.8917,
           "pnl": -536.9,
           "reason": "stop"
-        }
-      ],
-      "open": [
+        },
         {
           "sleeve": "Euro FX",
           "ticker": "6E=F",
           "micro": "M6E",
           "side": "short",
           "contracts": 5,
+          "entry_time": "2026-09-14",
           "entry": 1.1535,
-          "stop": 1.1283,
-          "unrealized": 1756.25
+          "exit_time": "2026-11-04",
+          "exit": 1.1271,
+          "pnl": 1643.12,
+          "reason": "exit_break"
         }
-      ]
+      ],
+      "open": []
     },
     "8pct": {
       "risk_pct": 0.08,
@@ -1956,8 +1958,8 @@
           "entry_time": "2021-11-26",
           "entry": 53569.7656,
           "exit_time": "2021-12-23",
-          "exit": 49680.2982,
-          "pnl": 386.95,
+          "exit": 49678.3433,
+          "pnl": 387.14,
           "reason": "stop"
         },
         {
@@ -2008,7 +2010,7 @@
           "entry_time": "2022-01-05",
           "entry": 43569.0039,
           "exit_time": "2022-02-01",
-          "exit": 38393.0876,
+          "exit": 38393.082,
           "pnl": 1031.18,
           "reason": "stop"
         },
@@ -3688,18 +3690,6 @@
           "exit": 98.5007,
           "pnl": -2071.72,
           "reason": "stop"
-        }
-      ],
-      "open": [
-        {
-          "sleeve": "Euro FX",
-          "ticker": "6E=F",
-          "micro": "M6E",
-          "side": "short",
-          "contracts": 30,
-          "entry": 1.1535,
-          "stop": 1.1283,
-          "unrealized": 10537.51
         },
         {
           "sleeve": "Gold",
@@ -3707,11 +3697,28 @@
           "micro": "MGC",
           "side": "short",
           "contracts": 2,
+          "entry_time": "2026-10-22",
           "entry": 4060.3999,
-          "stop": 4113.3185,
-          "unrealized": 2220.0
+          "exit_time": "2026-11-04",
+          "exit": 4123.8904,
+          "pnl": -1273.81,
+          "reason": "stop"
+        },
+        {
+          "sleeve": "Euro FX",
+          "ticker": "6E=F",
+          "micro": "M6E",
+          "side": "short",
+          "contracts": 30,
+          "entry_time": "2026-09-14",
+          "entry": 1.1535,
+          "exit_time": "2026-11-04",
+          "exit": 1.1271,
+          "pnl": 9858.72,
+          "reason": "exit_break"
         }
-      ]
+      ],
+      "open": []
     }
   }
 }
